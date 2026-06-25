@@ -592,6 +592,9 @@ input, textarea { cursor: text; }
       </div>
     </div>
 
+    
+
+
       <!-- PEDIDOS -->
       <div id="page-pedidos" class="page">
         <div class="page-title">Pedidos
@@ -656,6 +659,8 @@ input, textarea { cursor: text; }
           <div class="stock-log" id="stock-log"></div>
         </div>
       </div>
+
+    </div><!-- /content-area -->
 
     <div class="mob-nav"><div class="mob-nav-row">
       <button class="mob-nav-btn" data-mob-page="dashboard" data-mob-title="Início"><i class="ti ti-home"></i><span>Início</span></button>
@@ -965,6 +970,18 @@ function doLogin(){
 }
 
 document.addEventListener('DOMContentLoaded',function(){
+  // Fix: mover páginas novas para dentro do content-area
+  (function(){
+    var ca = document.querySelector('.content-area');
+    ['page-pedidos','page-producao','page-estoque'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el && el.parentElement && !el.parentElement.classList.contains('content-area')){
+        ca.appendChild(el);
+      }
+    });
+  })();
+
+
   // Login — tratado por onclick inline (iOS Safari file://)
   document.getElementById('login-pass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
   document.getElementById('btn-logout').addEventListener('click',logout);
