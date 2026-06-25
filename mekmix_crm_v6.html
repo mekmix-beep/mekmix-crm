@@ -239,7 +239,7 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;}
 }
 
 /* iOS Safari: cursor pointer ativa eventos de toque */
-body { cursor: pointer; }
+body { cursor: default; }
 button { cursor: pointer !important; touch-action: manipulation; }
 .conv-btn, .fbtn, .sb-btn, .mob-nav-btn, .mais-item, .quick-user { touch-action: manipulation; }
 
@@ -364,6 +364,15 @@ button { cursor: pointer !important; touch-action: manipulation; }
   .item-row-head { display: none; }
   .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
 }
+
+
+/* Fix cursor e seleção de texto */
+body { cursor: default; user-select: none; -webkit-user-select: none; }
+input, textarea { user-select: text; -webkit-user-select: text; cursor: text; }
+.conv-btn, .sb-btn, .mob-nav-btn, .mais-item, .quick-user, .fbtn,
+.btn, .qr-btn-item, .icon-btn, .send-btn, .login-btn, .prod-card,
+.k-card, .imp-btn, .tinta-btn, .prod-priority-btn, .prod-move button,
+.btn-remove-item { cursor: pointer !important; }
 
 </style>
 
