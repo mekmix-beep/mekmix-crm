@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#772583">
+<title>MekMix CRM</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:rgba(0,0,0,0);}
+:root{--rosa:#E31787;--roxo:#772583;--border:#e5e5e8;--text:#1a1a1a;--text2:#666;--text3:#aaa;--bg:#f8f8fa;--white:#fff;}
+html{height:-webkit-fill-available;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-size:13px;color:var(--text);height:100vh;height:-webkit-fill-available;overflow:hidden;background:var(--bg);}
+button{-webkit-appearance:none;appearance:none;cursor:pointer;font-family:inherit;}
+input,textarea,select{font-family:inherit;-webkit-appearance:none;}
+.login-screen{position:fixed;inset:0;background:var(--roxo);display:flex;align-items:center;justify-content:center;z-index:1000;padding:24px;}
+.login-card{background:var(--white);border-radius:16px;padding:32px 28px;width:100%;max-width:360px;}
+.login-logo{text-align:center;margin-bottom:24px;}
+.login-ico{width:56px;height:56px;background:var(--rosa);border-radius:14px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;margin-bottom:10px;}
+.login-title{font-size:20px;font-weight:700;color:var(--roxo);}
+.login-sub{font-size:13px;color:var(--text2);margin-top:4px;}
+.login-field{margin-bottom:14px;}
+.login-field label{display:block;font-size:12px;font-weight:500;margin-bottom:5px;color:var(--text2);}
+.login-inp{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;font-size:14px;color:var(--text);outline:none;background:var(--white);}
+.login-inp:focus{border-color:var(--rosa);}
+.login-btn{width:100%;background:var(--rosa);color:#fff;border:none;border-radius:9px;padding:12px;font-size:14px;font-weight:600;margin-top:6px;}
+.login-error{color:#c0392b;font-size:12px;margin-top:6px;display:none;}
+.login-divider{text-align:center;font-size:11px;color:var(--text3);margin:16px 0;text-transform:uppercase;letter-spacing:.06em;}
+.quick-user{display:flex;align-items:center;gap:10px;width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:8px;text-align:left;}
+.qu-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0;}
+.qu-name{font-size:13px;font-weight:500;color:var(--text);}
+.qu-role{font-size:11px;color:var(--text2);}
+.app{display:none;height:100%;width:100%;}
+.app.visible{display:flex;}
+.sidebar{width:210px;background:var(--roxo);display:flex;flex-direction:column;flex-shrink:0;}
+.sb-logo{padding:14px;border-bottom:1px solid rgba(255,255,255,.12);display:flex;align-items:center;gap:10px;}
+.sb-logo-ico{width:32px;height:32px;background:var(--rosa);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;flex-shrink:0;}
+.sb-logo-text{color:#fff;font-size:13px;font-weight:600;}
+.sb-sec{padding:12px 14px 4px;font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.07em;}
+.sb-btn{display:flex;align-items:center;gap:10px;padding:9px 14px;color:rgba(255,255,255,.7);font-size:12px;white-space:nowrap;width:100%;text-align:left;background:none;border:none;}
+.sb-btn:hover,.sb-btn.active{background:rgba(255,255,255,.15);color:#fff;}
+.sb-btn i{font-size:17px;flex-shrink:0;width:18px;}
+.sb-btn-lbl{flex:1;}
+.sb-badge{background:var(--rosa);color:#fff;font-size:10px;padding:1px 6px;border-radius:20px;}
+.sb-bottom{margin-top:auto;border-top:1px solid rgba(255,255,255,.12);}
+.sb-user{display:flex;align-items:center;gap:8px;padding:10px 14px;color:rgba(255,255,255,.8);font-size:12px;}
+.sb-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:600;flex-shrink:0;}
+.sb-logout{background:none;border:none;color:rgba(255,255,255,.5);font-size:11px;padding:4px 14px 10px;width:100%;text-align:left;display:flex;align-items:center;gap:6px;}
+.sb-logout:hover{color:#fff;}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.mob-top{display:none;align-items:center;background:var(--roxo);padding:0 12px;height:50px;flex-shrink:0;gap:8px;}
+.mob-back-btn{display:flex;align-items:center;gap:4px;color:rgba(255,255,255,.9);font-size:13px;min-width:60px;padding:8px 0;background:none;border:none;}
+.mob-top-title{flex:1;font-size:15px;font-weight:600;text-align:center;color:#fff;}
+.mob-top-right{min-width:60px;display:flex;justify-content:flex-end;}
+.content-area{flex:1;display:flex;overflow:hidden;min-width:0;}
+.page{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;background:var(--bg);display:none;}
+.page.visible{display:block;}
+.page-title{font-size:15px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.panel{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+.panel-title{font-size:13px;font-weight:600;}
+.btn{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--white);color:var(--text);}
+.btn-rosa{background:var(--rosa);color:#fff;border-color:var(--rosa);}
+.btn-roxo{background:var(--roxo);color:#fff;border-color:var(--roxo);}
+.btn-icon{padding:5px 7px;}
+.btn-sm{padding:4px 8px;font-size:11px;}
+.btn-danger{background:#c0392b;color:#fff;border-color:#c0392b;}
+.inp{width:100%;border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;background:var(--white);}
+.inp:focus{border-color:var(--rosa);}
+.sel{width:100%;border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:11px;color:var(--text);outline:none;background:var(--white);}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.tbl{width:100%;border-collapse:collapse;min-width:460px;}
+.tbl th{font-size:11px;color:var(--text2);font-weight:500;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);background:var(--bg);white-space:nowrap;}
+.tbl td{font-size:12px;padding:9px 10px;border-bottom:1px solid #f0f0f2;vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.pill{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;white-space:nowrap;}
+.p-novo{background:#FBEAF0;color:#72243E;}
+.p-orc{background:#EEEDFE;color:#3C3489;}
+.p-prod{background:#FAEEDA;color:#633806;}
+.p-entregue{background:#E1F5EE;color:#085041;}
+.p-arte{background:#E6F1FB;color:#0C447C;}
+.p-follow{background:#FCEBEB;color:#791F1F;}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.metric{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.metric-ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+.metric-val{font-size:22px;font-weight:600;}
+.metric-lbl{font-size:11px;color:var(--text2);margin-top:2px;}
+.metric-change{font-size:10px;margin-top:4px;}
+.up{color:#085041;} .dn{color:#791F1F;}
+.chat-layout{flex:1;display:flex;overflow:hidden;min-width:0;}
+.col1{width:280px;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;background:var(--white);}
+.col1-head{padding:12px;border-bottom:1px solid var(--border);}
+.col1-title{font-size:13px;font-weight:600;margin-bottom:8px;}
+.search-wrap{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;}
+.search-wrap input{border:none;background:none;font-size:12px;color:var(--text);outline:none;width:100%;}
+.filters{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap;}
+.fbtn{font-size:10px;padding:4px 9px;border-radius:20px;border:1px solid var(--border);background:var(--white);color:var(--text2);white-space:nowrap;}
+.fbtn.active{background:var(--rosa);color:#fff;border-color:var(--rosa);}
+.conv-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.conv-btn{display:flex;align-items:flex-start;gap:10px;padding:12px;border-bottom:1px solid #f0f0f2;width:100%;text-align:left;background:none;border-left:none;border-right:none;border-top:none;}
+.conv-btn:active,.conv-btn.sel{background:#fdf0f7;}
+.conv-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;position:relative;}
+.ch-badge{position:absolute;bottom:-2px;right:-2px;width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #fff;}
+.conv-body{flex:1;min-width:0;}
+.conv-top{display:flex;justify-content:space-between;align-items:center;}
+.conv-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
+.conv-time{font-size:10px;color:var(--text3);flex-shrink:0;margin-left:4px;}
+.conv-preview{font-size:11px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;}
+.conv-foot{display:flex;align-items:center;justify-content:space-between;margin-top:5px;}
+.vend-pill{font-size:10px;padding:2px 6px;border-radius:20px;background:#f0f0f2;color:#666;}
+.unread{background:var(--rosa);color:#fff;font-size:10px;min-width:17px;height:17px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 3px;}
+.col2{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--white);}
+.chat-head{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;}
+.chat-head-left{display:flex;align-items:center;gap:10px;min-width:0;flex:1;}
+.chat-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;}
+.chat-head-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
+.chat-head-sub{font-size:11px;color:var(--text2);}
+.chat-actions{display:flex;gap:4px;flex-shrink:0;}
+.chat-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;background:var(--bg);display:flex;flex-direction:column;gap:8px;}
+.date-sep{text-align:center;font-size:10px;color:var(--text3);padding:4px 0;}
+.msg{display:flex;flex-direction:column;}
+.msg-in{align-self:flex-start;max-width:80%;}
+.msg-out{align-self:flex-end;max-width:80%;}
+.msg-sender{font-size:10px;color:var(--rosa);font-weight:500;margin-bottom:2px;}
+.msg-bubble{padding:8px 12px;border-radius:12px;font-size:12px;line-height:1.6;}
+.msg-in .msg-bubble{background:var(--white);border:1px solid var(--border);border-bottom-left-radius:3px;color:var(--text);}
+.msg-out .msg-bubble{background:var(--rosa);color:#fff;border-bottom-right-radius:3px;}
+.msg-meta{font-size:10px;color:var(--text3);margin-top:3px;}
+.msg-out .msg-meta{text-align:right;}
+.audio-wrap{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;background:var(--white);border:1px solid var(--border);border-bottom-left-radius:3px;width:200px;}
+.audio-play{width:28px;height:28px;border-radius:50%;background:var(--rosa);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none;}
+.audio-wave{flex:1;height:24px;display:flex;align-items:center;gap:1.5px;}
+.audio-wave span{width:2px;border-radius:2px;background:#e0e0e0;}
+.note-bubble{background:#FFFDE7;border:1px dashed #FBC02D;border-radius:8px;padding:8px 12px;font-size:11px;color:#5D4037;align-self:stretch;}
+.note-lbl{font-size:10px;color:#8D6E63;font-weight:500;margin-bottom:3px;display:flex;align-items:center;gap:4px;}
+.sys-msg{text-align:center;font-size:11px;color:var(--text3);padding:6px 12px;background:rgba(0,0,0,.04);border-radius:20px;align-self:center;}
+.chat-footer{border-top:1px solid var(--border);background:var(--white);flex-shrink:0;}
+.qr-row{display:flex;gap:6px;padding:8px 12px 0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.qr-row::-webkit-scrollbar{display:none;}
+.qr-lbl{font-size:10px;color:var(--text3);white-space:nowrap;align-self:center;flex-shrink:0;}
+.qr-btn-item{font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);white-space:nowrap;background:var(--white);color:var(--text2);}
+.input-row{display:flex;align-items:center;gap:6px;padding:8px 12px;}
+.msg-input{flex:1;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:16px;color:var(--text);outline:none;background:var(--white);}
+.msg-input:focus{border-color:var(--rosa);}
+.icon-btn{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);background:var(--white);color:var(--text2);flex-shrink:0;}
+.icon-btn.rec-on{background:var(--rosa);border-color:var(--rosa);color:#fff;}
+.send-btn{background:var(--rosa);border-color:var(--rosa);color:#fff;width:40px;height:40px;}
+.col3{width:255px;border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;background:var(--white);}
+.col3-head{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;flex-shrink:0;}
+.col3-sec{padding:12px 14px;border-bottom:1px solid #f0f0f2;}
+.col3-lbl{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:8px;}
+.c3-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;margin:0 auto 8px;}
+.c3-name{font-size:14px;font-weight:600;text-align:center;color:var(--text);}
+.c3-sub{font-size:11px;color:var(--text2);text-align:center;margin-top:2px;}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;}
+.info-lbl{font-size:11px;color:var(--text2);}
+.info-val{font-size:11px;font-weight:500;text-align:right;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);}
+.tag-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;}
+.note-inp{width:100%;border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:14px;color:var(--text);outline:none;resize:none;background:var(--bg);}
+.hist-item{padding:6px 0;border-bottom:1px solid #f5f5f7;}
+.hist-item:last-child{border-bottom:none;}
+.hist-prod{font-size:11px;font-weight:500;color:var(--text);}
+.hist-meta{font-size:10px;color:var(--text3);}
+.hist-val{font-size:11px;color:var(--rosa);font-weight:500;margin-top:2px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--white);border-radius:14px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);}
+.modal-title{font-size:14px;font-weight:600;}
+.modal-close{background:none;border:none;font-size:22px;color:var(--text3);padding:0 4px;line-height:1;}
+.modal-body{padding:20px;}
+.modal-footer{padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
+.form-group{margin-bottom:14px;}
+.form-label{display:block;font-size:12px;font-weight:500;margin-bottom:5px;color:var(--text2);}
+.form-input{width:100%;border:1px solid var(--border);border-radius:7px;padding:8px 12px;font-size:13px;color:var(--text);outline:none;background:var(--white);}
+.form-input:focus{border-color:var(--rosa);}
+.form-textarea{width:100%;border:1px solid var(--border);border-radius:7px;padding:8px 12px;font-size:13px;color:var(--text);outline:none;resize:vertical;background:var(--white);min-height:80px;}
+.report-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;}
+.report-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff;flex-shrink:0;}
+.report-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;}
+.report-stat{text-align:center;padding:8px;background:var(--bg);border-radius:8px;}
+.report-stat-val{font-size:16px;font-weight:600;}
+.report-stat-lbl{font-size:10px;color:var(--text3);margin-top:2px;}
+.progress-bar{height:5px;background:#f0f0f2;border-radius:3px;margin-top:10px;}
+.progress-fill{height:100%;border-radius:3px;background:var(--rosa);}
+.bc-preview{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:12px;color:var(--text2);margin-top:8px;min-height:60px;white-space:pre-wrap;}
+.pdf-preview{background:var(--white);border:2px solid var(--border);border-radius:10px;padding:20px;margin-top:12px;}
+.pdf-header{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--roxo);padding-bottom:10px;margin-bottom:14px;}
+.pdf-logo{font-size:15px;font-weight:700;color:var(--roxo);}
+.pdf-logo-sub{font-size:10px;color:var(--text3);}
+.pdf-title{font-size:13px;font-weight:600;margin-bottom:10px;}
+.pdf-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f5f5f7;font-size:12px;}
+.pdf-row:last-child{border-bottom:none;}
+.pdf-total{background:var(--roxo);color:#fff;border-radius:7px;padding:8px 12px;display:flex;justify-content:space-between;margin-top:10px;font-weight:600;font-size:13px;}
+.pdf-footer{text-align:center;font-size:10px;color:var(--text3);margin-top:12px;padding-top:10px;border-top:1px solid var(--border);}
+.kanban-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px;}
+.kanban{display:flex;gap:10px;min-width:650px;}
+.k-col{width:165px;flex-shrink:0;}
+.k-head{font-size:11px;font-weight:600;padding:6px 10px;border-radius:7px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.kh-novo{background:#FBEAF0;color:#72243E;} .kh-orc{background:#EEEDFE;color:#3C3489;}
+.kh-arte{background:#E6F1FB;color:#0C447C;} .kh-prod{background:#FAEEDA;color:#633806;}
+.kh-ent{background:#E1F5EE;color:#085041;}
+.k-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:9px 10px;margin-bottom:7px;}
+.k-card-name{font-size:12px;font-weight:500;} .k-card-info{font-size:11px;color:var(--text2);margin-top:2px;}
+.k-card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
+.wapp-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #f0f0f2;}
+.wapp-item:last-child{border-bottom:none;}
+.wapp-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.follow-item{padding:8px 0;border-bottom:1px solid #f0f0f2;}
+.follow-item:last-child{border-bottom:none;}
+.notif-toast{position:fixed;top:16px;right:16px;background:var(--roxo);color:#fff;padding:10px 16px;border-radius:10px;font-size:12px;z-index:9999;display:none;align-items:center;gap:8px;max-width:280px;box-shadow:0 4px 20px rgba(0,0,0,.2);}
+.notif-toast.show{display:flex;}
+.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--border);z-index:200;padding-bottom:env(safe-area-inset-bottom,0px);}
+.mob-nav-row{display:flex;justify-content:space-around;}
+.mob-nav-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;color:var(--text3);position:relative;min-width:48px;background:none;border:none;}
+.mob-nav-btn.active{color:var(--rosa);}
+.mob-nav-btn i{font-size:22px;} .mob-nav-btn span{font-size:9px;}
+.mob-badge{position:absolute;top:4px;right:4px;background:var(--rosa);color:#fff;font-size:9px;min-width:14px;height:14px;border-radius:7px;display:flex;align-items:center;justify-content:center;padding:0 3px;}
+.mais-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);z-index:299;}
+.mais-menu{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--border);z-index:300;padding-bottom:env(safe-area-inset-bottom,0px);}
+.mais-item{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid #f5f5f7;width:100%;text-align:left;background:none;border-left:none;border-right:none;border-top:none;font-size:14px;color:var(--text);}
+.mais-item:last-child{border-bottom:none;}
+.mais-item i{font-size:20px;color:var(--rosa);}
+@media(max-width:768px){
+  .sidebar{display:none;} .mob-top{display:flex;} .mob-nav{display:block;}
+  .main{padding-bottom:56px;}
+  .col1{width:100%;border-right:none;} .col2{width:100%;}
+  .col3{width:100%;border-left:none;border-top:1px solid var(--border);}
+  .col1,.col2,.col3{display:none;}
+  .col1.mob-on,.col2.mob-on,.col3.mob-on{display:flex;}
+  .metrics{grid-template-columns:repeat(2,1fr);}
+  .report-stats{grid-template-columns:repeat(2,1fr);}
+  .chat-actions .hide-mob{display:none;}
+}
+@media(min-width:769px){
+  .col1,.col2,.col3{display:flex !important;}
+  .mob-top{display:none !important;} .mob-nav{display:none !important;}
+}
+
+/* iOS Safari: cursor pointer ativa eventos de toque */
+body { cursor: pointer; }
+button { cursor: pointer !important; touch-action: manipulation; }
+.conv-btn, .fbtn, .sb-btn, .mob-nav-btn, .mais-item, .quick-user { touch-action: manipulation; }
+
+</style>
+
+</head>
+<body>
+<div class="notif-toast" id="notif-toast"><i class="ti ti-brand-whatsapp" style="font-size:16px;flex-shrink:0;"></i><span id="notif-text">Nova mensagem!</span></div>
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo"><div class="login-ico">MM</div><div class="login-title">MekMix CRM</div><div class="login-sub">Faça login para continuar</div></div>
+    <div class="login-field"><label>Usuário</label><input type="text" class="login-inp" id="login-user" placeholder="seu.nome" autocapitalize="none"/></div>
+    <div class="login-field"><label>Senha</label><input type="password" class="login-inp" id="login-pass" placeholder="••••••"/></div>
+    <div class="login-error" id="login-error">Usuário ou senha incorretos</div>
+    <button class="login-btn" id="login-btn" ontouchstart="" onclick="doLogin()">Entrar</button>
+    <div class="login-divider">Acesso rápido (demo)</div>
+    <button class="quick-user" data-u="bruno" data-p="admin123" ontouchstart="" onclick="qlLogin('bruno','admin123')"><div class="qu-av" style="background:#E31787;">BR</div><div><div class="qu-name">Bruno</div><div class="qu-role">Admin — acesso total</div></div><i class="ti ti-arrow-right" style="color:#aaa;font-size:14px;margin-left:auto;"></i></button>
+    <button class="quick-user" data-u="joao" data-p="joao123" ontouchstart="" onclick="qlLogin('joao','joao123')"><div class="qu-av" style="background:#3C3489;">JO</div><div><div class="qu-name">João</div><div class="qu-role">Vendedor — vê seus leads</div></div><i class="ti ti-arrow-right" style="color:#aaa;font-size:14px;margin-left:auto;"></i></button>
+    <button class="quick-user" data-u="maria" data-p="maria123" ontouchstart="" onclick="qlLogin('maria','maria123')"><div class="qu-av" style="background:#633806;">MA</div><div><div class="qu-name">Maria</div><div class="qu-role">Vendedor — vê seus leads</div></div><i class="ti ti-arrow-right" style="color:#aaa;font-size:14px;margin-left:auto;"></i></button>
+  </div>
+</div>
+<div class="app" id="app">
+  <div class="sidebar">
+    <div class="sb-logo"><div class="sb-logo-ico">MM</div><div><div class="sb-logo-text">MekMix CRM</div><div style="color:rgba(255,255,255,.5);font-size:10px;" id="sb-role-lbl">Admin</div></div></div>
+    <div style="padding-top:6px;">
+      <div class="sb-sec">Principal</div>
+      <button class="sb-btn" data-page="dashboard"><i class="ti ti-home"></i><span class="sb-btn-lbl">Início</span></button>
+      <button class="sb-btn active" data-page="chats"><i class="ti ti-message-circle"></i><span class="sb-btn-lbl">Chats ao vivo</span><span class="sb-badge">8</span></button>
+      <button class="sb-btn" data-page="kanban"><i class="ti ti-layout-kanban"></i><span class="sb-btn-lbl">Kanban</span></button>
+      <button class="sb-btn" data-page="contatos"><i class="ti ti-users"></i><span class="sb-btn-lbl">Contatos</span></button>
+      <button class="sb-btn" data-page="followup"><i class="ti ti-bell"></i><span class="sb-btn-lbl">Follow-up 30d</span><span class="sb-badge">3</span></button>
+      <div class="sb-sec admin-only">Gestão</div>
+      <button class="sb-btn admin-only" data-page="relatorio"><i class="ti ti-chart-bar"></i><span class="sb-btn-lbl">Relatórios</span></button>
+      <button class="sb-btn admin-only" data-page="broadcast"><i class="ti ti-send"></i><span class="sb-btn-lbl">Broadcast</span></button>
+      <button class="sb-btn admin-only" data-page="templates"><i class="ti ti-template"></i><span class="sb-btn-lbl">Templates</span></button>
+      <div class="sb-sec admin-only">Config</div>
+      <button class="sb-btn admin-only" data-page="whatsapp"><i class="ti ti-brand-whatsapp"></i><span class="sb-btn-lbl">Conexões WA</span></button>
+      <button class="sb-btn admin-only" data-page="equipe"><i class="ti ti-users-group"></i><span class="sb-btn-lbl">Equipe</span></button>
+      <button class="sb-btn admin-only" data-page="config"><i class="ti ti-settings"></i><span class="sb-btn-lbl">Configurações</span></button>
+    </div>
+    <div class="sb-bottom">
+      <div class="sb-user"><div class="sb-av" id="sb-av" style="background:#E31787;">BR</div><div><div style="color:#fff;font-size:12px;font-weight:500;" id="sb-name">Bruno</div><div style="color:rgba(255,255,255,.5);font-size:10px;" id="sb-role">Admin</div></div></div>
+      <button class="sb-logout" id="btn-logout"><i class="ti ti-logout" style="font-size:14px;"></i> Sair</button>
+    </div>
+  </div>
+  <div class="main">
+    <div class="mob-top" id="mob-top">
+      <button class="mob-back-btn" id="mob-back" style="visibility:hidden;"><i class="ti ti-arrow-left" style="font-size:18px;"></i> Voltar</button>
+      <div class="mob-top-title" id="mob-title">Chats ao vivo</div>
+      <div class="mob-top-right"><button class="mob-back-btn" id="btn-mob-notif"><i class="ti ti-bell" style="font-size:20px;color:#fff;"></i></button></div>
+    </div>
+    <div class="content-area">
+      <div id="page-chats" class="chat-layout">
+        <div class="col1 mob-on" id="col1">
+          <div class="col1-head">
+            <div class="col1-title">Chats <span style="font-size:11px;color:#aaa;font-weight:400;" id="conv-count">8 abertos</span></div>
+            <div class="search-wrap"><i class="ti ti-search" style="font-size:14px;color:#aaa;"></i><input type="search" id="conv-search" placeholder="Buscar nome, número, cidade..."/></div>
+            <div class="filters">
+              <button class="fbtn active" data-filter="todos">Todos</button>
+              <button class="fbtn" data-filter="meus">Meus</button>
+              <button class="fbtn" data-filter="sem">Sem atrib.</button>
+              <button class="fbtn" data-filter="wa"><i class="ti ti-brand-whatsapp" style="font-size:10px;"></i> WA</button>
+              <button class="fbtn" data-filter="ig"><i class="ti ti-brand-instagram" style="font-size:10px;"></i> IG</button>
+              <button class="fbtn" data-filter="fb"><i class="ti ti-brand-facebook" style="font-size:10px;"></i> FB</button>
+            </div>
+          </div>
+          <div class="conv-list" id="conv-list"></div>
+        </div>
+        <div class="col2" id="col2">
+          <div class="chat-head">
+            <div class="chat-head-left">
+              <div class="chat-av" id="ch-av" style="background:#FBEAF0;color:#72243E;">AC</div>
+              <div style="min-width:0;"><div class="chat-head-name" id="ch-name">Ana Clara</div><div class="chat-head-sub" id="ch-sub">WhatsApp · online</div></div>
+            </div>
+            <div class="chat-actions">
+              <button class="btn btn-icon hide-mob" id="btn-transfer" title="Transferir"><i class="ti ti-arrows-transfer-up" style="font-size:15px;"></i></button>
+              <button class="btn btn-icon hide-mob" id="btn-pdf" title="Orçamento PDF"><i class="ti ti-file-invoice" style="font-size:15px;"></i></button>
+              <button class="btn btn-icon" id="btn-detail" title="Detalhes"><i class="ti ti-info-circle" style="font-size:15px;"></i></button>
+              <button class="btn btn-rosa" id="btn-resolve"><i class="ti ti-check" style="font-size:12px;"></i> Resolver</button>
+              <button class="btn btn-icon"><i class="ti ti-dots-vertical" style="font-size:14px;"></i></button>
+            </div>
+          </div>
+          <div class="chat-body" id="chat-body"></div>
+          <div class="chat-footer">
+            <div class="qr-row" id="qr-row"><span class="qr-lbl">Rápidas:</span></div>
+            <div class="input-row">
+              <button class="icon-btn hide-mob"><i class="ti ti-mood-smile" style="font-size:15px;"></i></button>
+              <button class="icon-btn hide-mob"><i class="ti ti-paperclip" style="font-size:15px;"></i></button>
+              <input type="text" class="msg-input" id="msg-input" placeholder="Mensagem..."/>
+              <button class="icon-btn" id="btn-rec"><i class="ti ti-microphone" style="font-size:15px;"></i></button>
+              <button class="icon-btn send-btn" id="btn-send"><i class="ti ti-send" style="font-size:15px;"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="col3" id="col3">
+          <div class="col3-head">Detalhes do cliente</div>
+          <div class="col3-sec">
+            <div class="c3-av" id="c3-av" style="background:#FBEAF0;color:#72243E;">AC</div>
+            <div class="c3-name" id="c3-name">Ana Clara</div>
+            <div class="c3-sub" id="c3-sub">Campinas/SP</div>
+            <div style="display:flex;justify-content:center;gap:6px;margin-top:10px;">
+              <button class="btn" style="font-size:11px;padding:4px 8px;"><i class="ti ti-brand-whatsapp" style="font-size:12px;color:#25D366;"></i></button>
+              <button class="btn" style="font-size:11px;padding:4px 8px;" id="btn-hist-modal">Histórico</button>
+            </div>
+          </div>
+          <div class="col3-sec"><div class="col3-lbl">Informações</div>
+            <div class="info-row"><span class="info-lbl">WhatsApp</span><span class="info-val" id="c3-wapp"></span></div>
+            <div class="info-row"><span class="info-lbl">Canal</span><span class="info-val" id="c3-canal"></span></div>
+            <div class="info-row"><span class="info-lbl">Cidade</span><span class="info-val" id="c3-cidade"></span></div>
+            <div class="info-row"><span class="info-lbl">Vendedor</span><span class="info-val" id="c3-vendedor"></span></div>
+            <div class="info-row"><span class="info-lbl">Status</span><span class="pill p-novo" id="c3-status">Novo lead</span></div>
+          </div>
+          <div class="col3-sec admin-only"><div class="col3-lbl">Atribuir vendedor</div>
+            <select class="sel" id="sel-vendedor" style="margin-bottom:8px;"><option>João</option><option>Maria</option><option>Pedro</option><option>— Sem atribuição</option></select>
+          </div>
+          <div class="col3-sec"><div class="col3-lbl">Status do pedido</div>
+            <select class="sel" id="sel-status"><option>Novo lead</option><option>Orçamento enviado</option><option>Arte pendente</option><option>Em produção</option><option>Entregue</option><option>Follow-up 30d</option></select>
+          </div>
+          <div class="col3-sec"><div class="col3-lbl">Etiquetas</div>
+            <div class="tag-row" id="c3-tags"><span class="pill p-novo">Novo lead</span><button class="pill" style="background:#f0f0f2;color:#666;border:none;" id="btn-add-tag">+ Adicionar</button></div>
+          </div>
+          <div class="col3-sec"><div class="col3-lbl">Histórico de pedidos</div><div id="c3-hist"></div></div>
+          <div class="col3-sec"><div class="col3-lbl">Data de entrega (follow-up 30d)</div><input type="date" class="sel"/></div>
+          <div class="col3-sec"><div class="col3-lbl">Nota interna</div>
+            <textarea class="note-inp" id="c3-nota" rows="3" placeholder="Visível só para a equipe..."></textarea>
+            <button class="btn btn-rosa" id="btn-save-note" style="width:100%;justify-content:center;margin-top:8px;"><i class="ti ti-device-floppy" style="font-size:12px;"></i> Salvar nota</button>
+          </div>
+        </div>
+      </div>
+      <div id="page-dashboard" class="page">
+        <div class="page-title">Visão geral</div>
+        <div class="metrics">
+          <div class="metric"><div class="metric-ico" style="background:#FBEAF0;"><i class="ti ti-users" style="font-size:16px;color:#E31787;"></i></div><div class="metric-val">12</div><div class="metric-lbl">Leads hoje</div><div class="metric-change up">↑ 3 vs ontem</div></div>
+          <div class="metric"><div class="metric-ico" style="background:#FAEEDA;"><i class="ti ti-package" style="font-size:16px;color:#633806;"></i></div><div class="metric-val">4</div><div class="metric-lbl">Em produção</div></div>
+          <div class="metric"><div class="metric-ico" style="background:#FCEBEB;"><i class="ti ti-bell" style="font-size:16px;color:#791F1F;"></i></div><div class="metric-val" style="color:#E31787;">3</div><div class="metric-lbl">Follow-up</div><div class="metric-change dn">↑ urgente</div></div>
+          <div class="metric"><div class="metric-ico" style="background:#E1F5EE;"><i class="ti ti-currency-dollar" style="font-size:16px;color:#085041;"></i></div><div class="metric-val">R$7.840</div><div class="metric-lbl">Faturamento mês</div><div class="metric-change up">↑ 12%</div></div>
+        </div>
+        <div class="panel"><div class="panel-head"><span class="panel-title">Atendimentos recentes</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Cliente</th><th>Produto</th><th>Status</th><th>Vendedor</th></tr></thead><tbody><tr><td><b>Ana Clara</b><div style="font-size:11px;color:#666;">Campinas/SP</div></td><td>500ml·2cx</td><td><span class="pill p-novo">Novo lead</span></td><td>João</td></tr><tr><td><b>Rafael Silva</b><div style="font-size:11px;color:#666;">BH/MG</div></td><td>330ml·1cx</td><td><span class="pill p-orc">Orçamento</span></td><td>Maria</td></tr><tr><td><b>Pedro Lima</b><div style="font-size:11px;color:#666;">SP/SP</div></td><td>770ml·3cx</td><td><span class="pill p-prod">Produção</span></td><td>João</td></tr></tbody></table></div></div>
+        <div class="panel"><div class="panel-head"><span class="panel-title">⏰ Follow-up 30d</span><span style="font-size:11px;color:#E31787;font-weight:500;">3 pendentes</span></div>
+          <div class="follow-item"><div style="display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:12px;font-weight:500;">Thiago Costa</div><div style="font-size:11px;color:#666;">Entregue 25/mai · João</div><div style="font-size:11px;color:#E31787;margin-top:2px;">🔔 Venceu há 1 dia</div></div><button class="btn btn-rosa btn-sm">Avisar João</button></div></div>
+          <div class="follow-item" style="margin-top:4px;"><div style="display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:12px;font-weight:500;">Luana Reis</div><div style="font-size:11px;color:#666;">Entregue 27/mai · Maria</div><div style="font-size:11px;color:#E31787;margin-top:2px;">🔔 Venceu hoje</div></div><button class="btn btn-rosa btn-sm">Avisar Maria</button></div></div>
+          <div class="follow-item" style="margin-top:4px;"><div style="display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:12px;font-weight:500;">Carlos Mota</div><div style="font-size:11px;color:#666;">Entregue 01/jun · Pedro</div><div style="font-size:11px;color:#633806;margin-top:2px;">⏱ Vence em 7 dias</div></div><button class="btn btn-sm">Lembrar</button></div></div>
+        </div>
+      </div>
+      <div id="page-kanban" class="page">
+        <div class="page-title">Kanban de vendedores</div>
+        <div class="panel"><div class="panel-head"><span class="panel-title">Pipeline</span><select class="sel" style="width:130px;"><option>Todos</option><option>João</option><option>Maria</option><option>Pedro</option></select></div>
+        <div class="kanban-wrap"><div class="kanban">
+          <div class="k-col"><div class="k-head kh-novo">Novo lead <span>3</span></div><div class="k-card"><div class="k-card-name">Ana Clara</div><div class="k-card-info">500ml·2cx·Campinas</div><div class="k-card-foot"><span class="pill p-novo" style="font-size:10px;">João</span></div></div><div class="k-card"><div class="k-card-name">Beatriz Alves</div><div class="k-card-info">330ml·1cx·SP</div><div class="k-card-foot"><span class="pill p-novo" style="font-size:10px;">Maria</span></div></div></div>
+          <div class="k-col"><div class="k-head kh-orc">Orçamento <span>2</span></div><div class="k-card"><div class="k-card-name">Rafael Silva</div><div class="k-card-info">330ml·1cx·BH</div><div class="k-card-foot"><span class="pill p-orc" style="font-size:10px;">Maria</span></div></div><div class="k-card"><div class="k-card-name">Cláudia Neves</div><div class="k-card-info">400ml·2cx·Uberlândia</div><div class="k-card-foot"><span class="pill p-orc" style="font-size:10px;">Pedro</span></div></div></div>
+          <div class="k-col"><div class="k-head kh-arte">Arte <span>1</span></div><div class="k-card"><div class="k-card-name">Marina Fonseca</div><div class="k-card-info">400ml·2cx·RJ</div><div class="k-card-foot"><span class="pill p-arte" style="font-size:10px;">Pedro</span></div></div></div>
+          <div class="k-col"><div class="k-head kh-prod">Em produção <span>2</span></div><div class="k-card"><div class="k-card-name">Pedro Lima</div><div class="k-card-info">770ml·3cx·SP</div><div class="k-card-foot"><span class="pill p-prod" style="font-size:10px;">João</span></div></div><div class="k-card"><div class="k-card-name">Fernanda Cruz</div><div class="k-card-info">500ml·2cx·Curitiba</div><div class="k-card-foot"><span class="pill p-prod" style="font-size:10px;">Pedro</span></div></div></div>
+          <div class="k-col"><div class="k-head kh-ent">Entregue <span>5</span></div><div class="k-card"><div class="k-card-name">Thiago Costa</div><div class="k-card-info">500ml·5cx</div><div class="k-card-foot"><span class="pill p-entregue" style="font-size:10px;">Maria</span></div></div><div class="k-card"><div class="k-card-name">Luana Reis</div><div class="k-card-info">330ml·2cx·BH</div><div class="k-card-foot"><span class="pill p-entregue" style="font-size:10px;">João</span></div></div></div>
+        </div></div></div>
+      </div>
+      <div id="page-contatos" class="page">
+        <div class="page-title">Contatos <button class="btn btn-rosa btn-sm" id="btn-new-contact"><i class="ti ti-plus" style="font-size:12px;"></i> Novo</button></div>
+        <div class="panel">
+          <div class="panel-head">
+            <div class="search-wrap" style="flex:1;max-width:280px;"><i class="ti ti-search" style="font-size:14px;color:#aaa;"></i><input type="search" id="contact-search" placeholder="Nome, WhatsApp ou cidade..."/></div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;"><select class="sel" style="width:120px;"><option value="">Todos status</option><option>Novo lead</option><option>Em produção</option><option>Entregue</option><option>Follow-up 30d</option></select><select class="sel" style="width:110px;"><option value="">Todos vendedores</option><option>João</option><option>Maria</option><option>Pedro</option></select></div>
+          </div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nome</th><th>WhatsApp</th><th>Cidade</th><th>Último pedido</th><th>Vendedor</th><th>Status</th><th></th></tr></thead><tbody>
+            <tr><td><b>Ana Clara</b></td><td>(19)99123-4567</td><td>Campinas/SP</td><td>500ml·24/06</td><td>João</td><td><span class="pill p-novo">Novo lead</span></td><td><button class="btn btn-sm" data-hist="AC">Histórico</button></td></tr>
+            <tr><td><b>Rafael Silva</b></td><td>(31)98765-4321</td><td>BH/MG</td><td>330ml·23/06</td><td>Maria</td><td><span class="pill p-orc">Orçamento</span></td><td><button class="btn btn-sm" data-hist="RS">Histórico</button></td></tr>
+            <tr><td><b>Pedro Lima</b></td><td>(11)97654-3210</td><td>SP/SP</td><td>770ml·20/06</td><td>João</td><td><span class="pill p-prod">Produção</span></td><td><button class="btn btn-sm" data-hist="PL">Histórico</button></td></tr>
+            <tr><td><b>Thiago Costa</b></td><td>(35)99888-7766</td><td>Pouso Alegre</td><td>500ml·25/05</td><td>João</td><td><span class="pill p-follow">Follow-up</span></td><td><button class="btn btn-sm" data-hist="TC">Histórico</button></td></tr>
+            <tr><td><b>Luana Reis</b></td><td>(31)98877-6655</td><td>BH/MG</td><td>330ml·27/05</td><td>Maria</td><td><span class="pill p-follow">Follow-up</span></td><td><button class="btn btn-sm" data-hist="LR">Histórico</button></td></tr>
+          </tbody></table></div>
+        </div>
+      </div>
+      <div id="page-followup" class="page">
+        <div class="page-title">Follow-up 30 dias</div>
+        <div class="panel"><div class="panel-head"><span class="panel-title">Clientes para reativar</span><button class="btn btn-rosa btn-sm" id="btn-go-broadcast"><i class="ti ti-send" style="font-size:12px;"></i> Broadcast</button></div>
+        <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Cliente</th><th>Pedido</th><th>Valor</th><th>Entregue</th><th>Vendedor</th><th>Prazo</th><th>Ação</th></tr></thead><tbody>
+          <tr><td><b>Thiago Costa</b></td><td>500ml·5cx</td><td style="color:#E31787;">R$2.245</td><td>25/05</td><td>João</td><td><span class="pill p-follow">Venceu há 1d</span></td><td><button class="btn btn-rosa btn-sm"><i class="ti ti-brand-whatsapp" style="font-size:11px;"></i> Avisar</button></td></tr>
+          <tr><td><b>Luana Reis</b></td><td>330ml·2cx</td><td style="color:#E31787;">R$818</td><td>27/05</td><td>Maria</td><td><span class="pill p-follow">Venceu hoje</span></td><td><button class="btn btn-rosa btn-sm"><i class="ti ti-brand-whatsapp" style="font-size:11px;"></i> Avisar</button></td></tr>
+          <tr><td><b>Carlos Mota</b></td><td>400ml·1cx</td><td style="color:#E31787;">R$489</td><td>01/06</td><td>Pedro</td><td><span class="pill p-prod">7 dias</span></td><td><button class="btn btn-sm">Lembrar</button></td></tr>
+        </tbody></table></div></div>
+      </div>
+      <div id="page-relatorio" class="page">
+        <div class="page-title">Relatórios <div style="display:flex;gap:8px;"><select class="sel" style="width:130px;"><option>Junho 2025</option><option>Maio 2025</option></select><button class="btn btn-rosa btn-sm"><i class="ti ti-download" style="font-size:12px;"></i> Exportar</button></div></div>
+        <div class="metrics"><div class="metric"><div class="metric-ico" style="background:#FBEAF0;"><i class="ti ti-users" style="font-size:16px;color:#E31787;"></i></div><div class="metric-val">47</div><div class="metric-lbl">Total de leads</div><div class="metric-change up">↑ 18%</div></div><div class="metric"><div class="metric-ico" style="background:#E1F5EE;"><i class="ti ti-check" style="font-size:16px;color:#085041;"></i></div><div class="metric-val">23%</div><div class="metric-lbl">Taxa de conversão</div><div class="metric-change up">↑ 5%</div></div><div class="metric"><div class="metric-ico" style="background:#EEEDFE;"><i class="ti ti-clock" style="font-size:16px;color:#3C3489;"></i></div><div class="metric-val">4 min</div><div class="metric-lbl">Tempo médio resp.</div><div class="metric-change up">↓ 2min</div></div><div class="metric"><div class="metric-ico" style="background:#E1F5EE;"><i class="ti ti-currency-dollar" style="font-size:16px;color:#085041;"></i></div><div class="metric-val">R$18.340</div><div class="metric-lbl">Faturamento</div><div class="metric-change up">↑ 12%</div></div></div>
+        <div class="report-card"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;"><div class="report-av" style="background:#E31787;">JO</div><div><div style="font-size:14px;font-weight:600;">João</div><div style="font-size:11px;color:#666;">Vendedor</div></div><span class="pill p-entregue" style="margin-left:auto;">Top vendedor</span></div><div class="report-stats"><div class="report-stat"><div class="report-stat-val">18</div><div class="report-stat-lbl">Leads</div></div><div class="report-stat"><div class="report-stat-val" style="color:#E31787;">28%</div><div class="report-stat-lbl">Conversão</div></div><div class="report-stat"><div class="report-stat-val">3 min</div><div class="report-stat-lbl">Resp. média</div></div><div class="report-stat"><div class="report-stat-val" style="color:#E31787;">R$8.120</div><div class="report-stat-lbl">Faturamento</div></div></div><div class="progress-bar"><div class="progress-fill" style="width:70%;"></div></div></div>
+        <div class="report-card"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;"><div class="report-av" style="background:#633806;">MA</div><div><div style="font-size:14px;font-weight:600;">Maria</div><div style="font-size:11px;color:#666;">Vendedor</div></div></div><div class="report-stats"><div class="report-stat"><div class="report-stat-val">16</div><div class="report-stat-lbl">Leads</div></div><div class="report-stat"><div class="report-stat-val" style="color:#E31787;">25%</div><div class="report-stat-lbl">Conversão</div></div><div class="report-stat"><div class="report-stat-val">5 min</div><div class="report-stat-lbl">Resp. média</div></div><div class="report-stat"><div class="report-stat-val" style="color:#E31787;">R$6.890</div><div class="report-stat-lbl">Faturamento</div></div></div><div class="progress-bar"><div class="progress-fill" style="width:55%;"></div></div></div>
+        <div class="report-card"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;"><div class="report-av" style="background:#3C3489;">PE</div><div><div style="font-size:14px;font-weight:600;">Pedro</div><div style="font-size:11px;color:#666;">Vendedor</div></div></div><div class="report-stats"><div class="report-stat"><div class="report-stat-val">13</div><div class="report-stat-lbl">Leads</div></div><div class="report-stat"><div class="report-stat-val" style="color:#E31787;">15%</div><div class="report-stat-lbl">Conversão</div></div><div class="report-stat"><div class="report-stat-val">6 min</div><div class="report-stat-lbl">Resp. média</div></div><div class="report-stat"><div class="report-stat-val" style="color:#E31787;">R$3.330</div><div class="report-stat-lbl">Faturamento</div></div></div><div class="progress-bar"><div class="progress-fill" style="width:35%;"></div></div></div>
+      </div>
+      <div id="page-broadcast" class="page">
+        <div class="page-title">Broadcast — Disparo em massa</div>
+        <div class="panel"><div class="panel-head"><span class="panel-title">Configurar disparo</span></div>
+          <div class="form-group"><label class="form-label">Segmento de clientes</label><select class="form-input" id="bc-segment"><option value="4">Follow-up 30d — reativar (4 contatos)</option><option value="2">Em produção — avisar andamento (2)</option><option value="12">Todos os clientes (12)</option><option value="3">Leads sem resposta (3)</option></select></div>
+          <div class="form-group"><label class="form-label">Mensagem — use {nome} para personalizar</label><textarea class="form-textarea" id="bc-msg">Oi {nome}! 👋 Passando para saber se você ainda tem interesse em copos personalizados MekMix. Temos condições especiais este mês! Posso te ajudar? 😊</textarea></div>
+          <div class="form-group"><label class="form-label">Prévia</label><div class="bc-preview" id="bc-preview">Oi Thiago! 👋 Passando para saber se você ainda tem interesse em copos personalizados MekMix. Temos condições especiais este mês! Posso te ajudar? 😊</div></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;"><div style="font-size:12px;color:#666;">Enviar para: <b id="bc-count">4 contatos</b></div><button class="btn btn-rosa" id="btn-bc-send"><i class="ti ti-send" style="font-size:13px;"></i> Disparar agora</button></div>
+        </div>
+        <div class="panel" id="bc-result" style="display:none;background:#E1F5EE;border-color:#9FE1CB;"><div style="font-size:13px;color:#085041;">✅ Disparo realizado! Mensagem enviada. Acompanhe as respostas nos Chats ao vivo.</div></div>
+      </div>
+      <div id="page-templates" class="page">
+        <div class="page-title">Templates de resposta rápida <button class="btn btn-rosa btn-sm" id="btn-new-template"><i class="ti ti-plus" style="font-size:12px;"></i> Novo</button></div>
+        <div id="templates-list"></div>
+      </div>
+      <div id="page-whatsapp" class="page">
+        <div class="page-title">Conexões WhatsApp</div>
+        <div class="panel"><div class="panel-head"><span class="panel-title">Evolution API — sem custo por mensagem</span><button class="btn btn-rosa btn-sm" id="btn-add-wapp"><i class="ti ti-plus" style="font-size:12px;"></i> Adicionar</button></div>
+          <div class="wapp-item"><div class="wapp-ico" style="background:#E1F5EE;"><i class="ti ti-brand-whatsapp" style="color:#25D366;font-size:22px;"></i></div><div style="flex:1;"><div style="font-weight:500;font-size:13px;">(35) 9 9999-0001 — Principal</div><div style="font-size:11px;color:#666;margin-top:2px;"><span style="color:#25D366;">● Conectado</span> · 247 msgs hoje</div><div style="font-size:11px;color:#791F1F;margin-top:3px;">⚠️ Não abrir WhatsApp Web ou app — exclusivo pelo servidor</div></div><div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;"><button class="btn btn-sm">QR Code</button><button class="btn btn-sm" style="color:#791F1F;border-color:#F7C1C1;">Desconectar</button></div></div>
+          <div class="wapp-item"><div class="wapp-ico" style="background:#FAEEDA;"><i class="ti ti-brand-whatsapp" style="color:#633806;font-size:22px;"></i></div><div style="flex:1;"><div style="font-weight:500;font-size:13px;">(35) 9 8888-0002 — Secundário</div><div style="font-size:11px;color:#666;margin-top:2px;"><span style="color:#25D366;">● Conectado</span> · 43 msgs hoje</div></div><div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;"><button class="btn btn-sm">QR Code</button><button class="btn btn-sm" style="color:#791F1F;border-color:#F7C1C1;">Desconectar</button></div></div>
+          <div class="wapp-item" id="new-wapp" style="display:none;"><div class="wapp-ico" style="background:#EEEDFE;"><i class="ti ti-brand-whatsapp" style="color:#3C3489;font-size:22px;"></i></div><div style="flex:1;"><div style="font-weight:500;">Novo número</div><div style="font-size:11px;color:#3C3489;margin-top:2px;">Abra WhatsApp → Dispositivos conectados → Escanear QR</div></div><button class="btn btn-rosa btn-sm">Escanear QR</button></div>
+        </div>
+      </div>
+      <div id="page-equipe" class="page">
+        <div class="page-title">Equipe <button class="btn btn-rosa btn-sm"><i class="ti ti-plus" style="font-size:12px;"></i> Adicionar</button></div>
+        <div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nome</th><th>Usuário</th><th>Perfil</th><th>Leads</th><th>Produção</th><th>Faturamento</th></tr></thead><tbody>
+          <tr><td><b>Bruno</b></td><td>bruno</td><td><span class="pill p-novo">Admin</span></td><td>—</td><td>—</td><td>—</td></tr>
+          <tr><td><b>João</b></td><td>joao</td><td><span class="pill p-orc">Vendedor</span></td><td>5</td><td>2</td><td style="color:#E31787;">R$8.120</td></tr>
+          <tr><td><b>Maria</b></td><td>maria</td><td><span class="pill p-orc">Vendedor</span></td><td>3</td><td>1</td><td style="color:#E31787;">R$6.890</td></tr>
+          <tr><td><b>Pedro</b></td><td>pedro</td><td><span class="pill p-orc">Vendedor</span></td><td>4</td><td>1</td><td style="color:#E31787;">R$3.330</td></tr>
+        </tbody></table></div></div>
+      </div>
+      <div id="page-config" class="page">
+        <div class="page-title">Configurações</div>
+        <div class="panel"><div class="panel-head"><span class="panel-title">Geral</span></div><div style="display:flex;flex-direction:column;gap:14px;max-width:400px;">
+          <div><label class="form-label">Nome da empresa</label><input class="form-input" type="text" value="MekMix Serigrafia"/></div>
+          <div><label class="form-label">WhatsApp principal</label><input class="form-input" type="tel" value="(35) 9 9999-0001"/></div>
+          <div><label class="form-label">Dias para follow-up</label><input class="form-input" type="number" value="30" style="width:100px;"/></div>
+          <div><label class="form-label">Horário de atendimento humano</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><input class="form-input" type="time" value="08:00" style="width:110px;"/> até <input class="form-input" type="time" value="18:00" style="width:110px;"/></div><div style="font-size:11px;color:#666;margin-top:4px;">Fora deste horário a Lara responde automaticamente</div></div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;cursor:pointer;"><input type="checkbox" checked style="width:16px;height:16px;cursor:pointer;"/> Notificações push ativas</label>
+          <button class="btn btn-rosa" style="width:fit-content;"><i class="ti ti-device-floppy" style="font-size:12px;"></i> Salvar</button>
+        </div></div>
+      </div>
+    </div>
+    <div class="mob-nav"><div class="mob-nav-row">
+      <button class="mob-nav-btn" data-mob-page="dashboard" data-mob-title="Início"><i class="ti ti-home"></i><span>Início</span></button>
+      <button class="mob-nav-btn active" data-mob-page="chats" data-mob-title="Chats"><i class="ti ti-message-circle"></i><span>Chats</span><span class="mob-badge">8</span></button>
+      <button class="mob-nav-btn" data-mob-page="kanban" data-mob-title="Kanban"><i class="ti ti-layout-kanban"></i><span>Kanban</span></button>
+      <button class="mob-nav-btn" data-mob-page="contatos" data-mob-title="Contatos"><i class="ti ti-users"></i><span>Contatos</span></button>
+      <button class="mob-nav-btn" data-mob-page="followup" data-mob-title="Follow-up"><i class="ti ti-bell"></i><span>Follow-up</span><span class="mob-badge">3</span></button>
+      <button class="mob-nav-btn" id="btn-mais"><i class="ti ti-dots"></i><span>Mais</span></button>
+    </div></div>
+    <div class="mais-overlay" id="mais-overlay"></div>
+    <div class="mais-menu" id="mais-menu">
+      <button class="mais-item" data-mob-page="relatorio" data-mob-title="Relatórios"><i class="ti ti-chart-bar"></i>Relatórios</button>
+      <button class="mais-item" data-mob-page="broadcast" data-mob-title="Broadcast"><i class="ti ti-send"></i>Broadcast</button>
+      <button class="mais-item" data-mob-page="templates" data-mob-title="Templates"><i class="ti ti-template"></i>Templates</button>
+      <button class="mais-item" data-mob-page="whatsapp" data-mob-title="WhatsApp"><i class="ti ti-brand-whatsapp"></i>Conexões WhatsApp</button>
+      <button class="mais-item" data-mob-page="equipe" data-mob-title="Equipe"><i class="ti ti-users-group"></i>Equipe</button>
+      <button class="mais-item" data-mob-page="config" data-mob-title="Configurações"><i class="ti ti-settings"></i>Configurações</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-transfer"><div class="modal"><div class="modal-head"><span class="modal-title">Transferir conversa</span><button class="modal-close" data-close="modal-transfer">×</button></div><div class="modal-body"><div class="form-group"><label class="form-label">Cliente</label><div style="font-size:13px;font-weight:500;" id="transfer-client">—</div></div><div class="form-group"><label class="form-label">Transferir para</label><select class="form-input" id="transfer-to"><option>João</option><option>Maria</option><option>Pedro</option></select></div><div class="form-group"><label class="form-label">Motivo (visível para o vendedor)</label><textarea class="form-textarea" rows="2" placeholder="Ex: Cliente fora da minha região..."></textarea></div></div><div class="modal-footer"><button class="btn" data-close="modal-transfer">Cancelar</button><button class="btn btn-rosa" id="btn-confirm-transfer">Transferir</button></div></div></div>
+<div class="modal-overlay" id="modal-pdf"><div class="modal"><div class="modal-head"><span class="modal-title">Gerar orçamento PDF</span><button class="modal-close" data-close="modal-pdf">×</button></div><div class="modal-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><div class="form-group"><label class="form-label">Cliente</label><input class="form-input" id="pdf-cliente" value="Ana Clara"/></div><div class="form-group"><label class="form-label">Tamanho</label><select class="form-input" id="pdf-tam"><option>500ml</option><option>330ml</option><option>400ml</option><option>770ml</option></select></div><div class="form-group"><label class="form-label">Qtd. caixas</label><input class="form-input" type="number" id="pdf-qtd" value="2" min="1"/></div><div class="form-group"><label class="form-label">Cor da tinta</label><select class="form-input" id="pdf-tinta"><option>Preta</option><option>Branca</option><option>Azul</option><option>Verde</option><option>Vermelha</option></select></div><div class="form-group"><label class="form-label">Impressão</label><select class="form-input" id="pdf-imp"><option>Frente e verso</option><option>Apenas frente</option></select></div><div class="form-group"><label class="form-label">Arte</label><select class="form-input" id="pdf-arte"><option>Inclusa (equipe MekMix)</option><option>Cliente envia</option></select></div></div><div class="pdf-preview" id="pdf-preview"><div class="pdf-header"><div><div class="pdf-logo">MekMix Serigrafia</div><div class="pdf-logo-sub">Copos Personalizados</div></div><div style="text-align:right;"><div style="font-size:11px;color:#aaa;">24/06/2025</div></div></div><div class="pdf-title">Orçamento para: <span id="pdf-prev-cliente">Ana Clara</span></div><div class="pdf-row"><span>Produto</span><span id="pdf-prev-prod">500ml · 2 caixas</span></div><div class="pdf-row"><span>Impressão</span><span id="pdf-prev-imp">Frente e verso</span></div><div class="pdf-row"><span>Tinta</span><span id="pdf-prev-tinta">Preta</span></div><div class="pdf-row"><span>Arte</span><span id="pdf-prev-arte">Inclusa</span></div><div class="pdf-row"><span>Prazo</span><span>12 dias úteis</span></div><div class="pdf-row"><span>Frete</span><span>A combinar</span></div><div class="pdf-total"><span>Total</span><span id="pdf-prev-total">R$ 1.078,00</span></div><div style="margin-top:10px;padding:8px;background:#f8f8fa;border-radius:6px;font-size:11px;color:#666;">30% entrada: R$ <span id="pdf-prev-ent">323,40</span> · 70% antes despacho: R$ <span id="pdf-prev-res">754,60</span></div><div class="pdf-footer">MekMix Serigrafia · mekmix.com.br · (35) 9 9999-0001</div></div></div><div class="modal-footer"><button class="btn" data-close="modal-pdf">Cancelar</button><button class="btn btn-roxo" id="btn-pdf-chat"><i class="ti ti-brand-whatsapp" style="font-size:12px;"></i> Enviar no chat</button><button class="btn btn-rosa" id="btn-pdf-dl"><i class="ti ti-download" style="font-size:12px;"></i> Baixar PDF</button></div></div></div>
+<div class="modal-overlay" id="modal-hist"><div class="modal"><div class="modal-head"><span class="modal-title" id="hist-title">Histórico</span><button class="modal-close" data-close="modal-hist">×</button></div><div class="modal-body" id="hist-body"></div></div></div>
+<div class="modal-overlay" id="modal-template"><div class="modal"><div class="modal-head"><span class="modal-title" id="tpl-modal-title">Novo template</span><button class="modal-close" data-close="modal-template">×</button></div><div class="modal-body"><div class="form-group"><label class="form-label">Atalho (ex: /orcamento)</label><input class="form-input" id="tpl-key" placeholder="/atalho" autocapitalize="none"/></div><div class="form-group"><label class="form-label">Texto da mensagem</label><textarea class="form-textarea" id="tpl-text" placeholder="Texto completo..."></textarea></div></div><div class="modal-footer"><button class="btn" data-close="modal-template">Cancelar</button><button class="btn btn-rosa" id="btn-save-tpl">Salvar</button></div></div></div>
+<div class="modal-overlay" id="modal-contact"><div class="modal"><div class="modal-head"><span class="modal-title">Novo contato</span><button class="modal-close" data-close="modal-contact">×</button></div><div class="modal-body"><div class="form-group"><label class="form-label">Nome completo</label><input class="form-input" id="nc-nome" placeholder="Nome do cliente"/></div><div class="form-group"><label class="form-label">WhatsApp</label><input class="form-input" type="tel" id="nc-wapp" placeholder="(99) 99999-9999"/></div><div class="form-group"><label class="form-label">Cidade / Estado</label><input class="form-input" id="nc-cidade" placeholder="Cidade/UF"/></div><div class="form-group"><label class="form-label">Atribuir vendedor</label><select class="form-input"><option>João</option><option>Maria</option><option>Pedro</option></select></div></div><div class="modal-footer"><button class="btn" data-close="modal-contact">Cancelar</button><button class="btn btn-rosa" id="btn-save-contact">Criar contato</button></div></div></div>
+
+<script>
+var USERS={bruno:{pass:'admin123',name:'Bruno',role:'Admin',av:'BR',color:'#E31787',isAdmin:true},joao:{pass:'joao123',name:'João',role:'Vendedor',av:'JO',color:'#3C3489',isAdmin:false},maria:{pass:'maria123',name:'Maria',role:'Vendedor',av:'MA',color:'#633806',isAdmin:false},pedro:{pass:'pedro123',name:'Pedro',role:'Vendedor',av:'PE',color:'#085041',isAdmin:false}};
+var currentUser=null,currentPage='chats',mobState='list',resolveOn=false,recOn=false,currentKey='AC',editTplIdx=-1;
+
+var TEMPLATES=[
+  {key:'/orcamento',text:'Olá {nome}! 😊 Segue seu orçamento MekMix:\n📦 {qtd}x caixas de {tamanho}ml transparente\n🎨 Tinta {tinta} · Frente e verso\n🖼️ Arte inclusa pela nossa equipe\n💰 R${valor} total (30% entrada + 70% antes despacho)\n📅 Prazo: 12 dias úteis\n\nVamos fechar? 🎉'},
+  {key:'/prazo',text:'Oi {nome}! O prazo é de 12 dias úteis após aprovação da arte e confirmação do pagamento de entrada. Quer me passar sua data do evento para eu verificar? 😊'},
+  {key:'/arte',text:'Pode enviar a arte aqui mesmo, {nome}! Aceitamos PNG, JPG, PDF, AI, CDR ou SVG (qualidade alta). Se precisar de ajuda para criar, nossa equipe de design faz por você sem custo adicional! 🎨'},
+  {key:'/pagamento',text:'O pagamento é feito em 2 etapas, {nome}: 30% de entrada para iniciar a produção e 70% quando ficar pronto, antes do despacho. Aceitamos PIX, depósito bancário e cartão de crédito (com taxa). 💳'},
+  {key:'/frete',text:'O frete é por conta do cliente, {nome}, pago diretamente à transportadora. O valor varia conforme sua cidade — me diz onde você está que eu verifico o estimado! 📦'},
+  {key:'/followup',text:'Oi {nome}! 👋 Já faz um tempinho desde o seu pedido. Tudo certo com os copos? Estamos com novidades e condições especiais este mês. Posso te ajudar com um novo pedido? 😊'}
+];
+
+var CONVDATA={
+  AC:{init:'AC',bg:'#FBEAF0',color:'#72243E',name:'Ana Clara',sub:'WhatsApp · (19) 99123-4567 · online agora',cidade:'Campinas/SP',wapp:'(19) 99123-4567',canalTxt:'WhatsApp',canalHtml:'<i class="ti ti-brand-whatsapp" style="font-size:12px;color:#25D366;"></i> WhatsApp',vendedor:'João',status:'Novo lead',pill:'p-novo',nota:'Evento de formatura em agosto. Arte ainda não tem.',hist:[{prod:'500ml · 2 caixas',data:'Jun/2025',vend:'João',valor:'R$1.078,00',status:'Em andamento'}],msgs:[{t:'in',s:'Lara (IA)',m:'Olá! 👋 Sou a Lara, do time comercial da MekMix. Como posso te ajudar hoje?',h:'14:28'},{t:'out',w:'Ana Clara',m:'Oi! Quero copos personalizados de 500ml para meu evento',h:'14:29'},{t:'in',s:'Lara (IA)',m:'Que ótimo! Qual seu nome? 😊',h:'14:29'},{t:'out',w:'Ana Clara',m:'Ana Clara!',h:'14:30'},{t:'in',s:'Lara (IA)',m:'Ana, quantas caixas você precisa?',h:'14:30'},{t:'out',w:'Ana Clara',m:'2 caixas de 500ml!',h:'14:31'},{t:'in',s:'Lara (IA)',m:'Perfeito! 2.000 copos. Tem arte pronta? 📦',h:'14:31'},{t:'note',w:'João',m:'Evento formatura agosto. Arte não tem — nosso time cria. Orçamento: R$1.078,00.'},{t:'out',w:'João (vendedor)',m:'Oi Ana! Aqui é o João. Vou te enviar o orçamento agora 😊',h:'14:33'},{t:'audio',h:'14:34'},{t:'out',w:'João',m:'Orçamento:\n📦 2cx 500ml transparente\n🎨 Tinta preta · Frente e verso\n🖼️ Arte inclusa\n💰 R$1.078,00 (entrada R$323,40)\n📅 12 dias úteis\n\nVamos fechar? 😊',h:'14:35'}]},
+  RS:{init:'RS',bg:'#EEEDFE',color:'#3C3489',name:'Rafael Silva',sub:'WhatsApp · (31) 98765-4321',cidade:'BH/MG',wapp:'(31) 98765-4321',canalTxt:'WhatsApp',canalHtml:'<i class="ti ti-brand-whatsapp" style="font-size:12px;color:#25D366;"></i> WhatsApp',vendedor:'Maria',status:'Em produção',pill:'p-prod',nota:'3cx 770ml em produção. Prazo 30/06.',hist:[{prod:'770ml · 3 caixas',data:'Jun/2025',vend:'Maria',valor:'R$1.347,00',status:'Em produção'},{prod:'330ml · 1 caixa',data:'Jan/2025',vend:'Maria',valor:'R$409,00',status:'Entregue'}],msgs:[{t:'in',s:'Lara (IA)',m:'Olá Rafael! Como posso te ajudar?',h:'13:05'},{t:'out',w:'Rafael Silva',m:'Quando meu pedido fica pronto?',h:'13:07'},{t:'in',s:'Maria (vendedor)',m:'Oi Rafael! Pedido de 770ml em produção. Prazo estimado: 30/06. 😊',h:'13:10'}]},
+  PL:{init:'PL',bg:'#FAEEDA',color:'#633806',name:'Pedro Lima',sub:'Instagram · @pedrolima_sp',cidade:'SP/SP',wapp:'(11) 97654-3210',canalTxt:'Instagram',canalHtml:'<i class="ti ti-brand-instagram" style="font-size:12px;color:#E1306C;"></i> Instagram',vendedor:'—',status:'Novo lead',pill:'p-novo',nota:'',hist:[],msgs:[{t:'in',s:'Lara (IA)',m:'Olá! 👋 Sou a Lara da MekMix. Como posso te ajudar?',h:'11:40'},{t:'out',w:'Pedro Lima',m:'Vi no instagram de vocês, quero saber mais sobre os copos',h:'11:45'}]},
+  MF:{init:'MF',bg:'#E6F1FB',color:'#0C447C',name:'Marina Fonseca',sub:'Facebook · Marina Fonseca',cidade:'RJ/RJ',wapp:'(21) 96543-2100',canalTxt:'Facebook',canalHtml:'<i class="ti ti-brand-facebook" style="font-size:12px;color:#1877F2;"></i> Facebook',vendedor:'—',status:'Novo lead',pill:'p-novo',nota:'',hist:[],msgs:[{t:'in',s:'Lara (IA)',m:'Olá Marina! Sou a Lara da MekMix. Como posso te ajudar? 😊',h:'10:18'},{t:'out',w:'Marina Fonseca',m:'Oi, vi o anúncio! Quero saber os preços.',h:'10:20'}]},
+  TC:{init:'TC',bg:'#FCEBEB',color:'#791F1F',name:'Thiago Costa',sub:'WhatsApp · (35) 99888-7766',cidade:'Pouso Alegre/MG',wapp:'(35) 99888-7766',canalTxt:'WhatsApp',canalHtml:'<i class="ti ti-brand-whatsapp" style="font-size:12px;color:#25D366;"></i> WhatsApp',vendedor:'João',status:'Orçamento enviado',pill:'p-orc',nota:'Mandou áudio perguntando prazo.',hist:[{prod:'500ml · 5 caixas',data:'Mai/2025',vend:'João',valor:'R$2.245,00',status:'Entregue'},{prod:'400ml · 2 caixas',data:'Fev/2025',vend:'João',valor:'R$918,00',status:'Entregue'}],msgs:[{t:'audio',h:'09:55'},{t:'in',s:'João (vendedor)',m:'Oi Thiago! O prazo é 12 dias úteis após confirmação de pagamento. Posso enviar o link de pagamento?',h:'10:02'}]},
+  LR:{init:'LR',bg:'#E1F5EE',color:'#085041',name:'Luana Reis',sub:'WhatsApp · (31) 98877-6655',cidade:'BH/MG',wapp:'(31) 98877-6655',canalTxt:'WhatsApp',canalHtml:'<i class="ti ti-brand-whatsapp" style="font-size:12px;color:#25D366;"></i> WhatsApp',vendedor:'Maria',status:'Entregue',pill:'p-entregue',nota:'Entregue 27/05. Follow-up venceu hoje.',hist:[{prod:'330ml · 2 caixas',data:'Mai/2025',vend:'Maria',valor:'R$818,00',status:'Entregue'}],msgs:[{t:'out',w:'Maria (vendedor)',m:'Oi Luana! Tudo certo com os copos? 😊',h:'08:25'},{t:'out',w:'Luana Reis',m:'Ok perfeito, pode fazer!',h:'08:30'}]}
+};
+
+var CONVLIST=[
+  {key:'AC',chBg:'#25D366',chIcon:'ti-brand-whatsapp',preview:'Quero 2 caixas de 500ml...',time:'14:32',pill:'p-novo',pillTxt:'Novo lead',unread:2,vend:'João'},
+  {key:'RS',chBg:'#25D366',chIcon:'ti-brand-whatsapp',preview:'Quando fica pronto meu pedido?',time:'13:10',pill:'p-prod',pillTxt:'Em produção',vend:'Maria'},
+  {key:'PL',chBg:'#E1306C',chIcon:'ti-brand-instagram',preview:'Vi no instagram de vocês...',time:'11:45',pill:'p-novo',pillTxt:'Novo lead',unread:1},
+  {key:'MF',chBg:'#1877F2',chIcon:'ti-brand-facebook',preview:'Oi, vi o anúncio de vocês!',time:'10:20',pill:'p-novo',pillTxt:'Novo lead',unread:4},
+  {key:'TC',chBg:'#25D366',chIcon:'ti-brand-whatsapp',preview:'🎤 Áudio · 0:34',time:'09:55',pill:'p-orc',pillTxt:'Orçamento enviado',vend:'João'},
+  {key:'LR',chBg:'#25D366',chIcon:'ti-brand-whatsapp',preview:'Ok perfeito, pode fazer!',time:'08:30',pill:'p-entregue',pillTxt:'Entregue',pill2:'p-follow',pill2Txt:'Follow-up',vend:'Maria'}
+];
+
+var PRICES={'330ml':{1:409,3:369},'400ml':{1:489,3:459},'500ml':{1:539,3:489},'770ml':{1:449,3:429}};
+var WAVE=[8,12,18,14,22,16,10,20,15,12,18,22,10,16,14,20,8,18,12,16];
+
+function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function now(){var d=new Date();return d.getHours()+':'+('0'+d.getMinutes()).slice(-2);}
+
+// ── TOAST ──
+function toast(msg){
+  var t=document.getElementById('notif-toast');
+  document.getElementById('notif-text').textContent=msg;
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},3500);
+  if('Notification' in window&&Notification.permission==='granted'){
+    try{new Notification('MekMix CRM',{body:msg});}catch(e){}
+  }
+}
+
+// ── MODAL ──
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// ── LOGIN ──
+function tryLogin(u,p){
+  var usr=USERS[u.toLowerCase()];
+  if(usr&&usr.pass===p){
+    currentUser=Object.assign({},usr,{key:u.toLowerCase()});
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').classList.add('visible');
+    applyRole();renderConvList();renderTemplates();renderQR();openConv('AC');
+    if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
+    return true;
+  }
+  return false;
+}
+
+function applyRole(){
+  document.getElementById('sb-name').textContent=currentUser.name;
+  document.getElementById('sb-role').textContent=currentUser.role;
+  document.getElementById('sb-role-lbl').textContent=currentUser.role;
+  var av=document.getElementById('sb-av');av.textContent=currentUser.av;av.style.background=currentUser.color;
+  document.querySelectorAll('.admin-only').forEach(function(el){el.style.display=currentUser.isAdmin?'':'none';});
+}
+
+function logout(){
+  currentUser=null;
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-user').value='';
+  document.getElementById('login-pass').value='';
+  document.getElementById('login-error').style.display='none';
+}
+
+// ── CONV LIST ──
+function renderConvList(filter,search){
+  var list=document.getElementById('conv-list');list.innerHTML='';var shown=0;
+  CONVLIST.forEach(function(c){
+    var d=CONVDATA[c.key];
+    if(!currentUser.isAdmin&&d.vendedor!==currentUser.name&&d.vendedor!=='—')return;
+    if(search){var s=search.toLowerCase();if(d.name.toLowerCase().indexOf(s)<0&&d.wapp.indexOf(s)<0&&d.cidade.toLowerCase().indexOf(s)<0)return;}
+    if(filter&&filter!=='todos'){
+      if(filter==='meus'&&d.vendedor!==currentUser.name)return;
+      if(filter==='sem'&&d.vendedor!=='—')return;
+      if(filter==='wa'&&d.canalTxt!=='WhatsApp')return;
+      if(filter==='ig'&&d.canalTxt!=='Instagram')return;
+      if(filter==='fb'&&d.canalTxt!=='Facebook')return;
+    }
+    shown++;
+    var btn=document.createElement('button');
+    btn.className='conv-btn'+(c.key===currentKey?' sel':'');
+    btn.setAttribute('data-key',c.key);
+    btn.innerHTML='<div class="conv-av" style="background:'+d.bg+';color:'+d.color+';">'+d.init+'<span class="ch-badge" style="background:'+c.chBg+';"><i class="ti '+c.chIcon+'" style="font-size:7px;color:#fff;"></i></span></div><div class="conv-body"><div class="conv-top"><span class="conv-name">'+d.name+'</span><span class="conv-time">'+c.time+'</span></div><div class="conv-preview">'+c.preview+'</div><div class="conv-foot"><span class="pill '+c.pill+'">'+c.pillTxt+'</span>'+(c.pill2?'<span class="pill '+c.pill2+'" style="margin-left:4px;">'+c.pill2Txt+'</span>':'')+(c.unread?'<span class="unread">'+c.unread+'</span>':'')+(c.vend&&currentUser.isAdmin?'<span class="vend-pill">'+c.vend+'</span>':'')+'</div></div>';
+    list.appendChild(btn);
+  });
+  document.getElementById('conv-count').textContent=shown+' abertos';
+}
+
+// ── OPEN CONV ──
+function openConv(key){
+  currentKey=key;var d=CONVDATA[key];if(!d)return;
+  document.querySelectorAll('.conv-btn').forEach(function(b){b.classList.remove('sel');});
+  var sel=document.querySelector('.conv-btn[data-key="'+key+'"]');if(sel)sel.classList.add('sel');
+  var chAv=document.getElementById('ch-av');chAv.textContent=d.init;chAv.style.background=d.bg;chAv.style.color=d.color;
+  document.getElementById('ch-name').textContent=d.name;
+  document.getElementById('ch-sub').textContent=d.sub;
+  var c3av=document.getElementById('c3-av');c3av.textContent=d.init;c3av.style.background=d.bg;c3av.style.color=d.color;
+  document.getElementById('c3-name').textContent=d.name;
+  document.getElementById('c3-sub').textContent=d.cidade;
+  document.getElementById('c3-wapp').textContent=d.wapp;
+  document.getElementById('c3-canal').innerHTML=d.canalHtml;
+  document.getElementById('c3-cidade').textContent=d.cidade;
+  document.getElementById('c3-vendedor').textContent=d.vendedor;
+  var st=document.getElementById('c3-status');st.className='pill '+d.pill;st.textContent=d.status;
+  document.getElementById('c3-nota').value=d.nota;
+  renderHistCol3(d.hist);renderMsgs(d.msgs);
+  document.getElementById('transfer-client').textContent=d.name;
+  document.getElementById('pdf-cliente').value=d.name;
+  updatePDF();
+  if(window.innerWidth<=768){mobState='chat';updateMobView();}
+}
+
+function renderHistCol3(hist){
+  var el=document.getElementById('c3-hist');
+  if(!hist||!hist.length){el.innerHTML='<span style="font-size:11px;color:#aaa;font-style:italic;">Primeiro pedido</span>';return;}
+  el.innerHTML=hist.map(function(h){return '<div class="hist-item"><div class="hist-prod">'+h.prod+'</div><div class="hist-meta">'+h.data+' · '+h.vend+'</div><div class="hist-val">'+h.valor+' <span class="pill '+(h.status==='Entregue'?'p-entregue':'p-prod')+'" style="font-size:9px;">'+h.status+'</span></div></div>';}).join('');
+}
+
+function renderMsgs(msgs){
+  var body=document.getElementById('chat-body');
+  body.innerHTML='<div class="date-sep">Hoje, 24 de junho</div>';
+  var bars=WAVE.map(function(h){return '<span style="height:'+h+'px;"></span>';}).join('');
+  msgs.forEach(function(m){
+    if(m.t==='note'){var n=document.createElement('div');n.className='note-bubble';n.innerHTML='<div class="note-lbl"><i class="ti ti-lock" style="font-size:11px;"></i> Nota interna — '+esc(m.w)+'</div>'+esc(m.m);body.appendChild(n);}
+    else if(m.t==='audio'){var a=document.createElement('div');a.className='msg msg-in';a.innerHTML='<div class="audio-wrap"><button class="audio-play" onclick="togglePlay(this)"><i class="ti ti-player-play" style="font-size:12px;color:#fff;"></i></button><div class="audio-wave">'+bars+'</div><span style="font-size:10px;color:#aaa;">0:34</span></div><div class="msg-meta">'+m.h+'</div>';body.appendChild(a);}
+    else{var div=document.createElement('div');div.className='msg msg-'+m.t;var html='';if(m.t==='in'&&m.s)html+='<div class="msg-sender">'+esc(m.s)+'</div>';html+='<div class="msg-bubble">'+esc(m.m).replace(/\n/g,'<br>')+'</div><div class="msg-meta">'+(m.t==='out'?m.h+' · '+esc(m.w||''):m.h)+'</div>';div.innerHTML=html;body.appendChild(div);}
+  });
+  body.scrollTop=body.scrollHeight;
+}
+
+function togglePlay(btn){var ic=btn.querySelector('i');if(!ic)return;ic.className=ic.className.indexOf('play')>-1?'ti ti-player-pause':'ti ti-player-play';ic.style.fontSize='12px';ic.style.color='#fff';}
+
+// ── TEMPLATES ──
+function renderTemplates(){
+  var list=document.getElementById('templates-list');if(!list)return;
+  list.innerHTML=TEMPLATES.map(function(t,i){
+    return '<div class="panel" style="margin-bottom:10px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span style="font-size:13px;font-weight:600;color:#E31787;">'+esc(t.key)+'</span><div style="display:flex;gap:6px;"><button class="btn btn-sm" data-edit-tpl="'+i+'"><i class="ti ti-edit" style="font-size:11px;"></i> Editar</button><button class="btn btn-sm btn-danger" data-del-tpl="'+i+'"><i class="ti ti-trash" style="font-size:11px;"></i></button></div></div><div style="font-size:12px;color:#666;background:#f8f8fa;padding:8px 10px;border-radius:6px;white-space:pre-wrap;">'+esc(t.text)+'</div></div>';
+  }).join('');
+  // bind template buttons
+  document.querySelectorAll('[data-edit-tpl]').forEach(function(btn){
+    btn.addEventListener('click',function(){editTpl(parseInt(this.getAttribute('data-edit-tpl')));});
+  });
+  document.querySelectorAll('[data-del-tpl]').forEach(function(btn){
+    btn.addEventListener('click',function(){delTpl(parseInt(this.getAttribute('data-del-tpl')));});
+  });
+}
+
+function renderQR(){
+  var row=document.getElementById('qr-row');row.innerHTML='<span class="qr-lbl">Rápidas:</span>';
+  TEMPLATES.forEach(function(t){
+    var btn=document.createElement('button');btn.className='qr-btn-item';btn.textContent=t.key;
+    btn.addEventListener('click',function(){
+      var inp=document.getElementById('msg-input');
+      var nome=document.getElementById('ch-name').textContent.split(' ')[0];
+      inp.value=t.text.replace(/{nome}/g,nome).replace(/{qtd}/g,'2').replace(/{tamanho}/g,'500ml').replace(/{tinta}/g,'preta').replace(/{valor}/g,'1.078,00');
+      inp.focus();
+    });
+    row.appendChild(btn);
+  });
+}
+
+function editTpl(i){editTplIdx=i;document.getElementById('tpl-modal-title').textContent='Editar template';document.getElementById('tpl-key').value=TEMPLATES[i].key;document.getElementById('tpl-text').value=TEMPLATES[i].text;openModal('modal-template');}
+function delTpl(i){if(confirm('Deletar o template '+TEMPLATES[i].key+'?')){TEMPLATES.splice(i,1);renderTemplates();renderQR();}}
+
+// ── PDF ──
+function updatePDF(){
+  var c=document.getElementById('pdf-cliente').value||'—';
+  var tam=document.getElementById('pdf-tam').value;
+  var qtd=parseInt(document.getElementById('pdf-qtd').value)||1;
+  var tinta=document.getElementById('pdf-tinta').value;
+  var imp=document.getElementById('pdf-imp').value;
+  var arte=document.getElementById('pdf-arte').value;
+  var p=PRICES[tam]||PRICES['500ml'];
+  var ppu=qtd>=3?p[3]:p[1];
+  var total=ppu*qtd;
+  var ent=(total*0.3).toFixed(2);
+  var res=(total*0.7).toFixed(2);
+  var unid=tam==='770ml'?500:1000;
+  document.getElementById('pdf-prev-cliente').textContent=c;
+  document.getElementById('pdf-prev-prod').textContent=tam+' · '+qtd+' caixa'+(qtd>1?'s':'')+' ('+(qtd*unid).toLocaleString('pt-BR')+' un.)';
+  document.getElementById('pdf-prev-imp').textContent=imp;
+  document.getElementById('pdf-prev-tinta').textContent=tinta;
+  document.getElementById('pdf-prev-arte').textContent=arte;
+  document.getElementById('pdf-prev-total').textContent='R$ '+total.toLocaleString('pt-BR',{minimumFractionDigits:2});
+  document.getElementById('pdf-prev-ent').textContent=ent;
+  document.getElementById('pdf-prev-res').textContent=res;
+}
+
+// ── HIST MODAL ──
+function openHistModal(key){
+  var d=CONVDATA[key];if(!d)return;
+  document.getElementById('hist-title').textContent='Histórico — '+d.name;
+  var body=document.getElementById('hist-body');
+  if(!d.hist||!d.hist.length){body.innerHTML='<p style="color:#aaa;font-style:italic;">Nenhum pedido anterior.</p>';}
+  else{body.innerHTML='<div style="margin-bottom:12px;font-size:12px;color:#666;">'+d.cidade+' · '+d.wapp+'</div>'+d.hist.map(function(h){return '<div class="panel" style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:13px;font-weight:600;">'+h.prod+'</div><div style="font-size:11px;color:#666;margin-top:2px;">'+h.data+' · '+h.vend+'</div></div><div style="text-align:right;"><div style="font-size:14px;font-weight:600;color:#E31787;">'+h.valor+'</div><span class="pill '+(h.status==='Entregue'?'p-entregue':'p-prod')+'">'+h.status+'</span></div></div></div>';}).join('');}
+  openModal('modal-hist');
+}
+
+// ── NAVEGAÇÃO ──
+function goPage(id,title){
+  currentPage=id;var isMob=window.innerWidth<=768;
+  document.getElementById('page-chats').style.display='none';
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('visible');});
+  document.querySelectorAll('.sb-btn').forEach(function(b){b.classList.remove('active');});
+  if(id==='chats'){document.getElementById('page-chats').style.display='flex';if(isMob){mobState='list';updateMobView();}}
+  else{var pg=document.getElementById('page-'+id);if(pg)pg.classList.add('visible');}
+  var sb=document.querySelector('.sb-btn[data-page="'+id+'"]');if(sb)sb.classList.add('active');
+  if(isMob){document.getElementById('mob-title').textContent=title||id;document.getElementById('mob-back').style.visibility='hidden';document.querySelectorAll('.mob-nav-btn').forEach(function(b){b.classList.remove('active');});var mnb=document.querySelector('.mob-nav-btn[data-mob-page="'+id+'"]');if(mnb)mnb.classList.add('active');}
+}
+
+function updateMobView(){
+  var c1=document.getElementById('col1'),c2=document.getElementById('col2'),c3=document.getElementById('col3');
+  var back=document.getElementById('mob-back'),title=document.getElementById('mob-title');
+  c1.classList.remove('mob-on');c2.classList.remove('mob-on');c3.classList.remove('mob-on');
+  if(mobState==='list'){c1.classList.add('mob-on');back.style.visibility='hidden';title.textContent='Chats ao vivo';}
+  else if(mobState==='chat'){c2.classList.add('mob-on');back.style.visibility='visible';title.textContent=document.getElementById('ch-name').textContent;}
+  else{c3.classList.add('mob-on');back.style.visibility='visible';title.textContent='Detalhes';}
+}
+
+function mobBack(){if(mobState==='detail')mobState='chat';else if(mobState==='chat')mobState='list';updateMobView();}
+
+// ── SEND MSG ──
+function sendMsg(){
+  var inp=document.getElementById('msg-input');var text=(inp.value||'').trim();if(!text)return;
+  var body=document.getElementById('chat-body');
+  var div=document.createElement('div');div.className='msg msg-out';
+  div.innerHTML='<div class="msg-bubble">'+esc(text).replace(/\n/g,'<br>')+'</div><div class="msg-meta">'+now()+' · '+currentUser.name+'</div>';
+  body.appendChild(div);inp.value='';body.scrollTop=body.scrollHeight;
+}
+
+// ── BROADCAST ──
+function updateBC(){
+  var sel=document.getElementById('bc-segment');
+  var count=sel.options[sel.selectedIndex].value;
+  document.getElementById('bc-count').textContent=count+' contatos';
+  var msg=(document.getElementById('bc-msg').value||'');
+  document.getElementById('bc-preview').textContent=msg.replace(/{nome}/g,'Thiago');
+}
+
+// ── INIT ──
+
+// iOS Safari file:// compat — funções chamadas por onclick inline
+function qlLogin(u,p){
+  document.getElementById('login-user').value=u;
+  document.getElementById('login-pass').value=p;
+  doLogin();
+}
+function doLogin(){
+  var u=document.getElementById('login-user').value.trim();
+  var p=document.getElementById('login-pass').value;
+  if(!tryLogin(u,p)){document.getElementById('login-error').style.display='block';}
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  // Login — tratado por onclick inline (iOS Safari file://)
+  document.getElementById('login-pass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+  document.getElementById('btn-logout').addEventListener('click',logout);
+
+  // Sidebar nav
+  document.querySelectorAll('.sb-btn[data-page]').forEach(function(btn){
+    btn.addEventListener('click',function(){var lbl=this.querySelector('.sb-btn-lbl');goPage(this.getAttribute('data-page'),lbl?lbl.textContent:'');});
+  });
+
+  // Conv list delegation
+  document.getElementById('conv-list').addEventListener('click',function(e){var btn=e.target.closest('.conv-btn');if(btn)openConv(btn.getAttribute('data-key'));});
+
+  // Search conv
+  document.getElementById('conv-search').addEventListener('input',function(){var af=document.querySelector('.fbtn.active');renderConvList(af?af.getAttribute('data-filter'):'todos',this.value);});
+
+  // Filters
+  document.querySelectorAll('.fbtn').forEach(function(btn){
+    btn.addEventListener('click',function(){document.querySelectorAll('.fbtn').forEach(function(b){b.classList.remove('active');});this.classList.add('active');renderConvList(this.getAttribute('data-filter'),document.getElementById('conv-search').value);});
+  });
+
+  // Chat actions
+  document.getElementById('btn-send').addEventListener('click',sendMsg);
+  document.getElementById('msg-input').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
+  document.getElementById('btn-rec').addEventListener('click',function(){recOn=!recOn;var ic=this.querySelector('i');if(recOn){this.classList.add('rec-on');ic.className='ti ti-player-stop';}else{this.classList.remove('rec-on');ic.className='ti ti-microphone';}ic.style.fontSize='15px';});
+  document.getElementById('btn-resolve').addEventListener('click',function(){resolveOn=!resolveOn;if(resolveOn){this.innerHTML='<i class="ti ti-rotate-clockwise" style="font-size:12px;"></i> Reabrir';this.style.background='#085041';this.style.borderColor='#085041';}else{this.innerHTML='<i class="ti ti-check" style="font-size:12px;"></i> Resolver';this.style.background='#E31787';this.style.borderColor='#E31787';}});
+  document.getElementById('btn-detail').addEventListener('click',function(){if(window.innerWidth<=768){mobState='detail';updateMobView();}});
+
+  // Transfer
+  document.getElementById('btn-transfer').addEventListener('click',function(){openModal('modal-transfer');});
+  document.getElementById('btn-confirm-transfer').addEventListener('click',function(){
+    var to=document.getElementById('transfer-to').value;
+    var body=document.getElementById('chat-body');
+    var sys=document.createElement('div');sys.className='sys-msg';sys.textContent='Conversa transferida para '+to;
+    body.appendChild(sys);body.scrollTop=body.scrollHeight;
+    toast('Conversa transferida para '+to+'!');closeModal('modal-transfer');
+  });
+
+  // PDF
+  document.getElementById('btn-pdf').addEventListener('click',function(){updatePDF();openModal('modal-pdf');});
+  ['pdf-cliente','pdf-tam','pdf-qtd','pdf-tinta','pdf-imp','pdf-arte'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',updatePDF);});
+  document.getElementById('btn-pdf-chat').addEventListener('click',function(){
+    var body=document.getElementById('chat-body');
+    var div=document.createElement('div');div.className='msg msg-out';
+    var total=document.getElementById('pdf-prev-total').textContent;
+    var prod=document.getElementById('pdf-prev-prod').textContent;
+    div.innerHTML='<div class="msg-bubble">📄 Orçamento MekMix<br>'+esc(prod)+'<br>'+esc(total)+'<br>📅 12 dias úteis</div><div class="msg-meta" style="text-align:right;">'+now()+' · '+currentUser.name+'</div>';
+    body.appendChild(div);body.scrollTop=body.scrollHeight;
+    closeModal('modal-pdf');toast('Orçamento enviado no chat!');
+  });
+  document.getElementById('btn-pdf-dl').addEventListener('click',function(){toast('PDF gerado! Na versão com servidor será baixado automaticamente.');closeModal('modal-pdf');});
+
+  // Col3 save note
+  document.getElementById('btn-save-note').addEventListener('click',function(){
+    var nota=(document.getElementById('c3-nota').value||'').trim();if(!nota)return;
+    var body=document.getElementById('chat-body');
+    var note=document.createElement('div');note.className='note-bubble';
+    note.innerHTML='<div class="note-lbl"><i class="ti ti-lock" style="font-size:11px;"></i> Nota interna — '+currentUser.name+' · '+now()+'</div>'+esc(nota);
+    body.appendChild(note);body.scrollTop=body.scrollHeight;toast('Nota salva!');
+  });
+
+  // Col3 hist btn
+  document.getElementById('btn-hist-modal').addEventListener('click',function(){openHistModal(currentKey);});
+
+  // Hist buttons in table
+  document.querySelectorAll('[data-hist]').forEach(function(btn){
+    btn.addEventListener('click',function(){openHistModal(this.getAttribute('data-hist'));});
+  });
+
+  // Status / vendedor
+  document.getElementById('sel-vendedor').addEventListener('change',function(){document.getElementById('c3-vendedor').textContent=this.value;});
+  document.getElementById('sel-status').addEventListener('change',function(){
+    var map={'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Entregue':'p-entregue','Follow-up 30d':'p-follow'};
+    var s=document.getElementById('c3-status');s.className='pill '+(map[this.value]||'p-novo');s.textContent=this.value;
+  });
+  document.getElementById('btn-add-tag').addEventListener('click',function(){
+    var tag=prompt('Nome da etiqueta:');if(!tag)return;
+    var row=document.getElementById('c3-tags');var span=document.createElement('span');span.className='pill p-orc';span.textContent=tag;row.insertBefore(span,this);
+  });
+
+  // Templates
+  document.getElementById('btn-new-template').addEventListener('click',function(){editTplIdx=-1;document.getElementById('tpl-modal-title').textContent='Novo template';document.getElementById('tpl-key').value='';document.getElementById('tpl-text').value='';openModal('modal-template');});
+  document.getElementById('btn-save-tpl').addEventListener('click',function(){
+    var key=(document.getElementById('tpl-key').value||'').trim();
+    var text=(document.getElementById('tpl-text').value||'').trim();
+    if(!key||!text)return;
+    if(!key.startsWith('/'))key='/'+key;
+    if(editTplIdx>=0)TEMPLATES[editTplIdx]={key:key,text:text};else TEMPLATES.push({key:key,text:text});
+    renderTemplates();renderQR();closeModal('modal-template');toast('Template salvo!');
+  });
+
+  // Novo contato
+  document.getElementById('btn-new-contact').addEventListener('click',function(){openModal('modal-contact');});
+  document.getElementById('btn-save-contact').addEventListener('click',function(){
+    var nome=(document.getElementById('nc-nome').value||'').trim();if(!nome)return;
+    toast('Contato '+nome+' criado!');closeModal('modal-contact');
+  });
+
+  // Broadcast
+  document.getElementById('bc-segment').addEventListener('change',updateBC);
+  document.getElementById('bc-msg').addEventListener('input',function(){document.getElementById('bc-preview').textContent=this.value.replace(/{nome}/g,'Thiago');});
+  document.getElementById('btn-bc-send').addEventListener('click',function(){
+    var count=document.getElementById('bc-count').textContent;
+    if(confirm('Confirmar disparo para '+count+'?')){document.getElementById('bc-result').style.display='block';toast('Broadcast enviado para '+count+'!');}
+  });
+  document.getElementById('btn-go-broadcast').addEventListener('click',function(){goPage('broadcast','Broadcast');});
+
+  // WhatsApp
+  document.getElementById('btn-add-wapp').addEventListener('click',function(){document.getElementById('new-wapp').style.display='flex';});
+
+  // Modais close
+  document.querySelectorAll('[data-close]').forEach(function(btn){btn.addEventListener('click',function(){closeModal(this.getAttribute('data-close'));});});
+  document.querySelectorAll('.modal-overlay').forEach(function(o){o.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});});
+
+  // Mobile back
+  document.getElementById('mob-back').addEventListener('click',mobBack);
+  document.getElementById('btn-mob-notif').addEventListener('click',function(){toast('Ana Clara: "Vou fechar sim! Como faço o pagamento?"');});
+
+  // Mobile nav
+  document.querySelectorAll('.mob-nav-btn[data-mob-page]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var id=this.getAttribute('data-mob-page'),title=this.getAttribute('data-mob-title');
+      goPage(id,title);
+      document.querySelectorAll('.mob-nav-btn').forEach(function(b){b.classList.remove('active');});
+      document.getElementById('btn-mais').classList.remove('active');
+      var t=document.querySelector('.mob-nav-btn[data-mob-page="'+id+'"]');if(t)t.classList.add('active');
+    });
+  });
+
+  // Mais menu
+  var btnMais=document.getElementById('btn-mais');
+  var maisMenu=document.getElementById('mais-menu');
+  var maisOv=document.getElementById('mais-overlay');
+  function openMais(){maisMenu.style.display='block';maisOv.style.display='block';}
+  function closeMais(){maisMenu.style.display='none';maisOv.style.display='none';}
+  btnMais.addEventListener('click',function(e){e.stopPropagation();openMais();});
+  maisOv.addEventListener('click',closeMais);
+  document.querySelectorAll('.mais-item[data-mob-page]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var id=this.getAttribute('data-mob-page'),title=this.getAttribute('data-mob-title');
+      closeMais();goPage(id,title);
+      document.querySelectorAll('.mob-nav-btn').forEach(function(b){b.classList.remove('active');});
+      document.getElementById('btn-mais').classList.add('active');
+    });
+  });
+
+  window.addEventListener('resize',function(){if(currentPage==='chats'&&window.innerWidth<=768)updateMobView();});
+
+  // Notif demo após 6s
+  setTimeout(function(){if(currentUser)toast('Ana Clara: "Vou fechar sim! Como faço o pagamento?"');},6000);
+});
+</script>
+
+<script>
+// iOS Safari: adiciona ontouchstart vazio em todos os buttons para ativar eventos de toque
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('button, [role="button"]').forEach(function(el) {
+    if (!el.getAttribute('ontouchstart')) {
+      el.setAttribute('ontouchstart', '');
+    }
+  });
+  // Observer para elementos adicionados dinamicamente
+  var obs = new MutationObserver(function(mutations) {
+    mutations.forEach(function(m) {
+      m.addedNodes.forEach(function(node) {
+        if (node.nodeType === 1) {
+          var btns = node.tagName === 'BUTTON' ? [node] : node.querySelectorAll('button');
+          btns.forEach(function(b) { if(!b.getAttribute('ontouchstart')) b.setAttribute('ontouchstart',''); });
+        }
+      });
+    });
+  });
+  obs.observe(document.body, {childList: true, subtree: true});
+});
+</script>
+</body>
+</html>
