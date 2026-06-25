@@ -239,7 +239,7 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;}
 }
 
 /* iOS Safari: cursor pointer ativa eventos de toque */
-body { cursor: default; }
+
 button { cursor: pointer !important; touch-action: manipulation; }
 .conv-btn, .fbtn, .sb-btn, .mob-nav-btn, .mais-item, .quick-user { touch-action: manipulation; }
 
@@ -253,11 +253,8 @@ button { cursor: pointer !important; touch-action: manipulation; }
 
 
 @media(max-width:768px){
-  .page.visible{overflow-y:auto !important;-webkit-overflow-scrolling:touch !important;height:calc(100dvh - 106px) !important;}
-  #page-relatorio.visible,#page-broadcast.visible,#page-templates.visible,
-  #page-whatsapp.visible,#page-equipe.visible,#page-config.visible,
-  #page-dashboard.visible,#page-kanban.visible,#page-contatos.visible,
-  #page-followup.visible{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch;height:calc(100dvh - 106px);}
+  .page.visible{overflow-y:auto !important;-webkit-overflow-scrolling:touch !important;
+    height:calc(100dvh - 106px) !important;display:block !important;}
 }
 
 
@@ -317,14 +314,9 @@ button { cursor: pointer !important; touch-action: manipulation; }
 
 
 /* Fix layout — conteúdo sempre começa do topo */
-.content-area { position: relative; }
-#page-chats { position: absolute; inset: 0; }
-#page-chats[style*="none"] { display: none !important; }
-.page.visible { position: absolute; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-@media(max-width:768px){
-  .page.visible { height: calc(100dvh - 106px); top: 0; }
-  #page-chats { height: calc(100dvh - 106px); }
-}
+.content-area { position: relative; align-items: stretch; }
+#page-chats { height: 100%; }
+.page.visible { overflow-y: auto; -webkit-overflow-scrolling: touch; height: 100%; }
 
 
 /* FORMULÁRIO DE PEDIDO */
@@ -366,13 +358,9 @@ button { cursor: pointer !important; touch-action: manipulation; }
 }
 
 
-/* Fix cursor e seleção de texto */
-body { cursor: default; user-select: none; -webkit-user-select: none; }
-input, textarea { user-select: text; -webkit-user-select: text; cursor: text; }
-.conv-btn, .sb-btn, .mob-nav-btn, .mais-item, .quick-user, .fbtn,
-.btn, .qr-btn-item, .icon-btn, .send-btn, .login-btn, .prod-card,
-.k-card, .imp-btn, .tinta-btn, .prod-priority-btn, .prod-move button,
-.btn-remove-item { cursor: pointer !important; }
+/* Fix cursor */
+button { cursor: pointer; }
+input, textarea { cursor: text; }
 
 </style>
 
@@ -2177,27 +2165,6 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
 </div>
 
-<script>
-// iOS Safari: adiciona ontouchstart vazio em todos os buttons para ativar eventos de toque
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('button, [role="button"]').forEach(function(el) {
-    if (!el.getAttribute('ontouchstart')) {
-      el.setAttribute('ontouchstart', '');
-    }
-  });
-  // Observer para elementos adicionados dinamicamente
-  var obs = new MutationObserver(function(mutations) {
-    mutations.forEach(function(m) {
-      m.addedNodes.forEach(function(node) {
-        if (node.nodeType === 1) {
-          var btns = node.tagName === 'BUTTON' ? [node] : node.querySelectorAll('button');
-          btns.forEach(function(b) { if(!b.getAttribute('ontouchstart')) b.setAttribute('ontouchstart',''); });
-        }
-      });
-    });
-  });
-  obs.observe(document.body, {childList: true, subtree: true});
-});
-</script>
+<!-- iOS touch handled via ontouchstart inline -->
 </body>
 </html>
