@@ -361,6 +361,52 @@ button { cursor: pointer !important; touch-action: manipulation; }
 button { cursor: pointer; }
 input, textarea { cursor: text; }
 
+
+/* CLIENTES */
+.cliente-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:14px;}
+.cliente-card:hover{border-color:var(--rosa);}
+.cliente-av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;}
+.cliente-info{flex:1;min-width:0;}
+.cliente-nome{font-size:13px;font-weight:600;}
+.cliente-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.cliente-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;}
+.badge-vip{background:#FAEEDA;color:#633806;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;}
+.badge-ativo{background:#E1F5EE;color:#085041;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;}
+.badge-inativo{background:#FCEBEB;color:#791F1F;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;}
+.badge-aniversario{background:#EEEDFE;color:#3C3489;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;}
+.cliente-stats{display:flex;gap:16px;flex-shrink:0;text-align:right;}
+.cliente-stat-val{font-size:14px;font-weight:600;color:var(--rosa);}
+.cliente-stat-lbl{font-size:10px;color:var(--text3);}
+
+/* AÇÕES DE VENDAS */
+.acao-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;}
+.acao-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;}
+.acao-ico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.acao-titulo{font-size:14px;font-weight:600;color:var(--text);}
+.acao-subtitulo{font-size:12px;color:var(--rosa);font-weight:500;margin-top:2px;}
+.acao-regra{background:var(--bg);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:8px;}
+.acao-regra b{color:var(--text);}
+.acao-alerta-count{display:inline-flex;align-items:center;gap:6px;background:#FBEAF0;color:var(--rosa);font-size:12px;font-weight:500;padding:4px 10px;border-radius:20px;}
+.alerta-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg);border-radius:8px;margin-top:6px;gap:8px;}
+.alerta-item-info{flex:1;min-width:0;}
+.alerta-item-nome{font-size:12px;font-weight:500;}
+.alerta-item-desc{font-size:11px;color:var(--text2);margin-top:1px;}
+.alerta-status{font-size:10px;padding:2px 8px;border-radius:20px;white-space:nowrap;}
+.st-pendente{background:#FBEAF0;color:#72243E;}
+.st-aplicado{background:#E1F5EE;color:#085041;}
+.st-expirado{background:#f0f0f2;color:#666;}
+.vendedor-note{background:#FFFDE7;border:1px dashed #FBC02D;border-radius:8px;padding:8px 12px;font-size:11px;color:#5D4037;margin-top:8px;display:flex;align-items:flex-start;gap:6px;}
+
+/* FORM CLIENTE MODAL */
+.modal-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px;}
+.modal-tab{padding:8px 16px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;}
+.modal-tab.active{color:var(--rosa);border-bottom-color:var(--rosa);}
+
+@media(max-width:768px){
+  .cliente-stats{display:none;}
+  .cliente-card{flex-wrap:wrap;}
+}
+
 </style>
 
 </head>
@@ -390,6 +436,8 @@ input, textarea { cursor: text; }
       <button class="sb-btn" data-page="contatos"><i class="ti ti-users"></i><span class="sb-btn-lbl">Contatos</span></button>
       <button class="sb-btn" data-page="followup"><i class="ti ti-bell"></i><span class="sb-btn-lbl">Follow-up 30d</span><span class="sb-badge">3</span></button>
       <div class="sb-sec admin-only">Gestão</div>
+      <button class="sb-btn" data-page="clientes"><i class="ti ti-address-book"></i><span class="sb-btn-lbl">Clientes</span></button>
+      <button class="sb-btn" data-page="acoes"><i class="ti ti-trophy"></i><span class="sb-btn-lbl">Ações de vendas</span></button>
       <button class="sb-btn" data-page="pedidos"><i class="ti ti-clipboard-list"></i><span class="sb-btn-lbl">Pedidos</span></button>
       <button class="sb-btn admin-only" data-page="producao"><i class="ti ti-tools"></i><span class="sb-btn-lbl">Fila de produção</span></button>
       <button class="sb-btn admin-only" data-page="estoque"><i class="ti ti-package"></i><span class="sb-btn-lbl">Estoque</span></button>
@@ -662,6 +710,311 @@ input, textarea { cursor: text; }
 
     </div><!-- /content-area -->
 
+      <!-- CLIENTES -->
+      <div id="page-clientes" class="page">
+        <div class="page-title">Clientes
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <button class="btn btn-sm" id="btn-export-clientes" style="background:#217346;color:#fff;border-color:#217346;"><i class="ti ti-file-spreadsheet" style="font-size:12px;"></i> Exportar Excel</button>
+            <button class="btn btn-rosa btn-sm" id="btn-novo-cliente"><i class="ti ti-user-plus" style="font-size:12px;"></i> Novo cliente</button>
+          </div>
+        </div>
+        <div class="panel" style="margin-bottom:10px;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <div class="search-wrap" style="flex:1;max-width:300px;"><i class="ti ti-search" style="font-size:14px;color:#aaa;"></i><input type="search" id="cliente-search" placeholder="Nome, CNPJ/CPF ou cidade..."/></div>
+            <select class="sel" style="width:120px;" id="filter-cli-status"><option value="">Todos</option><option value="ativo">Ativos</option><option value="inativo">Inativos</option><option value="vip">VIP</option></select>
+            <select class="sel" style="width:130px;" id="filter-cli-vend"><option value="">Todos vendedores</option><option>João</option><option>Maria</option><option>Pedro</option></select>
+          </div>
+        </div>
+        <div id="clientes-list"></div>
+        <div id="clientes-empty" style="display:none;text-align:center;padding:40px;color:var(--text3);">
+          <i class="ti ti-users" style="font-size:40px;display:block;margin-bottom:10px;"></i>
+          Nenhum cliente encontrado
+        </div>
+      </div>
+
+      <!-- AÇÕES DE VENDAS -->
+      <div id="page-acoes" class="page">
+        <div class="page-title">Ações de vendas
+          <span style="font-size:12px;color:var(--text2);font-weight:400;">Benefícios automáticos para seus clientes</span>
+        </div>
+
+        <!-- Alertas pendentes resumo -->
+        <div class="panel" style="background:linear-gradient(135deg,#772583,#E31787);border:none;margin-bottom:16px;">
+          <div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:10px;">🔔 Alertas pendentes hoje</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="alertas-resumo">
+            <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px;text-align:center;">
+              <div style="font-size:22px;font-weight:700;color:#fff;" id="alerta-count-brinde">2</div>
+              <div style="font-size:10px;color:rgba(255,255,255,.8);">Brindes a oferecer</div>
+            </div>
+            <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px;text-align:center;">
+              <div style="font-size:22px;font-weight:700;color:#fff;" id="alerta-count-desc">3</div>
+              <div style="font-size:10px;color:rgba(255,255,255,.8);">Descontos pendentes</div>
+            </div>
+            <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px;text-align:center;">
+              <div style="font-size:22px;font-weight:700;color:#fff;" id="alerta-count-aniv">1</div>
+              <div style="font-size:10px;color:rgba(255,255,255,.8);">Aniversários</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AÇÃO 1: 10 caixas / brinde -->
+        <div class="acao-card">
+          <div class="acao-header">
+            <div class="acao-ico" style="background:#FBEAF0;">🎁</div>
+            <div>
+              <div class="acao-titulo">Brinde na 11ª caixa</div>
+              <div class="acao-subtitulo">A cada 10 caixas compradas em 30 dias</div>
+            </div>
+          </div>
+          <div class="acao-regra">
+            <b>Regra:</b> Cliente que comprar <b>10 ou mais caixas</b> (qualquer tamanho) em um período de <b>30 dias corridos</b> ganha <b>1 caixa de 330ml de brinde</b> na próxima compra.<br><br>
+            <b>Condição importante:</b> Só vale para pedidos com <b>preço de tabela normal</b>. Clientes com condição de preço especial negociada anteriormente <b>não</b> têm direito ao brinde.<br><br>
+            <b>O que o sistema faz:</b> Detecta automaticamente quando o cliente atingiu 10 caixas no período e gera um alerta para o vendedor responsável.<br>
+            <b>O que o vendedor faz:</b> Entra em contato com o cliente e oferece o brinde no próximo pedido.
+          </div>
+          <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;margin-top:1px;"></i>
+            <span><b>Para vendedores:</b> Verifique sempre se o cliente possui condição especial de preço antes de oferecer o brinde. Clientes com desconto negociado não têm esse benefício.</span>
+          </div>
+          <div style="margin-top:10px;">
+            <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px;">Alertas ativos:</div>
+            <div class="alerta-item">
+              <div class="alerta-item-info">
+                <div class="alerta-item-nome">Thiago Costa</div>
+                <div class="alerta-item-desc">12 caixas em 30 dias · João · Preço tabela ✓</div>
+              </div>
+              <span class="alerta-status st-pendente">Pendente</span>
+              <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
+            </div>
+            <div class="alerta-item">
+              <div class="alerta-item-info">
+                <div class="alerta-item-nome">Fernanda Cruz</div>
+                <div class="alerta-item-desc">10 caixas em 28 dias · Pedro · Preço tabela ✓</div>
+              </div>
+              <span class="alerta-status st-pendente">Pendente</span>
+              <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AÇÃO 2: 5 caixas / 10% desconto -->
+        <div class="acao-card">
+          <div class="acao-header">
+            <div class="acao-ico" style="background:#E1F5EE;">💰</div>
+            <div>
+              <div class="acao-titulo">10% de desconto na próxima compra</div>
+              <div class="acao-subtitulo">A cada 5 caixas compradas em 30 dias</div>
+            </div>
+          </div>
+          <div class="acao-regra">
+            <b>Regra:</b> Cliente que comprar <b>5 ou mais caixas</b> (qualquer tamanho) em um período de <b>30 dias corridos</b> ganha <b>10% de desconto</b> na próxima compra.<br><br>
+            <b>Condição:</b> O desconto só é válido para pedidos com <b>no mínimo 3 caixas</b> (qualquer tamanho). Pedidos de unidades avulsas não ativam nem recebem esse benefício.<br><br>
+            <b>Validade:</b> O desconto expira após <b>30 dias</b> da data em que foi gerado, caso não seja utilizado.<br><br>
+            <b>O que o sistema faz:</b> Marca o cliente com o benefício de 10% pendente e avisa o vendedor.<br>
+            <b>O que o vendedor faz:</b> Aplica o desconto manualmente ao fechar o próximo pedido elegível.
+          </div>
+          <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;margin-top:1px;"></i>
+            <span><b>Para vendedores:</b> Ao abrir um novo pedido para cliente com esse benefício, o sistema mostrará um aviso. Aplique o desconto de 10% no campo de valor e marque como utilizado.</span>
+          </div>
+          <div style="margin-top:10px;">
+            <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px;">Alertas ativos:</div>
+            <div class="alerta-item">
+              <div class="alerta-item-info">
+                <div class="alerta-item-nome">Rafael Silva</div>
+                <div class="alerta-item-desc">5 caixas em 20 dias · Maria · Expira em 10 dias</div>
+              </div>
+              <span class="alerta-status st-pendente">Pendente</span>
+              <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
+            </div>
+            <div class="alerta-item">
+              <div class="alerta-item-info">
+                <div class="alerta-item-nome">Carlos Mota</div>
+                <div class="alerta-item-desc">6 caixas em 15 dias · Pedro · Expira em 5 dias</div>
+              </div>
+              <span class="alerta-status st-pendente">Pendente</span>
+              <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
+            </div>
+            <div class="alerta-item">
+              <div class="alerta-item-info">
+                <div class="alerta-item-nome">Beatriz Alves</div>
+                <div class="alerta-item-desc">5 caixas em 30 dias · João · Expirou</div>
+              </div>
+              <span class="alerta-status st-expirado">Expirado</span>
+              <button class="btn btn-sm" disabled style="opacity:.5;">Expirado</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AÇÃO 3: 3 meses seguidos / 5% -->
+        <div class="acao-card">
+          <div class="acao-header">
+            <div class="acao-ico" style="background:#EEEDFE;">📅</div>
+            <div>
+              <div class="acao-titulo">5% de desconto no 3º mês consecutivo</div>
+              <div class="acao-subtitulo">Cliente fiel que compra mês a mês</div>
+            </div>
+          </div>
+          <div class="acao-regra">
+            <b>Regra:</b> Cliente que realizar <b>pelo menos 1 pedido de caixas fechadas</b> nos <b>2 meses anteriores consecutivos</b> ganha <b>5% de desconto automático</b> no pedido do 3º mês.<br><br>
+            <b>Condição:</b> Não vale para pedidos de <b>unidades avulsas</b>. O pedido do 3º mês precisa ter <b>no mínimo 1 caixa</b>.<br><br>
+            <b>Como funciona na prática:</b><br>
+            → Mês 1: cliente compra 2cx de 500ml ✓<br>
+            → Mês 2: cliente compra 1cx de 330ml ✓<br>
+            → Mês 3: sistema aplica 5% automaticamente ao criar o pedido ✓<br><br>
+            <b>O que o sistema faz:</b> Detecta o padrão e aplica o desconto automaticamente no 3º pedido consecutivo.
+          </div>
+          <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;margin-top:1px;"></i>
+            <span><b>Para vendedores:</b> O desconto de 5% já estará pré-aplicado quando você abrir o pedido. Não precisa fazer nada — só confirmar com o cliente que ele ganhou o benefício de fidelidade.</span>
+          </div>
+          <div style="margin-top:10px;">
+            <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px;">Alertas ativos:</div>
+            <div class="alerta-item">
+              <div class="alerta-item-info">
+                <div class="alerta-item-nome">Luana Reis</div>
+                <div class="alerta-item-desc">3 meses seguidos · Maria · Desconto aplicado no último pedido</div>
+              </div>
+              <span class="alerta-status st-aplicado">Aplicado</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- AÇÃO 4: Aniversário de cadastro -->
+        <div class="acao-card">
+          <div class="acao-header">
+            <div class="acao-ico" style="background:#FEF3C7;">🎂</div>
+            <div>
+              <div class="acao-titulo">Aniversário de cadastro</div>
+              <div class="acao-subtitulo">A cada 12 meses de relacionamento com a MekMix</div>
+            </div>
+          </div>
+          <div class="acao-regra">
+            <b>Regra:</b> A cada <b>12 meses completos</b> desde a data de cadastro do cliente, o sistema gera um alerta de aniversário de relacionamento.<br><br>
+            <b>O que o cliente ganha:</b> Um <b>brinde surpresa</b> definido pelo gestor (ex: amostra de produto, desconto especial, brindes personalizados).<br><br>
+            <b>Antecedência:</b> O alerta aparece <b>7 dias antes</b> da data de aniversário para dar tempo de preparar o brinde e entrar em contato.<br><br>
+            <b>O que o sistema faz:</b> Monitora a data de cadastro de todos os clientes e gera alerta 7 dias antes do aniversário.<br>
+            <b>O que o vendedor faz:</b> Entra em contato com o cliente, celebra o aniversário de parceria e entrega o brinde combinado.
+          </div>
+          <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;margin-top:1px;"></i>
+            <span><b>Para vendedores:</b> Esse contato é uma excelente oportunidade de fortalecer o relacionamento. Personalize a mensagem — mencione o tempo de parceria e mostre que a MekMix valoriza o cliente.</span>
+          </div>
+          <div style="margin-top:10px;">
+            <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px;">Próximos aniversários:</div>
+            <div class="alerta-item">
+              <div class="alerta-item-info">
+                <div class="alerta-item-nome">Pedro Lima</div>
+                <div class="alerta-item-desc">1 ano de cadastro · Aniversário em 3 dias (28/06)</div>
+              </div>
+              <span class="alerta-status st-pendente">Em 3 dias</span>
+              <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar enviado</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AÇÃO 5: Indicação -->
+        <div class="acao-card">
+          <div class="acao-header">
+            <div class="acao-ico" style="background:#F0FDF4;">🤝</div>
+            <div>
+              <div class="acao-titulo">Programa de indicação</div>
+              <div class="acao-subtitulo">Cliente que indica ganha 10% na próxima compra</div>
+            </div>
+          </div>
+          <div class="acao-regra">
+            <b>Regra:</b> Quando um cliente indica outro e o <b>indicado fecha o primeiro pedido</b>, o cliente que indicou ganha <b>10% de desconto</b> no seu próximo pedido.<br><br>
+            <b>Como registrar:</b> No cadastro de cada cliente há um campo <b>"Indicado por"</b>. Ao fechar o primeiro pedido do novo cliente, o sistema gera automaticamente o alerta de desconto para quem indicou.<br><br>
+            <b>Validade:</b> O desconto de 10% expira em <b>60 dias</b> após ser gerado.<br><br>
+            <b>O que o sistema faz:</b> Detecta quando o indicado fecha o primeiro pedido e gera o benefício para quem indicou.<br>
+            <b>O que o vendedor faz:</b> Entra em contato com o cliente que indicou para informar o benefício e aplica o desconto no próximo pedido.
+          </div>
+          <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;margin-top:1px;"></i>
+            <span><b>Para vendedores:</b> Sempre pergunte ao cadastrar um novo cliente se ele foi indicado por alguém. Esse dado é essencial para o programa funcionar corretamente.</span>
+          </div>
+          <div style="margin-top:10px;">
+            <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px;">Alertas ativos:</div>
+            <div class="alerta-item">
+              <div class="alerta-item-info">
+                <div class="alerta-item-nome">Ana Clara</div>
+                <div class="alerta-item-desc">Indicou Marina Fonseca · Primeiro pedido fechado · 10% pendente</div>
+              </div>
+              <span class="alerta-status st-pendente">Pendente</span>
+              <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AÇÃO 6: Pedido recorrente -->
+        <div class="acao-card">
+          <div class="acao-header">
+            <div class="acao-ico" style="background:#EFF6FF;">🔄</div>
+            <div>
+              <div class="acao-titulo">Alerta de pedido recorrente</div>
+              <div class="acao-subtitulo">Cliente com padrão de compra mensal</div>
+            </div>
+          </div>
+          <div class="acao-regra">
+            <b>Regra:</b> Cliente que realizou pedidos nos <b>2 meses consecutivos anteriores</b> recebe um alerta para o vendedor entrar em contato proativamente no mês seguinte.<br><br>
+            <b>Objetivo:</b> Antecipar o contato antes do cliente precisar pedir, demonstrando atenção e facilitando a recompra.<br><br>
+            <b>Importante sobre preços:</b> A mensagem de contato <b>não deve mencionar preços</b>. Os valores são negociados pelo vendedor durante a conversa.<br><br>
+            <b>Sugestão de mensagem:</b> <i>"Oi [Nome]! 👋 Vi que você tem pedido copos todo mês — posso já verificar disponibilidade para você esse mês?"</i><br><br>
+            <b>O que o sistema faz:</b> Gera alerta quando detecta padrão de 2 meses consecutivos.<br>
+            <b>O que o vendedor faz:</b> Entra em contato pelo WhatsApp, sem mencionar preços, e abre o pedido se houver interesse.
+          </div>
+          <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;margin-top:1px;"></i>
+            <span><b>Para vendedores:</b> Nunca mencione preços na mensagem de prospecção recorrente. O objetivo é facilitar — não pressionar. Deixe o cliente guiar a conversa.</span>
+          </div>
+          <div style="margin-top:10px;">
+            <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px;">Alertas ativos:</div>
+            <div class="alerta-item">
+              <div class="alerta-item-info">
+                <div class="alerta-item-nome">Thiago Costa</div>
+                <div class="alerta-item-desc">Pediu em Abril e Maio · João · Contato sugerido para Junho</div>
+              </div>
+              <span class="alerta-status st-pendente">Contatar</span>
+              <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar contatado</button>
+            </div>
+            <div class="alerta-item">
+              <div class="alerta-item-info">
+                <div class="alerta-item-nome">Rafael Silva</div>
+                <div class="alerta-item-desc">Pediu em Abril e Maio · Maria · Contato sugerido para Junho</div>
+              </div>
+              <span class="alerta-status st-pendente">Contatar</span>
+              <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar contatado</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AÇÃO 7: Cliente inativo -->
+        <div class="acao-card">
+          <div class="acao-header">
+            <div class="acao-ico" style="background:#FFF7ED;">⏰</div>
+            <div>
+              <div class="acao-titulo">Reativação de cliente inativo</div>
+              <div class="acao-subtitulo">Cliente sem compras há 60 ou mais dias</div>
+            </div>
+          </div>
+          <div class="acao-regra">
+            <b>Regra:</b> Cliente que não realiza nenhuma compra há <b>60 dias ou mais</b> entra na lista de reativação.<br><br>
+            <b>O que o sistema faz:</b> Monitora a data do último pedido e gera alerta quando o cliente ultrapassa 60 dias sem comprar.<br><br>
+            <b>Sugestão de mensagem:</b> <i>"Oi [Nome]! 👋 Faz um tempinho que não nos falamos. Temos novidades e condições especiais este mês. Posso te ajudar com alguma coisa?"</i><br><br>
+            <b>O que o vendedor faz:</b> Entra em contato pelo WhatsApp, sem pressão, e tenta reativar o cliente com novidades ou condições especiais autorizadas pelo gestor.
+          </div>
+          <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;margin-top:1px;"></i>
+            <span><b>Para vendedores:</b> Condições especiais para reativação precisam de autorização prévia do Bruno. Não ofereça descontos por conta própria.</span>
+          </div>
+          <div style="margin-top:10px;">
+            <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px;">Clientes inativos:</div>
+            <div class="alerta-item">
+              <div class="alerta-item-info">
+                <div class="alerta-item-nome">Beatriz Alves</div>
+                <div class="alerta-item-desc">Último pedido: 15/03 · 72 dias inativa · João</div>
+              </div>
+              <span class="alerta-status st-pendente">72 dias</span>
+              <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar contatado</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
     <div class="mob-nav"><div class="mob-nav-row">
       <button class="mob-nav-btn" data-mob-page="dashboard" data-mob-title="Início"><i class="ti ti-home"></i><span>Início</span></button>
       <button class="mob-nav-btn active" data-mob-page="chats" data-mob-title="Chats"><i class="ti ti-message-circle"></i><span>Chats</span><span class="mob-badge">8</span></button>
@@ -672,6 +1025,8 @@ input, textarea { cursor: text; }
     </div></div>
     <div class="mais-overlay" id="mais-overlay"></div>
     <div class="mais-menu" id="mais-menu">
+      <button class="mais-item" data-mob-page="clientes" data-mob-title="Clientes"><i class="ti ti-address-book"></i>Clientes</button>
+      <button class="mais-item" data-mob-page="acoes" data-mob-title="Ações de vendas"><i class="ti ti-trophy"></i>Ações de vendas</button>
       <button class="mais-item" data-mob-page="pedidos" data-mob-title="Pedidos"><i class="ti ti-clipboard-list"></i>Pedidos</button>
       <button class="mais-item" data-mob-page="producao" data-mob-title="Fila de Produção"><i class="ti ti-tools"></i>Fila de Produção</button>
       <button class="mais-item" data-mob-page="estoque" data-mob-title="Estoque"><i class="ti ti-package"></i>Estoque</button>
@@ -980,6 +1335,75 @@ document.addEventListener('DOMContentLoaded',function(){
       }
     });
   })();
+
+
+
+  // Clientes
+  var btnNovoCli = document.getElementById('btn-novo-cliente');
+  if(btnNovoCli) btnNovoCli.addEventListener('click', function(){
+    editingClienteIdx=-1;
+    document.getElementById('cliente-modal-title').textContent='Novo cliente';
+    document.getElementById('cliente-modal-sub').textContent='Preencha os dados cadastrais';
+    ['cli-nome','cli-doc','cli-wapp','cli-email','cli-endereco','cli-cidade','cli-obs'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+    openModal('modal-novo-cliente');
+  });
+
+  var btnSalvarCli = document.getElementById('btn-salvar-cliente');
+  if(btnSalvarCli) btnSalvarCli.addEventListener('click', function(){
+    var nome = (document.getElementById('cli-nome').value||'').trim();
+    if(!nome){toast('Informe o nome do cliente!');return;}
+    var cli = {
+      id: editingClienteIdx >= 0 ? CLIENTES[editingClienteIdx].id : 'CLI-' + String(CLIENTES.length+1).padStart(3,'0'),
+      nome: nome,
+      tipo: document.getElementById('cli-tipo').value,
+      doc: document.getElementById('cli-doc').value||'',
+      wapp: document.getElementById('cli-wapp').value||'',
+      email: document.getElementById('cli-email').value||'',
+      segmento: document.getElementById('cli-segmento').value||'',
+      endereco: document.getElementById('cli-endereco').value||'',
+      cidade: document.getElementById('cli-cidade').value||'',
+      estado: document.getElementById('cli-estado').value||'MG',
+      vendedor: document.getElementById('cli-vendedor').value,
+      indicado: document.getElementById('cli-indicado').value||'',
+      preco_esp: document.querySelector('input[name="preco-esp"]:checked').value === 'sim',
+      obs: document.getElementById('cli-obs').value||'',
+      cadastro: editingClienteIdx>=0 ? CLIENTES[editingClienteIdx].cadastro : new Date().toISOString().split('T')[0],
+      ultimo_pedido: editingClienteIdx>=0 ? CLIENTES[editingClienteIdx].ultimo_pedido : '',
+      total_pedidos: editingClienteIdx>=0 ? CLIENTES[editingClienteIdx].total_pedidos : 0,
+      total_caixas: editingClienteIdx>=0 ? CLIENTES[editingClienteIdx].total_caixas : 0,
+      status: 'ativo'
+    };
+    if(editingClienteIdx>=0) CLIENTES[editingClienteIdx]=cli;
+    else CLIENTES.unshift(cli);
+    closeModal('modal-novo-cliente');
+    renderClientes('','','');
+    toast('✅ Cliente '+(editingClienteIdx>=0?'atualizado':'cadastrado')+': '+nome);
+  });
+
+  var btnExport = document.getElementById('btn-export-clientes');
+  if(btnExport) btnExport.addEventListener('click', exportarExcel);
+
+  var cliSearch = document.getElementById('cliente-search');
+  if(cliSearch) cliSearch.addEventListener('input', function(){
+    renderClientes(this.value, document.getElementById('filter-cli-status').value, document.getElementById('filter-cli-vend').value);
+  });
+  var filterCliStatus = document.getElementById('filter-cli-status');
+  if(filterCliStatus) filterCliStatus.addEventListener('change', function(){
+    renderClientes(document.getElementById('cliente-search').value, this.value, document.getElementById('filter-cli-vend').value);
+  });
+  var filterCliVend = document.getElementById('filter-cli-vend');
+  if(filterCliVend) filterCliVend.addEventListener('change', function(){
+    renderClientes(document.getElementById('cliente-search').value, document.getElementById('filter-cli-status').value, this.value);
+  });
+
+  // Tipo de documento
+  var cliTipo = document.getElementById('cli-tipo');
+  if(cliTipo) cliTipo.addEventListener('change', function(){
+    var lbl = document.getElementById('cli-doc-label');
+    var inp = document.getElementById('cli-doc');
+    if(this.value === 'PJ') { lbl.textContent='CNPJ'; inp.placeholder='00.000.000/0001-00'; }
+    else { lbl.textContent='CPF'; inp.placeholder='000.000.000-00'; }
+  });
 
 
   // Login — tratado por onclick inline (iOS Safari file://)
@@ -1972,6 +2396,170 @@ document.addEventListener('DOMContentLoaded',function(){
   openNovoPedido = function() {
     _openNovoPedido();
     setTimeout(initClientSearch, 100);
+  };
+
+
+
+  // ── DADOS DE CLIENTES ──
+  var CLIENTES = [
+    {id:'CLI-001',nome:'Ana Clara',tipo:'PF',doc:'',wapp:'(19) 99123-4567',email:'ana@email.com',segmento:'Eventos / Buffet',cidade:'Campinas',estado:'SP',vendedor:'João',indicado:'',preco_esp:false,obs:'Evento de formatura em agosto.',cadastro:'2024-06-24',ultimo_pedido:'2025-06-24',total_caixas:2,total_pedidos:1,status:'ativo'},
+    {id:'CLI-002',nome:'Rafael Silva',tipo:'PJ',doc:'12.345.678/0001-90',wapp:'(31) 98765-4321',email:'rafael@empresa.com',segmento:'Bar / Boteco',cidade:'Belo Horizonte',estado:'MG',vendedor:'Maria',indicado:'',preco_esp:false,obs:'',cadastro:'2024-01-15',ultimo_pedido:'2025-06-20',total_caixas:8,total_pedidos:3,status:'ativo'},
+    {id:'CLI-003',nome:'Pedro Lima',tipo:'PJ',doc:'98.765.432/0001-10',wapp:'(11) 97654-3210',email:'pedro@empresa.com',segmento:'Distribuidora',cidade:'São Paulo',estado:'SP',vendedor:'João',indicado:'',preco_esp:false,obs:'',cadastro:'2024-06-24',ultimo_pedido:'2025-06-20',total_caixas:3,total_pedidos:1,status:'ativo'},
+    {id:'CLI-004',nome:'Thiago Costa',tipo:'PJ',doc:'11.222.333/0001-44',wapp:'(35) 99888-7766',email:'thiago@empresa.com',segmento:'Adega',cidade:'Pouso Alegre',estado:'MG',vendedor:'João',indicado:'',preco_esp:false,obs:'Cliente VIP — comprador frequente.',cadastro:'2024-05-10',ultimo_pedido:'2025-05-25',total_caixas:12,total_pedidos:4,status:'vip'},
+    {id:'CLI-005',nome:'Luana Reis',tipo:'PF',doc:'',wapp:'(31) 98877-6655',email:'',segmento:'Eventos / Buffet',cidade:'Belo Horizonte',estado:'MG',vendedor:'Maria',indicado:'',preco_esp:false,obs:'',cadastro:'2024-06-01',ultimo_pedido:'2025-05-27',total_caixas:4,total_pedidos:2,status:'ativo'},
+    {id:'CLI-006',nome:'Marina Fonseca',tipo:'PF',doc:'',wapp:'(21) 96543-2100',email:'',segmento:'Eventos / Buffet',cidade:'Rio de Janeiro',estado:'RJ',vendedor:'Pedro',indicado:'Ana Clara',preco_esp:false,obs:'Indicada pela Ana Clara.',cadastro:'2025-06-22',ultimo_pedido:'',total_caixas:0,total_pedidos:0,status:'ativo'},
+    {id:'CLI-007',nome:'Fernanda Cruz',tipo:'PJ',doc:'55.444.333/0001-22',wapp:'(41) 99777-5544',email:'fernanda@empresa.com',segmento:'Bar / Boteco',cidade:'Curitiba',estado:'PR',vendedor:'Pedro',indicado:'',preco_esp:false,obs:'',cadastro:'2024-12-01',ultimo_pedido:'2025-06-19',total_caixas:6,total_pedidos:2,status:'ativo'},
+    {id:'CLI-008',nome:'Carlos Mota',tipo:'PF',doc:'',wapp:'(11) 98888-4433',email:'',segmento:'Outro',cidade:'São Paulo',estado:'SP',vendedor:'Pedro',indicado:'',preco_esp:false,obs:'',cadastro:'2024-03-15',ultimo_pedido:'2025-06-01',total_caixas:3,total_pedidos:2,status:'ativo'},
+  ];
+
+  var CLI_CORES = ['#E31787','#772583','#3C3489','#633806','#085041','#0C447C','#791F1F','#633806'];
+  var editingClienteIdx = -1;
+
+  function getCliStatus(cli) {
+    if(cli.status === 'vip') return '<span class="badge-vip">⭐ VIP</span>';
+    var hoje = new Date();
+    if(cli.ultimo_pedido) {
+      var ult = new Date(cli.ultimo_pedido);
+      var dias = Math.floor((hoje - ult) / 86400000);
+      if(dias > 60) return '<span class="badge-inativo">Inativo '+dias+'d</span>';
+    }
+    // Verifica aniversário
+    if(cli.cadastro) {
+      var cad = new Date(cli.cadastro);
+      var aniv = new Date(cad.getFullYear() + Math.floor((hoje - cad) / (365.25*86400000)) + 1, cad.getMonth(), cad.getDate());
+      var diasAniv = Math.floor((aniv - hoje) / 86400000);
+      if(diasAniv >= 0 && diasAniv <= 7) return '<span class="badge-aniversario">🎂 Aniversário em '+diasAniv+'d</span>';
+    }
+    return '<span class="badge-ativo">Ativo</span>';
+  }
+
+  function renderClientes(search, statusF, vendF) {
+    var list = document.getElementById('clientes-list');
+    var empty = document.getElementById('clientes-empty');
+    if(!list) return;
+
+    var filtered = CLIENTES.filter(function(cli) {
+      if(!currentUser.isAdmin && cli.vendedor !== currentUser.name) return false;
+      if(search) {
+        var s = search.toLowerCase();
+        if(cli.nome.toLowerCase().indexOf(s) < 0 && cli.doc.indexOf(s) < 0 && cli.cidade.toLowerCase().indexOf(s) < 0 && cli.wapp.indexOf(s) < 0) return false;
+      }
+      if(statusF === 'vip' && cli.status !== 'vip') return false;
+      if(statusF === 'ativo' && cli.status === 'inativo') return false;
+      if(statusF === 'inativo') {
+        var hoje = new Date();
+        if(cli.ultimo_pedido) {
+          var ult = new Date(cli.ultimo_pedido);
+          if(Math.floor((hoje-ult)/86400000) < 60) return false;
+        }
+      }
+      if(vendF && cli.vendedor !== vendF) return false;
+      return true;
+    });
+
+    if(!filtered.length) {
+      list.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    list.innerHTML = filtered.map(function(cli, i) {
+      var cor = CLI_CORES[i % CLI_CORES.length];
+      var initials = cli.nome.split(' ').slice(0,2).map(function(n){ return n[0]; }).join('').toUpperCase();
+      var status = getCliStatus(cli);
+      var totalVal = 'R$' + (cli.total_caixas * 500).toLocaleString('pt-BR');
+      return '<div class="cliente-card">' +
+        '<div class="cliente-av" style="background:'+cor+';">'+initials+'</div>' +
+        '<div class="cliente-info">' +
+          '<div class="cliente-nome">'+esc(cli.nome)+(cli.preco_esp?' <span style="font-size:10px;color:#3C3489;background:#EEEDFE;padding:1px 6px;border-radius:10px;">Preço especial</span>':'')+
+          (cli.indicado?' <span style="font-size:10px;color:#085041;background:#E1F5EE;padding:1px 6px;border-radius:10px;">Indicação</span>':'')+'</div>' +
+          '<div class="cliente-sub">'+esc(cli.segmento||'—')+' · '+esc(cli.cidade)+'/'+esc(cli.estado)+' · '+esc(cli.wapp)+'</div>' +
+          '<div class="cliente-badges">'+status+(currentUser.isAdmin?'<span class="vend-pill">'+esc(cli.vendedor)+'</span>':'')+'</div>' +
+        '</div>' +
+        '<div class="cliente-stats">' +
+          '<div><div class="cliente-stat-val">'+cli.total_pedidos+'</div><div class="cliente-stat-lbl">Pedidos</div></div>' +
+          '<div><div class="cliente-stat-val">'+cli.total_caixas+'</div><div class="cliente-stat-lbl">Caixas</div></div>' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">' +
+          '<button class="btn btn-sm" data-cli-edit="'+cli.id+'"><i class="ti ti-edit" style="font-size:11px;"></i> Editar</button>' +
+          '<button class="btn btn-rosa btn-sm" onclick="abrirPedidoCliente(''+cli.id+'')"><i class="ti ti-plus" style="font-size:11px;"></i> Pedido</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    // Bind edit
+    list.querySelectorAll('[data-cli-edit]').forEach(function(btn) {
+      btn.addEventListener('click', function() { editarCliente(this.getAttribute('data-cli-edit')); });
+    });
+  }
+
+  function editarCliente(id) {
+    var cli = CLIENTES.find(function(c){ return c.id === id; });
+    if(!cli) return;
+    editingClienteIdx = CLIENTES.indexOf(cli);
+    document.getElementById('cliente-modal-title').textContent = 'Editar cliente';
+    document.getElementById('cliente-modal-sub').textContent = cli.id;
+    document.getElementById('cli-nome').value = cli.nome;
+    document.getElementById('cli-tipo').value = cli.tipo;
+    document.getElementById('cli-doc').value = cli.doc;
+    document.getElementById('cli-wapp').value = cli.wapp;
+    document.getElementById('cli-email').value = cli.email;
+    document.getElementById('cli-segmento').value = cli.segmento;
+    document.getElementById('cli-endereco').value = cli.endereco || '';
+    document.getElementById('cli-cidade').value = cli.cidade;
+    document.getElementById('cli-estado').value = cli.estado;
+    document.getElementById('cli-vendedor').value = cli.vendedor;
+    document.getElementById('cli-indicado').value = cli.indicado || '';
+    document.getElementById('cli-obs').value = cli.obs;
+    var radios = document.querySelectorAll('input[name="preco-esp"]');
+    radios.forEach(function(r) { r.checked = r.value === (cli.preco_esp ? 'sim' : 'nao'); });
+    openModal('modal-novo-cliente');
+  }
+
+  function abrirPedidoCliente(id) {
+    var cli = CLIENTES.find(function(c){ return c.id === id; });
+    if(!cli) return;
+    goPage('pedidos','Pedidos');
+    setTimeout(function(){
+      openNovoPedido();
+      document.getElementById('np-nome').value = cli.nome;
+      document.getElementById('np-wapp').value = cli.wapp;
+      document.getElementById('np-cidade').value = cli.cidade+'/'+cli.estado;
+      document.getElementById('np-vendedor').value = cli.vendedor;
+    }, 200);
+  }
+
+  function exportarExcel() {
+    var rows = [['ID','Nome','Tipo','CNPJ/CPF','WhatsApp','Email','Segmento','Cidade','Estado','Vendedor','Indicado por','Preço especial','Pedidos','Caixas','Cadastro','Último pedido']];
+    CLIENTES.forEach(function(cli) {
+      rows.push([cli.id,cli.nome,cli.tipo,cli.doc,cli.wapp,cli.email,cli.segmento,cli.cidade,cli.estado,cli.vendedor,cli.indicado,cli.preco_esp?'Sim':'Não',cli.total_pedidos,cli.total_caixas,cli.cadastro,cli.ultimo_pedido]);
+    });
+    var csv = rows.map(function(r){ return r.map(function(v){ return '"'+String(v||'').replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+    var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href=url; a.download='clientes_mekmix.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    toast('✅ Exportado! Abra o arquivo no Excel.');
+  }
+
+  function marcarAcao(btn, status) {
+    var item = btn.closest('.alerta-item');
+    var badge = item.querySelector('.alerta-status');
+    var labels = {aplicado:'Aplicado',contatado:'Contatado'};
+    badge.className = 'alerta-status st-aplicado';
+    badge.textContent = labels[status] || 'Feito';
+    btn.disabled = true; btn.style.opacity = '.5';
+    toast('✅ Ação registrada!');
+  }
+
+  // Bind clientes
+  var _goPageOrig = goPage;
+  goPage = function(id, title) {
+    _goPageOrig(id, title);
+    if(id === 'clientes') {
+      renderClientes('','','');
+    }
   };
 
 
