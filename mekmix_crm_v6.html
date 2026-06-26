@@ -305,6 +305,7 @@ button { cursor: pointer !important; touch-action: manipulation; }
 .stock-log-type{font-size:10px;padding:1px 6px;border-radius:20px;}
 .entrada{background:#E1F5EE;color:#085041;}
 .saida{background:#FBEAF0;color:#72243E;}
+.abertura{background:#FFF8E1;color:#7B5800;}
 .stock-inp-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;}
 .stock-field{flex:1;min-width:80px;}
 .stock-field label{display:block;font-size:11px;color:var(--text2);margin-bottom:4px;}
@@ -618,9 +619,9 @@ input, textarea { cursor: text; }
         </div>
         <div class="panel"><div class="panel-head"><span class="panel-title">Atendimentos recentes</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Cliente</th><th>Produto</th><th>Status</th><th>Vendedor</th></tr></thead><tbody><tr><td><b>Ana Clara</b><div style="font-size:11px;color:#666;">Campinas/SP</div></td><td>500ml·2cx</td><td><span class="pill p-novo">Novo lead</span></td><td>João</td></tr><tr><td><b>Rafael Silva</b><div style="font-size:11px;color:#666;">BH/MG</div></td><td>330ml·1cx</td><td><span class="pill p-orc">Orçamento</span></td><td>Maria</td></tr><tr><td><b>Pedro Lima</b><div style="font-size:11px;color:#666;">SP/SP</div></td><td>770ml·3cx</td><td><span class="pill p-prod">Produção</span></td><td>João</td></tr></tbody></table></div></div>
         <div class="panel"><div class="panel-head"><span class="panel-title">⏰ Follow-up 30d</span><span style="font-size:11px;color:#E31787;font-weight:500;">3 pendentes</span></div>
-          <div class="follow-item"><div style="display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:12px;font-weight:500;">Thiago Costa</div><div style="font-size:11px;color:#666;">Entregue 25/mai · João</div><div style="font-size:11px;color:#E31787;margin-top:2px;">🔔 Venceu há 1 dia</div></div><button class="btn btn-rosa btn-sm">Avisar João</button></div></div>
-          <div class="follow-item" style="margin-top:4px;"><div style="display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:12px;font-weight:500;">Luana Reis</div><div style="font-size:11px;color:#666;">Entregue 27/mai · Maria</div><div style="font-size:11px;color:#E31787;margin-top:2px;">🔔 Venceu hoje</div></div><button class="btn btn-rosa btn-sm">Avisar Maria</button></div></div>
-          <div class="follow-item" style="margin-top:4px;"><div style="display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:12px;font-weight:500;">Carlos Mota</div><div style="font-size:11px;color:#666;">Entregue 01/jun · Pedro</div><div style="font-size:11px;color:#633806;margin-top:2px;">⏱ Vence em 7 dias</div></div><button class="btn btn-sm">Lembrar</button></div></div>
+          <div class="follow-item"><div style="display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:12px;font-weight:500;">Thiago Costa</div><div style="font-size:11px;color:#666;">Entregue 25/mai · <span style="background:#EDE3F5;color:#5A1E7A;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">João</span></div><div style="font-size:11px;color:#E31787;margin-top:2px;">🔔 Venceu há 1 dia</div></div><button class="btn btn-rosa btn-sm">Avisar João</button></div></div>
+          <div class="follow-item" style="margin-top:4px;"><div style="display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:12px;font-weight:500;">Luana Reis</div><div style="font-size:11px;color:#666;">Entregue 27/mai · <span style="background:#FBEAF0;color:#A0184E;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">Maria</span></div><div style="font-size:11px;color:#E31787;margin-top:2px;">🔔 Venceu hoje</div></div><button class="btn btn-rosa btn-sm">Avisar Maria</button></div></div>
+          <div class="follow-item" style="margin-top:4px;"><div style="display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:12px;font-weight:500;">Carlos Mota</div><div style="font-size:11px;color:#666;">Entregue 01/jun · <span style="background:#E0F0FF;color:#1A5A9A;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">Pedro</span></div><div style="font-size:11px;color:#633806;margin-top:2px;">⏱ Vence em 7 dias</div></div><button class="btn btn-sm">Lembrar</button></div></div>
         </div>
       </div>
       <div id="page-kanban" class="page">
@@ -762,6 +763,20 @@ input, textarea { cursor: text; }
           </div>
           <button class="btn btn-rosa" id="btn-confirm-entrada" style="width:100%;justify-content:center;margin-top:12px;"><i class="ti ti-check" style="font-size:12px;"></i> Confirmar entrada</button>
         </div>
+        <!-- ABRIR CAIXA -->
+        <div class="stock-card" style="border:1px solid #f0c040;">
+          <div class="panel-head"><span class="panel-title">📦 Abrir caixa (uso parcial)</span></div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">Use quando abrir uma caixa fechada para retirar apenas alguns pacotes. O sistema baixa 1 caixa e credita os pacotes avulsos no estoque.</div>
+          <div class="stock-inp-row">
+            <div class="stock-field"><label>Tamanho</label><select id="abrir-tam"><option>330ml</option><option>400ml</option><option>500ml</option><option>770ml</option></select></div>
+            <div class="stock-field"><label>Pacotes na caixa</label><input type="number" id="abrir-total" min="1" placeholder="Ex: 25"/></div>
+            <div class="stock-field"><label>Pacotes usados agora</label><input type="number" id="abrir-usados" min="0" placeholder="0"/></div>
+            <div class="stock-field"><label>Motivo</label><input type="text" id="abrir-motivo" placeholder="Ex: Amostra cliente"/></div>
+          </div>
+          <div style="background:#FFFDE7;border-radius:8px;padding:8px 12px;font-size:11px;color:#5D4037;margin-top:8px;" id="abrir-preview" style="display:none;"></div>
+          <button class="btn" id="btn-confirm-abrir" style="width:100%;justify-content:center;margin-top:12px;background:#f0c040;color:#5D4037;border-color:#f0c040;font-weight:600;"><i class="ti ti-package-open" style="font-size:12px;"></i> Abrir caixa e lançar avulsos</button>
+        </div>
+
         <div class="stock-card">
           <div class="panel-head"><span class="panel-title">Baixa manual de estoque</span></div>
           <div class="stock-inp-row">
@@ -802,325 +817,6 @@ input, textarea { cursor: text; }
         </div>
       </div>
 
-      <!-- AÇÕES DE VENDAS -->
-      <div id="page-acoes" class="page">
-        <div class="page-title">Ações de vendas
-          <span style="font-size:12px;color:var(--text2);font-weight:400;">Benefícios automáticos para seus clientes</span>
-        </div>
-
-        <!-- Alertas resumo -->
-        <div class="panel" style="background:linear-gradient(135deg,#772583,#E31787);border:none;margin-bottom:16px;">
-          <div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:10px;">🔔 Alertas pendentes hoje</div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-            <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px;text-align:center;">
-              <div style="font-size:22px;font-weight:700;color:#fff;">2</div>
-              <div style="font-size:10px;color:rgba(255,255,255,.8);">Brindes a oferecer</div>
-            </div>
-            <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px;text-align:center;">
-              <div style="font-size:22px;font-weight:700;color:#fff;">3</div>
-              <div style="font-size:10px;color:rgba(255,255,255,.8);">Descontos pendentes</div>
-            </div>
-            <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px;text-align:center;">
-              <div style="font-size:22px;font-weight:700;color:#fff;">1</div>
-              <div style="font-size:10px;color:rgba(255,255,255,.8);">Aniversários</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- AÇÃO 1 -->
-        <div class="acao-card">
-          <div class="acao-header">
-            <div class="acao-ico" style="background:#FBEAF0;">🎁</div>
-            <div style="flex:1;">
-              <div class="acao-titulo">Brinde na 11ª caixa</div>
-              <div class="acao-subtitulo">A cada 10 caixas compradas em 30 dias</div>
-            </div>
-          </div>
-          <button class="acao-accordion-btn" onclick="toggleAcc(this)">
-            📋 Ver regras e condições <span class="acc-arrow">▼</span>
-          </button>
-          <div class="acao-accordion-body">
-            <div class="acao-regra">
-              <b>Regra:</b> Cliente que comprar <b>10 ou mais caixas</b> (qualquer tamanho) em um período de <b>30 dias corridos</b> ganha <b>1 caixa de 330ml de brinde</b> na próxima compra.<br><br>
-              <b>Condição importante:</b> Só vale para pedidos com <b>preço de tabela normal</b>. Clientes com condição de preço especial negociada anteriormente <b>não</b> têm direito ao brinde.<br><br>
-              <b>O que o sistema faz:</b> Detecta automaticamente quando o cliente atingiu 10 caixas no período e gera um alerta para o vendedor.<br>
-              <b>O que o vendedor faz:</b> Entra em contato e oferece o brinde no próximo pedido.
-            </div>
-            <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;"></i>
-              <span><b>Para vendedores:</b> Verifique sempre se o cliente possui condição especial de preço antes de oferecer o brinde.</span>
-            </div>
-          </div>
-          <div class="beneficio-grupo">
-            <div class="beneficio-grupo-titulo">Clientes com alerta ativo</div>
-            <div>
-              <div class="alerta-item">
-                <div class="alerta-item-info">
-                  <div class="alerta-item-nome">Thiago Costa</div>
-                  <div class="alerta-item-desc">12 caixas em 30 dias · João · Preço tabela ✓</div>
-                </div>
-                <span class="alerta-status st-pendente">Pendente</span>
-                <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
-              </div>
-              <div class="alerta-item">
-                <div class="alerta-item-info">
-                  <div class="alerta-item-nome">Fernanda Cruz</div>
-                  <div class="alerta-item-desc">10 caixas em 28 dias · Pedro · Preço tabela ✓</div>
-                </div>
-                <span class="alerta-status st-pendente">Pendente</span>
-                <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- AÇÃO 2 -->
-        <div class="acao-card">
-          <div class="acao-header">
-            <div class="acao-ico" style="background:#E1F5EE;">💰</div>
-            <div style="flex:1;">
-              <div class="acao-titulo">10% de desconto na próxima compra</div>
-              <div class="acao-subtitulo">A cada 5 caixas compradas em 30 dias</div>
-            </div>
-          </div>
-          <button class="acao-accordion-btn" onclick="toggleAcc(this)">
-            📋 Ver regras e condições <span class="acc-arrow">▼</span>
-          </button>
-          <div class="acao-accordion-body">
-            <div class="acao-regra">
-              <b>Regra:</b> Cliente que comprar <b>5 ou mais caixas</b> em <b>30 dias corridos</b> ganha <b>10% de desconto</b> na próxima compra.<br><br>
-              <b>Condição:</b> O desconto só é válido para pedidos com <b>no mínimo 3 caixas</b>. Pedidos de unidades avulsas não ativam nem recebem esse benefício.<br><br>
-              <b>Validade:</b> O desconto expira após <b>30 dias</b> caso não seja utilizado.
-            </div>
-            <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;"></i>
-              <span><b>Para vendedores:</b> Ao abrir novo pedido para cliente com esse benefício, aplique o desconto de 10% e marque como utilizado.</span>
-            </div>
-          </div>
-          <div class="beneficio-grupo">
-            <div class="beneficio-grupo-titulo">Clientes com desconto pendente</div>
-            <div>
-              <div class="alerta-item">
-                <div class="alerta-item-info">
-                  <div class="alerta-item-nome">Rafael Silva</div>
-                  <div class="alerta-item-desc">5 caixas em 20 dias · Maria · Expira em 10 dias</div>
-                </div>
-                <span class="alerta-status st-pendente">Pendente</span>
-                <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
-              </div>
-              <div class="alerta-item">
-                <div class="alerta-item-info">
-                  <div class="alerta-item-nome">Carlos Mota</div>
-                  <div class="alerta-item-desc">6 caixas em 15 dias · Pedro · Expira em 5 dias</div>
-                </div>
-                <span class="alerta-status st-pendente">Pendente</span>
-                <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
-              </div>
-              <div class="alerta-item">
-                <div class="alerta-item-info">
-                  <div class="alerta-item-nome">Beatriz Alves</div>
-                  <div class="alerta-item-desc">5 caixas em 30 dias · João · Expirou</div>
-                </div>
-                <span class="alerta-status st-expirado">Expirado</span>
-                <button class="btn btn-sm" disabled style="opacity:.5;">Expirado</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- AÇÃO 3 -->
-        <div class="acao-card">
-          <div class="acao-header">
-            <div class="acao-ico" style="background:#EEEDFE;">📅</div>
-            <div style="flex:1;">
-              <div class="acao-titulo">5% de desconto no 3º mês consecutivo</div>
-              <div class="acao-subtitulo">Cliente fiel que compra mês a mês</div>
-            </div>
-          </div>
-          <button class="acao-accordion-btn" onclick="toggleAcc(this)">
-            📋 Ver regras e condições <span class="acc-arrow">▼</span>
-          </button>
-          <div class="acao-accordion-body">
-            <div class="acao-regra">
-              <b>Regra:</b> Cliente que realizar pelo menos <b>1 pedido de caixas fechadas</b> nos <b>2 meses anteriores consecutivos</b> ganha <b>5% de desconto automático</b> no 3º mês.<br><br>
-              <b>Condição:</b> Não vale para unidades avulsas. O pedido precisa ter no mínimo 1 caixa.<br><br>
-              → Mês 1: cliente compra 2cx ✓ · Mês 2: cliente compra 1cx ✓ · Mês 3: 5% aplicado automaticamente ✓
-            </div>
-            <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;"></i>
-              <span><b>Para vendedores:</b> O desconto de 5% já estará pré-aplicado ao abrir o pedido.</span>
-            </div>
-          </div>
-          <div class="beneficio-grupo">
-            <div class="beneficio-grupo-titulo">Clientes no ciclo de fidelidade</div>
-            <div>
-              <div class="alerta-item">
-                <div class="alerta-item-info">
-                  <div class="alerta-item-nome">Luana Reis</div>
-                  <div class="alerta-item-desc">3 meses seguidos · Maria · Desconto aplicado no último pedido</div>
-                </div>
-                <span class="alerta-status st-aplicado">Aplicado</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- AÇÃO 4 -->
-        <div class="acao-card">
-          <div class="acao-header">
-            <div class="acao-ico" style="background:#FEF3C7;">🎂</div>
-            <div style="flex:1;">
-              <div class="acao-titulo">Aniversário de cadastro</div>
-              <div class="acao-subtitulo">A cada 12 meses de relacionamento</div>
-            </div>
-          </div>
-          <button class="acao-accordion-btn" onclick="toggleAcc(this)">
-            📋 Ver regras e condições <span class="acc-arrow">▼</span>
-          </button>
-          <div class="acao-accordion-body">
-            <div class="acao-regra">
-              <b>Regra:</b> A cada <b>12 meses completos</b> desde o cadastro, o sistema gera um alerta de aniversário de relacionamento.<br><br>
-              <b>Antecedência:</b> O alerta aparece <b>7 dias antes</b> da data de aniversário.<br><br>
-              <b>O cliente ganha:</b> Um brinde surpresa definido pelo gestor.
-            </div>
-            <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;"></i>
-              <span><b>Para vendedores:</b> Personalize a mensagem — mencione o tempo de parceria e valorize o cliente.</span>
-            </div>
-          </div>
-          <div class="beneficio-grupo">
-            <div class="beneficio-grupo-titulo">Próximos aniversários</div>
-            <div>
-              <div class="alerta-item">
-                <div class="alerta-item-info">
-                  <div class="alerta-item-nome">Pedro Lima</div>
-                  <div class="alerta-item-desc">1 ano de cadastro · Aniversário em 3 dias (28/06)</div>
-                </div>
-                <span class="alerta-status st-pendente">Em 3 dias</span>
-                <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar enviado</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- AÇÃO 5 -->
-        <div class="acao-card">
-          <div class="acao-header">
-            <div class="acao-ico" style="background:#F0FDF4;">🤝</div>
-            <div style="flex:1;">
-              <div class="acao-titulo">Programa de indicação</div>
-              <div class="acao-subtitulo">Cliente que indica ganha 10% na próxima compra</div>
-            </div>
-          </div>
-          <button class="acao-accordion-btn" onclick="toggleAcc(this)">
-            📋 Ver regras e condições <span class="acc-arrow">▼</span>
-          </button>
-          <div class="acao-accordion-body">
-            <div class="acao-regra">
-              <b>Regra:</b> Quando um cliente indica outro e o indicado fecha o <b>primeiro pedido</b>, o cliente que indicou ganha <b>10% de desconto</b> no próximo pedido.<br><br>
-              <b>Como registrar:</b> No cadastro de cada cliente há o campo <b>"Indicado por"</b>.<br><br>
-              <b>Validade:</b> O desconto de 10% expira em <b>60 dias</b>.
-            </div>
-            <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;"></i>
-              <span><b>Para vendedores:</b> Sempre pergunte ao cadastrar um novo cliente se ele foi indicado por alguém.</span>
-            </div>
-          </div>
-          <div class="beneficio-grupo">
-            <div class="beneficio-grupo-titulo">Indicações com benefício pendente</div>
-            <div>
-              <div class="alerta-item">
-                <div class="alerta-item-info">
-                  <div class="alerta-item-nome">Ana Clara</div>
-                  <div class="alerta-item-desc">Indicou Marina Fonseca · Primeiro pedido fechado · 10% pendente · expira em 60 dias</div>
-                </div>
-                <span class="alerta-status st-pendente">Pendente</span>
-                <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- AÇÃO 6 -->
-        <div class="acao-card">
-          <div class="acao-header">
-            <div class="acao-ico" style="background:#EFF6FF;">🔄</div>
-            <div style="flex:1;">
-              <div class="acao-titulo">Alerta de pedido recorrente</div>
-              <div class="acao-subtitulo">Cliente com padrão de compra mensal</div>
-            </div>
-          </div>
-          <button class="acao-accordion-btn" onclick="toggleAcc(this)">
-            📋 Ver regras e condições <span class="acc-arrow">▼</span>
-          </button>
-          <div class="acao-accordion-body">
-            <div class="acao-regra">
-              <b>Regra:</b> Cliente que realizou pedidos nos <b>2 meses consecutivos anteriores</b> recebe um alerta para contato proativo.<br><br>
-              <b>Importante:</b> A mensagem de contato <b>não deve mencionar preços</b>. Os valores são negociados na conversa.<br><br>
-              <i>"Oi [Nome]! 👋 Vi que você tem pedido copos todo mês — posso já verificar disponibilidade para você?"</i>
-            </div>
-            <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;"></i>
-              <span><b>Para vendedores:</b> Nunca mencione preços na mensagem de prospecção recorrente.</span>
-            </div>
-          </div>
-          <div class="beneficio-grupo">
-            <div class="beneficio-grupo-titulo">Clientes a contatar este mês</div>
-            <div>
-              <div class="alerta-item">
-                <div class="alerta-item-info">
-                  <div class="alerta-item-nome">Thiago Costa</div>
-                  <div class="alerta-item-desc">Pediu em Abril e Maio · João · Contato sugerido para Junho</div>
-                </div>
-                <span class="alerta-status st-pendente">Contatar</span>
-                <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar contatado</button>
-              </div>
-              <div class="alerta-item">
-                <div class="alerta-item-info">
-                  <div class="alerta-item-nome">Rafael Silva</div>
-                  <div class="alerta-item-desc">Pediu em Abril e Maio · Maria · Contato sugerido para Junho</div>
-                </div>
-                <span class="alerta-status st-pendente">Contatar</span>
-                <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar contatado</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- AÇÃO 7 -->
-        <div class="acao-card">
-          <div class="acao-header">
-            <div class="acao-ico" style="background:#FFF7ED;">⏰</div>
-            <div style="flex:1;">
-              <div class="acao-titulo">Reativação de cliente inativo</div>
-              <div class="acao-subtitulo">Cliente sem compras há 60 ou mais dias</div>
-            </div>
-          </div>
-          <button class="acao-accordion-btn" onclick="toggleAcc(this)">
-            📋 Ver regras e condições <span class="acc-arrow">▼</span>
-          </button>
-          <div class="acao-accordion-body">
-            <div class="acao-regra">
-              <b>Regra:</b> Cliente que não compra há <b>60 dias ou mais</b> entra na lista de reativação.<br><br>
-              <i>"Oi [Nome]! 👋 Faz um tempinho que não nos falamos. Temos novidades este mês. Posso te ajudar?"</i><br><br>
-              <b>Atenção:</b> Condições especiais de reativação precisam de autorização do Bruno.
-            </div>
-            <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;"></i>
-              <span><b>Para vendedores:</b> Não ofereça descontos por conta própria. Sempre peça autorização ao Bruno.</span>
-            </div>
-          </div>
-          <div class="beneficio-grupo">
-            <div class="beneficio-grupo-titulo">Clientes inativos</div>
-            <div>
-              <div class="alerta-item">
-                <div class="alerta-item-info">
-                  <div class="alerta-item-nome">Beatriz Alves</div>
-                  <div class="alerta-item-desc">Último pedido: 15/03 · 72 dias inativa · João</div>
-                </div>
-                <span class="alerta-status st-pendente">72 dias</span>
-                <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar contatado</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-
       <!-- CLIENTES -->
       <div id="page-clientes" class="page">
         <div class="page-title">Clientes
@@ -1147,15 +843,16 @@ input, textarea { cursor: text; }
       <div id="page-acoes" class="page">
         <div class="page-title">Ações de vendas
           <span style="font-size:12px;color:var(--text2);font-weight:400;">Benefícios automáticos para seus clientes</span>
+          <button class="btn btn-sm" onclick="document.getElementById('modal-regras').style.display='flex'" style="margin-left:auto;font-size:11px;background:#772D83;border-color:#772D83;color:#fff;font-weight:600;"><i class="ti ti-book-2" style="font-size:11px;"></i> Ver todas as regras</button>
         </div>
 
-        <!-- Alertas pendentes resumo -->
+        <!-- Resumo -->
         <div class="panel" style="background:linear-gradient(135deg,#772583,#E31787);border:none;margin-bottom:16px;">
           <div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:10px;">🔔 Alertas pendentes hoje</div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="alertas-resumo">
             <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px;text-align:center;">
               <div style="font-size:22px;font-weight:700;color:#fff;" id="alerta-count-brinde">2</div>
-              <div style="font-size:10px;color:rgba(255,255,255,.8);">Brindes a oferecer</div>
+              <div style="font-size:10px;color:rgba(255,255,255,.8);">Brinde da 11ª caixa</div>
             </div>
             <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px;text-align:center;">
               <div style="font-size:22px;font-weight:700;color:#fff;" id="alerta-count-desc">3</div>
@@ -1163,268 +860,253 @@ input, textarea { cursor: text; }
             </div>
             <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px;text-align:center;">
               <div style="font-size:22px;font-weight:700;color:#fff;" id="alerta-count-aniv">1</div>
-              <div style="font-size:10px;color:rgba(255,255,255,.8);">Aniversários</div>
+              <div style="font-size:10px;color:rgba(255,255,255,.8);">Aniversários / Indicações</div>
             </div>
           </div>
         </div>
 
-        <!-- AÇÃO 1: 10 caixas / brinde -->
-        <div class="acao-card">
-          <div class="acao-header">
-            <div class="acao-ico" style="background:#FBEAF0;">🎁</div>
-            <div>
-              <div class="acao-titulo">Brinde na 11ª caixa</div>
-              <div class="acao-subtitulo">A cada 10 caixas compradas em 30 dias</div>
-            </div>
+        <!-- CATEGORIA: BRINDES -->
+        <div class="panel" style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="font-size:18px;">🎁</span>
+            <span style="font-weight:600;font-size:13px;">Brinde da 11ª caixa</span>
+            <span style="background:#FBEAF0;color:#72243E;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;">2 pendentes</span>
           </div>
-          <div class="acao-regra">
-            <b>Regra:</b> Cliente que comprar <b>10 ou mais caixas</b> (qualquer tamanho) em um período de <b>30 dias corridos</b> ganha <b>1 caixa de 330ml de brinde</b> na próxima compra.<br><br>
-            <b>Condição importante:</b> Só vale para pedidos com <b>preço de tabela normal</b>. Clientes com condição de preço especial negociada anteriormente <b>não</b> têm direito ao brinde.<br><br>
-            <b>O que o sistema faz:</b> Detecta automaticamente quando o cliente atingiu 10 caixas no período e gera um alerta para o vendedor responsável.<br>
-            <b>O que o vendedor faz:</b> Entra em contato com o cliente e oferece o brinde no próximo pedido.
-          </div>
-          <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;margin-top:1px;"></i>
-            <span><b>Para vendedores:</b> Verifique sempre se o cliente possui condição especial de preço antes de oferecer o brinde. Clientes com desconto negociado não têm esse benefício.</span>
-          </div>
-          <div style="margin-top:10px;">
-            <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px;">Alertas ativos:</div>
-            <div class="alerta-item">
-              <div class="alerta-item-info">
-                <div class="alerta-item-nome">Thiago Costa</div>
-                <div class="alerta-item-desc">12 caixas em 30 dias · João · Preço tabela ✓</div>
-              </div>
-              <span class="alerta-status st-pendente">Pendente</span>
-              <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
+          <div class="alerta-item">
+            <div class="alerta-item-info">
+              <div class="alerta-item-nome">Thiago Costa</div>
+              <div class="alerta-item-desc">12 caixas em 30 dias · <span style="background:#EDE3F5;color:#5A1E7A;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">João</span> · Brinde na 11ª caixa · Preço tabela ✓</div>
             </div>
-            <div class="alerta-item">
-              <div class="alerta-item-info">
-                <div class="alerta-item-nome">Fernanda Cruz</div>
-                <div class="alerta-item-desc">10 caixas em 28 dias · Pedro · Preço tabela ✓</div>
-              </div>
-              <span class="alerta-status st-pendente">Pendente</span>
-              <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
+            <span class="alerta-status st-pendente">Pendente</span>
+            <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
+          </div>
+          <div class="alerta-item">
+            <div class="alerta-item-info">
+              <div class="alerta-item-nome">Fernanda Cruz</div>
+              <div class="alerta-item-desc">10 caixas em 28 dias · <span style="background:#E0F0FF;color:#1A5A9A;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">Pedro</span> · Brinde na 11ª caixa · Preço tabela ✓</div>
             </div>
+            <span class="alerta-status st-pendente">Pendente</span>
+            <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
           </div>
         </div>
 
-        <!-- AÇÃO 2: 5 caixas / 10% desconto -->
-        <div class="acao-card">
-          <div class="acao-header">
-            <div class="acao-ico" style="background:#E1F5EE;">💰</div>
-            <div>
-              <div class="acao-titulo">10% de desconto na próxima compra</div>
-              <div class="acao-subtitulo">A cada 5 caixas compradas em 30 dias</div>
-            </div>
+        <!-- CATEGORIA: DESCONTOS -->
+        <div class="panel" style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="font-size:18px;">💰</span>
+            <span style="font-weight:600;font-size:13px;">Descontos pendentes</span>
+            <span style="background:#E1F5EE;color:#085041;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;">3 pendentes</span>
           </div>
-          <div class="acao-regra">
-            <b>Regra:</b> Cliente que comprar <b>5 ou mais caixas</b> (qualquer tamanho) em um período de <b>30 dias corridos</b> ganha <b>10% de desconto</b> na próxima compra.<br><br>
-            <b>Condição:</b> O desconto só é válido para pedidos com <b>no mínimo 3 caixas</b> (qualquer tamanho). Pedidos de unidades avulsas não ativam nem recebem esse benefício.<br><br>
-            <b>Validade:</b> O desconto expira após <b>30 dias</b> da data em que foi gerado, caso não seja utilizado.<br><br>
-            <b>O que o sistema faz:</b> Marca o cliente com o benefício de 10% pendente e avisa o vendedor.<br>
-            <b>O que o vendedor faz:</b> Aplica o desconto manualmente ao fechar o próximo pedido elegível.
+          <div class="alerta-item">
+            <div class="alerta-item-info">
+              <div class="alerta-item-nome">Rafael Silva</div>
+              <div class="alerta-item-desc">5 caixas em 20 dias · <span style="background:#FBEAF0;color:#A0184E;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">Maria</span> · 10% desconto próxima compra · Expira em 10 dias</div>
+            </div>
+            <span class="alerta-status st-pendente">Pendente</span>
+            <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
           </div>
-          <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;margin-top:1px;"></i>
-            <span><b>Para vendedores:</b> Ao abrir um novo pedido para cliente com esse benefício, o sistema mostrará um aviso. Aplique o desconto de 10% no campo de valor e marque como utilizado.</span>
+          <div class="alerta-item">
+            <div class="alerta-item-info">
+              <div class="alerta-item-nome">Carlos Mota</div>
+              <div class="alerta-item-desc">6 caixas em 15 dias · <span style="background:#E0F0FF;color:#1A5A9A;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">Pedro</span> · 10% desconto próxima compra · Expira em 5 dias</div>
+            </div>
+            <span class="alerta-status st-pendente">Pendente</span>
+            <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
           </div>
-          <div style="margin-top:10px;">
-            <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px;">Alertas ativos:</div>
-            <div class="alerta-item">
-              <div class="alerta-item-info">
-                <div class="alerta-item-nome">Rafael Silva</div>
-                <div class="alerta-item-desc">5 caixas em 20 dias · Maria · Expira em 10 dias</div>
-              </div>
-              <span class="alerta-status st-pendente">Pendente</span>
-              <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
+          <div class="alerta-item">
+            <div class="alerta-item-info">
+              <div class="alerta-item-nome">Beatriz Alves</div>
+              <div class="alerta-item-desc">5 caixas em 30 dias · <span style="background:#EDE3F5;color:#5A1E7A;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">João</span> · 10% desconto · Expirou</div>
             </div>
-            <div class="alerta-item">
-              <div class="alerta-item-info">
-                <div class="alerta-item-nome">Carlos Mota</div>
-                <div class="alerta-item-desc">6 caixas em 15 dias · Pedro · Expira em 5 dias</div>
-              </div>
-              <span class="alerta-status st-pendente">Pendente</span>
-              <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
-            </div>
-            <div class="alerta-item">
-              <div class="alerta-item-info">
-                <div class="alerta-item-nome">Beatriz Alves</div>
-                <div class="alerta-item-desc">5 caixas em 30 dias · João · Expirou</div>
-              </div>
-              <span class="alerta-status st-expirado">Expirado</span>
-              <button class="btn btn-sm" disabled style="opacity:.5;">Expirado</button>
-            </div>
+            <span class="alerta-status st-expirado">Expirado</span>
+            <button class="btn btn-sm" disabled style="opacity:.5;">Expirado</button>
           </div>
         </div>
 
-        <!-- AÇÃO 3: 3 meses seguidos / 5% -->
-        <div class="acao-card">
-          <div class="acao-header">
-            <div class="acao-ico" style="background:#EEEDFE;">📅</div>
-            <div>
-              <div class="acao-titulo">5% de desconto no 3º mês consecutivo</div>
-              <div class="acao-subtitulo">Cliente fiel que compra mês a mês</div>
+        <!-- CATEGORIA: FIDELIDADE -->
+        <div class="panel" style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="font-size:18px;">📅</span>
+            <span style="font-weight:600;font-size:13px;">Fidelidade — 3º mês consecutivo</span>
+            <span style="background:#E1F5EE;color:#085041;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;">1 aplicado</span>
+          </div>
+          <div class="alerta-item">
+            <div class="alerta-item-info">
+              <div class="alerta-item-nome">Luana Reis</div>
+              <div class="alerta-item-desc">3 meses seguidos · <span style="background:#FBEAF0;color:#A0184E;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">Maria</span> · 5% aplicado no último pedido</div>
             </div>
-          </div>
-          <div class="acao-regra">
-            <b>Regra:</b> Cliente que realizar <b>pelo menos 1 pedido de caixas fechadas</b> nos <b>2 meses anteriores consecutivos</b> ganha <b>5% de desconto automático</b> no pedido do 3º mês.<br><br>
-            <b>Condição:</b> Não vale para pedidos de <b>unidades avulsas</b>. O pedido do 3º mês precisa ter <b>no mínimo 1 caixa</b>.<br><br>
-            <b>Como funciona na prática:</b><br>
-            → Mês 1: cliente compra 2cx de 500ml ✓<br>
-            → Mês 2: cliente compra 1cx de 330ml ✓<br>
-            → Mês 3: sistema aplica 5% automaticamente ao criar o pedido ✓<br><br>
-            <b>O que o sistema faz:</b> Detecta o padrão e aplica o desconto automaticamente no 3º pedido consecutivo.
-          </div>
-          <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;margin-top:1px;"></i>
-            <span><b>Para vendedores:</b> O desconto de 5% já estará pré-aplicado quando você abrir o pedido. Não precisa fazer nada — só confirmar com o cliente que ele ganhou o benefício de fidelidade.</span>
-          </div>
-          <div style="margin-top:10px;">
-            <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px;">Alertas ativos:</div>
-            <div class="alerta-item">
-              <div class="alerta-item-info">
-                <div class="alerta-item-nome">Luana Reis</div>
-                <div class="alerta-item-desc">3 meses seguidos · Maria · Desconto aplicado no último pedido</div>
-              </div>
-              <span class="alerta-status st-aplicado">Aplicado</span>
-            </div>
+            <span class="alerta-status st-aplicado">Aplicado</span>
           </div>
         </div>
 
-        <!-- AÇÃO 4: Aniversário de cadastro -->
-        <div class="acao-card">
-          <div class="acao-header">
-            <div class="acao-ico" style="background:#FEF3C7;">🎂</div>
-            <div>
-              <div class="acao-titulo">Aniversário de cadastro</div>
-              <div class="acao-subtitulo">A cada 12 meses de relacionamento com a MekMix</div>
+        <!-- CATEGORIA: ANIVERSÁRIOS -->
+        <div class="panel" style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="font-size:18px;">🎂</span>
+            <span style="font-weight:600;font-size:13px;">Aniversários de cadastro</span>
+            <span style="background:#FEF3C7;color:#7B5800;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;">1 em breve</span>
+          </div>
+          <div class="alerta-item">
+            <div class="alerta-item-info">
+              <div class="alerta-item-nome">Pedro Lima</div>
+              <div class="alerta-item-desc">1 ano de cadastro · Aniversário em 3 dias (28/06) · <span style="background:#EDE3F5;color:#5A1E7A;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">João</span></div>
             </div>
-          </div>
-          <div class="acao-regra">
-            <b>Regra:</b> A cada <b>12 meses completos</b> desde a data de cadastro do cliente, o sistema gera um alerta de aniversário de relacionamento.<br><br>
-            <b>O que o cliente ganha:</b> Um <b>brinde surpresa</b> definido pelo gestor (ex: amostra de produto, desconto especial, brindes personalizados).<br><br>
-            <b>Antecedência:</b> O alerta aparece <b>7 dias antes</b> da data de aniversário para dar tempo de preparar o brinde e entrar em contato.<br><br>
-            <b>O que o sistema faz:</b> Monitora a data de cadastro de todos os clientes e gera alerta 7 dias antes do aniversário.<br>
-            <b>O que o vendedor faz:</b> Entra em contato com o cliente, celebra o aniversário de parceria e entrega o brinde combinado.
-          </div>
-          <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;margin-top:1px;"></i>
-            <span><b>Para vendedores:</b> Esse contato é uma excelente oportunidade de fortalecer o relacionamento. Personalize a mensagem — mencione o tempo de parceria e mostre que a MekMix valoriza o cliente.</span>
-          </div>
-          <div style="margin-top:10px;">
-            <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px;">Próximos aniversários:</div>
-            <div class="alerta-item">
-              <div class="alerta-item-info">
-                <div class="alerta-item-nome">Pedro Lima</div>
-                <div class="alerta-item-desc">1 ano de cadastro · Aniversário em 3 dias (28/06)</div>
-              </div>
-              <span class="alerta-status st-pendente">Em 3 dias</span>
-              <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar enviado</button>
-            </div>
+            <span class="alerta-status st-pendente">Em 3 dias</span>
+            <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar enviado</button>
           </div>
         </div>
 
-        <!-- AÇÃO 5: Indicação -->
-        <div class="acao-card">
-          <div class="acao-header">
-            <div class="acao-ico" style="background:#F0FDF4;">🤝</div>
-            <div>
-              <div class="acao-titulo">Programa de indicação</div>
-              <div class="acao-subtitulo">Cliente que indica ganha 10% na próxima compra</div>
+        <!-- CATEGORIA: INDICAÇÕES -->
+        <div class="panel" style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="font-size:18px;">🤝</span>
+            <span style="font-weight:600;font-size:13px;">Programa de indicação</span>
+            <span style="background:#FBEAF0;color:#72243E;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;">1 pendente</span>
+          </div>
+          <div class="alerta-item">
+            <div class="alerta-item-info">
+              <div class="alerta-item-nome">Ana Clara</div>
+              <div class="alerta-item-desc">Indicou Marina Fonseca · Primeiro pedido fechado · 10% pendente · Expira em 60 dias</div>
             </div>
-          </div>
-          <div class="acao-regra">
-            <b>Regra:</b> Quando um cliente indica outro e o <b>indicado fecha o primeiro pedido</b>, o cliente que indicou ganha <b>10% de desconto</b> no seu próximo pedido.<br><br>
-            <b>Como registrar:</b> No cadastro de cada cliente há um campo <b>"Indicado por"</b>. Ao fechar o primeiro pedido do novo cliente, o sistema gera automaticamente o alerta de desconto para quem indicou.<br><br>
-            <b>Validade:</b> O desconto de 10% expira em <b>60 dias</b> após ser gerado.<br><br>
-            <b>O que o sistema faz:</b> Detecta quando o indicado fecha o primeiro pedido e gera o benefício para quem indicou.<br>
-            <b>O que o vendedor faz:</b> Entra em contato com o cliente que indicou para informar o benefício e aplica o desconto no próximo pedido.
-          </div>
-          <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;margin-top:1px;"></i>
-            <span><b>Para vendedores:</b> Sempre pergunte ao cadastrar um novo cliente se ele foi indicado por alguém. Esse dado é essencial para o programa funcionar corretamente.</span>
-          </div>
-          <div style="margin-top:10px;">
-            <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px;">Alertas ativos:</div>
-            <div class="alerta-item">
-              <div class="alerta-item-info">
-                <div class="alerta-item-nome">Ana Clara</div>
-                <div class="alerta-item-desc">Indicou Marina Fonseca · Primeiro pedido fechado · 10% pendente</div>
-              </div>
-              <span class="alerta-status st-pendente">Pendente</span>
-              <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
-            </div>
+            <span class="alerta-status st-pendente">Pendente</span>
+            <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
           </div>
         </div>
 
-        <!-- AÇÃO 6: Pedido recorrente -->
-        <div class="acao-card">
-          <div class="acao-header">
-            <div class="acao-ico" style="background:#EFF6FF;">🔄</div>
-            <div>
-              <div class="acao-titulo">Alerta de pedido recorrente</div>
-              <div class="acao-subtitulo">Cliente com padrão de compra mensal</div>
-            </div>
+        <!-- CATEGORIA: RECORRENTES / REATIVAÇÃO -->
+        <div class="panel" style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="font-size:18px;">🔄</span>
+            <span style="font-weight:600;font-size:13px;">Contato recorrente sugerido</span>
+            <span style="background:#EFF6FF;color:#1E40AF;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;">2 para contatar</span>
           </div>
-          <div class="acao-regra">
-            <b>Regra:</b> Cliente que realizou pedidos nos <b>2 meses consecutivos anteriores</b> recebe um alerta para o vendedor entrar em contato proativamente no mês seguinte.<br><br>
-            <b>Objetivo:</b> Antecipar o contato antes do cliente precisar pedir, demonstrando atenção e facilitando a recompra.<br><br>
-            <b>Importante sobre preços:</b> A mensagem de contato <b>não deve mencionar preços</b>. Os valores são negociados pelo vendedor durante a conversa.<br><br>
-            <b>Sugestão de mensagem:</b> <i>"Oi [Nome]! 👋 Vi que você tem pedido copos todo mês — posso já verificar disponibilidade para você esse mês?"</i><br><br>
-            <b>O que o sistema faz:</b> Gera alerta quando detecta padrão de 2 meses consecutivos.<br>
-            <b>O que o vendedor faz:</b> Entra em contato pelo WhatsApp, sem mencionar preços, e abre o pedido se houver interesse.
-          </div>
-          <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;margin-top:1px;"></i>
-            <span><b>Para vendedores:</b> Nunca mencione preços na mensagem de prospecção recorrente. O objetivo é facilitar — não pressionar. Deixe o cliente guiar a conversa.</span>
-          </div>
-          <div style="margin-top:10px;">
-            <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px;">Alertas ativos:</div>
-            <div class="alerta-item">
-              <div class="alerta-item-info">
-                <div class="alerta-item-nome">Thiago Costa</div>
-                <div class="alerta-item-desc">Pediu em Abril e Maio · João · Contato sugerido para Junho</div>
-              </div>
-              <span class="alerta-status st-pendente">Contatar</span>
-              <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar contatado</button>
+          <div class="alerta-item">
+            <div class="alerta-item-info">
+              <div class="alerta-item-nome">Thiago Costa</div>
+              <div class="alerta-item-desc">Pediu em Abril e Maio · <span style="background:#EDE3F5;color:#5A1E7A;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">João</span> · Contato sugerido para Junho</div>
             </div>
-            <div class="alerta-item">
-              <div class="alerta-item-info">
-                <div class="alerta-item-nome">Rafael Silva</div>
-                <div class="alerta-item-desc">Pediu em Abril e Maio · Maria · Contato sugerido para Junho</div>
-              </div>
-              <span class="alerta-status st-pendente">Contatar</span>
-              <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar contatado</button>
+            <span class="alerta-status st-pendente">Contatar</span>
+            <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar contatado</button>
+          </div>
+          <div class="alerta-item">
+            <div class="alerta-item-info">
+              <div class="alerta-item-nome">Rafael Silva</div>
+              <div class="alerta-item-desc">Pediu em Abril e Maio · <span style="background:#FBEAF0;color:#A0184E;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">Maria</span> · Contato sugerido para Junho</div>
             </div>
+            <span class="alerta-status st-pendente">Contatar</span>
+            <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar contatado</button>
           </div>
         </div>
 
-        <!-- AÇÃO 7: Cliente inativo -->
-        <div class="acao-card">
-          <div class="acao-header">
-            <div class="acao-ico" style="background:#FFF7ED;">⏰</div>
-            <div>
-              <div class="acao-titulo">Reativação de cliente inativo</div>
-              <div class="acao-subtitulo">Cliente sem compras há 60 ou mais dias</div>
+        <!-- CATEGORIA: REATIVAÇÃO -->
+        <div class="panel" style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="font-size:18px;">⏰</span>
+            <span style="font-weight:600;font-size:13px;">Reativação de inativos</span>
+            <span style="background:#FFF7ED;color:#9A3412;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;">2 inativos</span>
+          </div>
+          <div class="alerta-item">
+            <div class="alerta-item-info">
+              <div class="alerta-item-nome">Carlos Mota</div>
+              <div class="alerta-item-desc">Sem compras há 75 dias · <span style="background:#E0F0FF;color:#1A5A9A;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">Pedro</span> · Último pedido: 12/04</div>
             </div>
+            <span class="alerta-status st-expirado">75 dias</span>
+            <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar contatado</button>
           </div>
-          <div class="acao-regra">
-            <b>Regra:</b> Cliente que não realiza nenhuma compra há <b>60 dias ou mais</b> entra na lista de reativação.<br><br>
-            <b>O que o sistema faz:</b> Monitora a data do último pedido e gera alerta quando o cliente ultrapassa 60 dias sem comprar.<br><br>
-            <b>Sugestão de mensagem:</b> <i>"Oi [Nome]! 👋 Faz um tempinho que não nos falamos. Temos novidades e condições especiais este mês. Posso te ajudar com alguma coisa?"</i><br><br>
-            <b>O que o vendedor faz:</b> Entra em contato pelo WhatsApp, sem pressão, e tenta reativar o cliente com novidades ou condições especiais autorizadas pelo gestor.
-          </div>
-          <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;margin-top:1px;"></i>
-            <span><b>Para vendedores:</b> Condições especiais para reativação precisam de autorização prévia do Bruno. Não ofereça descontos por conta própria.</span>
-          </div>
-          <div style="margin-top:10px;">
-            <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px;">Clientes inativos:</div>
-            <div class="alerta-item">
-              <div class="alerta-item-info">
-                <div class="alerta-item-nome">Beatriz Alves</div>
-                <div class="alerta-item-desc">Último pedido: 15/03 · 72 dias inativa · João</div>
-              </div>
-              <span class="alerta-status st-pendente">72 dias</span>
-              <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar contatado</button>
+          <div class="alerta-item">
+            <div class="alerta-item-info">
+              <div class="alerta-item-nome">Marina Fonseca</div>
+              <div class="alerta-item-desc">Sem compras há 62 dias · <span style="background:#EDE3F5;color:#5A1E7A;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">João</span> · Último pedido: 25/04</div>
             </div>
+            <span class="alerta-status st-expirado">62 dias</span>
+            <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar contatado</button>
           </div>
         </div>
 
       </div>
+
+      <!-- MODAL: TODAS AS REGRAS -->
+      <div id="modal-regras" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+        <div style="background:#fff;border-radius:16px;max-width:680px;width:100%;max-height:90vh;overflow-y:auto;padding:24px;position:relative;box-shadow:0 8px 40px rgba(0,0,0,.35);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+            <div style="font-size:16px;font-weight:700;color:#1a1a1a;">📋 Todas as regras de benefícios</div>
+            <button onclick="document.getElementById('modal-regras').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#666;">×</button>
+          </div>
+
+          <!-- Regra 1 -->
+          <div style="border-bottom:1px solid #e5e7eb;padding-bottom:16px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="font-size:16px;">🎁</span><b style="font-size:13px;">Brinde na 11ª caixa</b><span style="font-size:11px;color:#555;">A cada 10 caixas em 30 dias</span></div>
+            <div style="font-size:12px;color:#555;line-height:1.7;">
+              <b>Regra:</b> Cliente que comprar <b>10+ caixas</b> em 30 dias corridos ganha <b>1 caixa 330ml de brinde</b> na próxima compra.<br>
+              <b>Condição:</b> Apenas para clientes com preço de tabela normal. Preço negociado = sem brinde.<br>
+              <b>Vendedor:</b> Confirme a condição de preço antes de oferecer.
+            </div>
+          </div>
+
+          <!-- Regra 2 -->
+          <div style="border-bottom:1px solid #e5e7eb;padding-bottom:16px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="font-size:16px;">💰</span><b style="font-size:13px;">10% de desconto</b><span style="font-size:11px;color:#555;">A cada 5 caixas em 30 dias</span></div>
+            <div style="font-size:12px;color:#555;line-height:1.7;">
+              <b>Regra:</b> Cliente que comprar <b>5+ caixas</b> em 30 dias ganha <b>10% de desconto</b> na próxima compra.<br>
+              <b>Condição:</b> Desconto válido apenas em pedidos com mínimo 3 caixas. Expira em 30 dias.<br>
+              <b>Vendedor:</b> Aplique o desconto manualmente ao fechar o pedido elegível.
+            </div>
+          </div>
+
+          <!-- Regra 3 -->
+          <div style="border-bottom:1px solid #e5e7eb;padding-bottom:16px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="font-size:16px;">📅</span><b style="font-size:13px;">5% no 3º mês consecutivo</b><span style="font-size:11px;color:#555;">Cliente fiel mês a mês</span></div>
+            <div style="font-size:12px;color:#555;line-height:1.7;">
+              <b>Regra:</b> Cliente com pedido nos 2 meses anteriores consecutivos ganha <b>5% no 3º pedido</b>.<br>
+              <b>Condição:</b> Só para caixas fechadas (mín. 1 cx). Avulso não conta.<br>
+              <b>Vendedor:</b> Desconto já fica pré-aplicado no pedido — só confirmar com o cliente.
+            </div>
+          </div>
+
+          <!-- Regra 4 -->
+          <div style="border-bottom:1px solid #e5e7eb;padding-bottom:16px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="font-size:16px;">🎂</span><b style="font-size:13px;">Aniversário de cadastro</b><span style="font-size:11px;color:#555;">A cada 12 meses de relacionamento</span></div>
+            <div style="font-size:12px;color:#555;line-height:1.7;">
+              <b>Regra:</b> Alerta 7 dias antes do aniversário de cadastro do cliente.<br>
+              <b>Benefício:</b> Brinde surpresa definido pelo gestor (amostra, desconto especial).<br>
+              <b>Vendedor:</b> Personalize a mensagem — mencione o tempo de parceria.
+            </div>
+          </div>
+
+          <!-- Regra 5 -->
+          <div style="border-bottom:1px solid #e5e7eb;padding-bottom:16px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="font-size:16px;">🤝</span><b style="font-size:13px;">Programa de indicação</b><span style="font-size:11px;color:#555;">Quem indica, ganha</span></div>
+            <div style="font-size:12px;color:#555;line-height:1.7;">
+              <b>Regra:</b> Quando o indicado fecha o <b>1º pedido</b>, quem indicou ganha <b>10% na próxima compra</b>.<br>
+              <b>Validade:</b> 60 dias. Registrar indicação no campo "Indicado por" no cadastro do cliente.<br>
+              <b>Vendedor:</b> Sempre pergunte ao cadastrar se o cliente foi indicado por alguém.
+            </div>
+          </div>
+
+          <!-- Regra 6 -->
+          <div style="border-bottom:1px solid #e5e7eb;padding-bottom:16px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="font-size:16px;">🔄</span><b style="font-size:13px;">Contato recorrente</b><span style="font-size:11px;color:#555;">Cliente com padrão mensal</span></div>
+            <div style="font-size:12px;color:#555;line-height:1.7;">
+              <b>Regra:</b> Pedidos nos 2 meses anteriores consecutivos = alerta para contato proativo.<br>
+              <b>Objetivo:</b> Antecipar o contato antes do cliente precisar pedir.<br>
+              <b>Vendedor:</b> <i>Nunca mencione preços</i> na mensagem de prospecção recorrente.
+            </div>
+          </div>
+
+          <!-- Regra 7 -->
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="font-size:16px;">⏰</span><b style="font-size:13px;">Reativação de inativo</b><span style="font-size:11px;color:#555;">Sem compras há 60+ dias</span></div>
+            <div style="font-size:12px;color:#555;line-height:1.7;">
+              <b>Regra:</b> Cliente sem compras há 60 dias = alerta de reativação.<br>
+              <b>Sugestão:</b> Oferecer desconto especial de retorno (ex: 5% no 1º pedido após retorno).<br>
+              <b>Vendedor:</b> Abordagem leve — pergunte se há algo que pode melhorar, sem pressionar.
+            </div>
+          </div>
+
+          <button onclick="document.getElementById('modal-regras').style.display='none'" class="btn btn-rosa" style="width:100%;justify-content:center;margin-top:20px;">Fechar</button>
+        </div>
+      </div>
+
 
       <!-- FINANCEIRO -->
       <div id="page-financeiro" class="page">
@@ -2566,7 +2248,7 @@ document.addEventListener('DOMContentLoaded',function(){
       if(l.unid > 0) desc += (desc ? ' + ' : '') + l.unid + ' un';
       return '<div class="stock-log-item">' +
         '<div>' +
-          '<span class="stock-log-type ' + l.tipo + '">' + (l.tipo==='entrada'?'▲ Entrada':'▼ Saída') + '</span>' +
+          '<span class="stock-log-type ' + l.tipo + '">' + (l.tipo==='entrada'?'▲ Entrada': l.tipo==='abertura'?'📦 Abertura':'▼ Saída') + '</span>' +
           ' <b>' + l.tam + '</b> · ' + desc +
           (l.nf ? ' <span style="color:var(--text3);">· ' + l.nf + '</span>' : '') +
           '<div style="font-size:10px;color:var(--text3);margin-top:2px;">' + l.data + ' · ' + l.motivo + '</div>' +
@@ -2631,6 +2313,42 @@ document.addEventListener('DOMContentLoaded',function(){
       renderStockGrid(); renderStockLog(); checkStockAlerts();
       document.getElementById('baixa-caixas').value=''; document.getElementById('baixa-unid').value=''; document.getElementById('baixa-motivo').value='';
       toast('📉 Baixa registrada: ' + caixas + 'cx de ' + tam);
+    });
+
+    // Preview ao digitar no Abrir caixa
+    ['abrir-total','abrir-usados'].forEach(function(fid){
+      var el = document.getElementById(fid);
+      if(el) el.addEventListener('input', function(){
+        var total = parseInt(document.getElementById('abrir-total').value)||0;
+        var usados = parseInt(document.getElementById('abrir-usados').value)||0;
+        var preview = document.getElementById('abrir-preview');
+        if(total > 0) {
+          var sobra = Math.max(0, total - usados);
+          preview.style.display = 'block';
+          preview.innerHTML = '⬇️ Baixa: <b>1 caixa fechada</b> &nbsp;|&nbsp; ➕ Entrada: <b>' + total + ' pacotes avulsos</b> &nbsp;|&nbsp; 🔄 Uso imediato: <b>' + usados + ' pacotes</b> &nbsp;|&nbsp; 💾 Saldo avulso: <b>' + sobra + ' pacotes</b>';
+        } else {
+          preview.style.display = 'none';
+        }
+      });
+    });
+
+    // Botão Abrir caixa
+    var btnAbrir = document.getElementById('btn-confirm-abrir');
+    if(btnAbrir) btnAbrir.addEventListener('click', function(){
+      var tam = document.getElementById('abrir-tam').value;
+      var total = parseInt(document.getElementById('abrir-total').value)||0;
+      var usados = parseInt(document.getElementById('abrir-usados').value)||0;
+      var motivo = document.getElementById('abrir-motivo').value||'Abertura parcial';
+      if(!total) { toast('Informe quantos pacotes tem a caixa!'); return; }
+      if(STOCK[tam].caixas < 1) { toast('⚠️ Sem caixas fechadas de ' + tam + ' em estoque!'); return; }
+      var sobra = Math.max(0, total - usados);
+      STOCK[tam].caixas = Math.max(0, STOCK[tam].caixas - 1);
+      STOCK[tam].unid = (STOCK[tam].unid || 0) + sobra;
+      STOCK_LOG.unshift({tipo:'abertura',tam:tam,caixas:1,unid:sobra,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:motivo + ' (abriu 1cx → ' + total + 'pct, usou ' + usados + ', sobra ' + sobra + ')'});
+      renderStockGrid(); renderStockLog(); checkStockAlerts();
+      document.getElementById('abrir-total').value=''; document.getElementById('abrir-usados').value=''; document.getElementById('abrir-motivo').value='';
+      document.getElementById('abrir-preview').style.display='none';
+      toast('📦 Caixa aberta! -1cx / +' + sobra + ' pct avulsos de ' + tam);
     });
   }
 
