@@ -55,7 +55,7 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;}
 .mob-top-right{min-width:60px;display:flex;justify-content:flex-end;}
 .content-area{flex:1;display:flex;overflow:hidden;min-width:0;height:100%;}
 .page{display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg);}
-.page.visible{display:block;padding:16px;flex:1;min-height:0;}
+.page.visible{display:block;padding:16px;flex:1;min-height:0;height:100%;}
 .page-title{font-size:15px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
 .panel{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;}
 .panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
@@ -253,7 +253,8 @@ button { cursor: pointer !important; touch-action: manipulation; }
 
 
 @media(max-width:768px){
-  .page.visible{overflow-y:auto !important;-webkit-overflow-scrolling:touch !important;min-height:0;display:block !important;}
+  .page.visible{overflow-y:visible !important;-webkit-overflow-scrolling:touch !important;min-height:calc(100vh - 106px);height:auto !important;display:block !important;}
+  .content-area{overflow-y:auto !important;-webkit-overflow-scrolling:touch !important;}
 }
 
 
@@ -315,6 +316,10 @@ button { cursor: pointer !important; touch-action: manipulation; }
 
 /* Fix layout definitivo */
 .content-area { align-items: stretch; overflow: hidden; }
+@media(max-width:768px){
+  .content-area { overflow-y: auto; -webkit-overflow-scrolling: touch; flex-direction: column; }
+  .page.visible { height: auto; min-height: calc(100vh - 106px); overflow-y: visible; }
+}
 #page-chats { flex: 1; min-height: 0; }
 #page-chats[style*="none"] { flex: 0 !important; height: 0 !important; overflow: hidden !important; }
 
@@ -406,6 +411,10 @@ input, textarea { cursor: text; }
 @media(max-width:768px){
   .cliente-stats{display:none;}
   .cliente-card{flex-wrap:wrap;}
+  .alerta-item{flex-wrap:wrap;gap:6px;}
+  .alerta-item .btn{width:100%;justify-content:center;}
+  .stock-inp-row{grid-template-columns:1fr 1fr !important;}
+  .stock-field label{font-size:10px;}
 }
 
 
@@ -417,6 +426,24 @@ input, textarea { cursor: text; }
 .acao-accordion-body{display:none;padding:0 4px 8px 4px;}
 .acao-accordion-body.open{display:block;}
 .acao-accordion-body .acao-regra{margin-bottom:0;}
+
+/* Script de vendas — botão copiar responsivo */
+@media(max-width:768px){
+  #page-script .panel > div[style*="position:relative"],
+  #page-script div[style*="position:relative"] {
+    padding-right: 12px !important;
+  }
+  #page-script button[onclick*="copyScript"] {
+    position: static !important;
+    display: block;
+    margin-top: 10px;
+    width: 100%;
+    text-align: center;
+    padding: 6px 12px !important;
+    font-size: 11px !important;
+  }
+}
+
 /* CLIENTES POR BENEFÍCIO */
 .beneficio-grupo{margin-top:10px;}
 .beneficio-grupo-titulo{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;padding-left:2px;}
