@@ -33,6 +33,7 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;}
 .qu-role{font-size:11px;color:var(--text2);}
 .app{display:none;height:100%;width:100%;}
 .app.visible{display:flex;}
+@media(max-width:768px){.app.visible{display:block;}}
 .sidebar{width:210px;background:var(--roxo);display:flex;flex-direction:column;flex-shrink:0;}
 .sb-logo{padding:14px;border-bottom:1px solid rgba(255,255,255,.12);display:flex;align-items:center;gap:10px;}
 .sb-logo-ico{width:32px;height:32px;background:var(--rosa);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;flex-shrink:0;}
@@ -253,8 +254,19 @@ button { cursor: pointer !important; touch-action: manipulation; }
 
 
 @media(max-width:768px){
-  .page.visible{overflow-y:visible !important;-webkit-overflow-scrolling:touch !important;min-height:calc(100vh - 106px);height:auto !important;display:block !important;}
-  .content-area{overflow-y:auto !important;-webkit-overflow-scrolling:touch !important;}
+  /* SCROLL MOBILE — correção definitiva */
+  body { overflow: auto !important; overflow-x: hidden !important; height: auto !important; min-height: 100vh; }
+  .app { height: auto !important; min-height: 100vh; overflow: visible !important; }
+  .main { height: auto !important; overflow: visible !important; }
+  .content-area { height: auto !important; overflow: visible !important; flex-direction: column; }
+  .page.visible {
+    display: block !important;
+    overflow-y: visible !important;
+    height: auto !important;
+    min-height: calc(100vh - 106px);
+    padding: 16px;
+    padding-bottom: 80px;
+  }
 }
 
 
