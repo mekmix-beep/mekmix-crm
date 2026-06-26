@@ -513,6 +513,7 @@ input, textarea { cursor: text; }
       <button class="sb-btn admin-only" data-page="relatorio"><i class="ti ti-chart-bar"></i><span class="sb-btn-lbl">Relatórios</span></button>
       <button class="sb-btn admin-only" data-page="broadcast"><i class="ti ti-send"></i><span class="sb-btn-lbl">Broadcast</span></button>
       <button class="sb-btn admin-only" data-page="templates"><i class="ti ti-template"></i><span class="sb-btn-lbl">Templates</span></button>
+      <button class="sb-btn" data-page="script"><i class="ti ti-script"></i><span class="sb-btn-lbl">Script de vendas</span></button>
       <div class="sb-sec admin-only">Config</div>
       <button class="sb-btn admin-only" data-page="whatsapp"><i class="ti ti-brand-whatsapp"></i><span class="sb-btn-lbl">Conexões WA</span></button>
       <button class="sb-btn admin-only" data-page="financeiro"><i class="ti ti-cash"></i><span class="sb-btn-lbl">Financeiro</span></button>
@@ -1108,6 +1109,185 @@ input, textarea { cursor: text; }
       </div>
 
 
+
+      <!-- SCRIPT DE VENDAS -->
+      <div id="page-script" class="page">
+        <div class="page-title">Script de vendas
+          <span style="font-size:12px;color:var(--text2);font-weight:400;">Guia de atendimento para o vendedor</span>
+        </div>
+
+        <!-- Filtro de situação -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+          <button class="btn btn-rosa btn-sm script-tab-btn active" data-tab="lead-novo" onclick="switchScriptTab(this)">🟢 Lead novo</button>
+        </div>
+
+        <!-- ===== LEAD NOVO ===== -->
+        <div id="script-lead-novo" class="script-tab-content">
+
+          <!-- Intro -->
+          <div class="panel" style="border-left:4px solid #772D83;margin-bottom:12px;">
+            <div style="font-size:13px;font-weight:700;color:#772D83;margin-bottom:6px;">📲 Situação: Lead novo — primeiro contato pelo WhatsApp</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.7;">
+              O cliente mandou mensagem pela primeira vez. Ele pode ter visto um anúncio, recebido indicação ou chegado organicamente. 
+              O objetivo aqui é <b>qualificar rapidamente</b> (o que precisa, quanto, quando) e já direcionar para o orçamento.
+              <br><br>⚡ <b>Responda em até 5 minutos</b> — leads que esperam mais de 1h têm taxa de conversão 80% menor.
+            </div>
+          </div>
+
+          <!-- ETAPA 1 -->
+          <div class="panel" style="margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+              <div style="background:#772D83;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">1</div>
+              <div>
+                <div style="font-weight:700;font-size:13px;">Abertura — Boas-vindas e apresentação</div>
+                <div style="font-size:11px;color:var(--text2);">Enviar assim que o lead chegar</div>
+              </div>
+            </div>
+            <div style="background:#F8F4FC;border-radius:10px;padding:14px 16px;font-size:12px;line-height:1.8;color:#333;position:relative;">
+              <div style="font-size:10px;font-weight:600;color:#772D83;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">💬 Mensagem</div>
+              Olá, [nome]! 👋 Tudo bem?<br>
+              Sou [seu nome], da <b>MekMix Serigrafia</b> — somos especializados em copos personalizados para bares, eventos, adegas e açaí. 🥤<br><br>
+              Vi que você entrou em contato — posso te ajudar?
+              <button onclick="copyScript(this)" style="position:absolute;top:10px;right:10px;background:#772D83;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:10px;cursor:pointer;">📋 Copiar</button>
+            </div>
+            <div style="background:#FFFDE7;border:1px dashed #FBC02D;border-radius:8px;padding:8px 12px;font-size:11px;color:#5D4037;margin-top:8px;">
+              <b>💡 Dica:</b> Se souber o nome pelo Instagram/anúncio, já use. Se não souber, mande assim mesmo — pergunte o nome na próxima mensagem.
+            </div>
+          </div>
+
+          <!-- ETAPA 2 -->
+          <div class="panel" style="margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+              <div style="background:#772D83;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">2</div>
+              <div>
+                <div style="font-weight:700;font-size:13px;">Qualificação — Entender a necessidade</div>
+                <div style="font-size:11px;color:var(--text2);">Após o cliente responder a abertura</div>
+              </div>
+            </div>
+            <div style="background:#F8F4FC;border-radius:10px;padding:14px 16px;font-size:12px;line-height:1.8;color:#333;position:relative;">
+              <div style="font-size:10px;font-weight:600;color:#772D83;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">💬 Mensagem</div>
+              Ótimo! Para eu te passar o melhor orçamento, me conta rapidinho:<br><br>
+              1️⃣ Qual o <b>tamanho do copo</b> que você precisa? (330ml, 400ml, 500ml ou 700ml)<br>
+              2️⃣ <b>Quantidade</b> — quantas caixas ou unidades você precisa?<br>
+              3️⃣ Você já tem a <b>arte/logo</b> pronta, ou vai precisar criar?<br>
+              4️⃣ Qual a <b>data que você precisa</b> receber?
+              <button onclick="copyScript(this)" style="position:absolute;top:10px;right:10px;background:#772D83;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:10px;cursor:pointer;">📋 Copiar</button>
+            </div>
+            <div style="background:#FFFDE7;border:1px dashed #FBC02D;border-radius:8px;padding:8px 12px;font-size:11px;color:#5D4037;margin-top:8px;">
+              <b>💡 Dica:</b> Não mande as perguntas separadas — mande tudo junto em uma mensagem. Isso evita notificação excessiva e parece mais profissional.
+            </div>
+          </div>
+
+          <!-- ETAPA 3 -->
+          <div class="panel" style="margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+              <div style="background:#772D83;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">3</div>
+              <div>
+                <div style="font-weight:700;font-size:13px;">Orçamento — Apresentar o valor</div>
+                <div style="font-size:11px;color:var(--text2);">Após receber as respostas da qualificação</div>
+              </div>
+            </div>
+            <div style="background:#F8F4FC;border-radius:10px;padding:14px 16px;font-size:12px;line-height:1.8;color:#333;position:relative;">
+              <div style="font-size:10px;font-weight:600;color:#772D83;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">💬 Mensagem</div>
+              Perfeito, [nome]! Segue o orçamento:<br><br>
+              🥤 <b>[tamanho]ml personalizados</b><br>
+              📦 Quantidade: [X caixas / Y unidades]<br>
+              🎨 Arte: [inclusa / a confirmar]<br>
+              💰 Valor: <b>R$ [valor]</b><br>
+              🚚 Frete: a calcular conforme seu CEP<br>
+              ⏱️ Prazo: [X dias úteis após aprovação da arte]<br><br>
+              O que acha? Posso tirar alguma dúvida? 😊
+              <button onclick="copyScript(this)" style="position:absolute;top:10px;right:10px;background:#772D83;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:10px;cursor:pointer;">📋 Copiar</button>
+            </div>
+            <div style="background:#FFFDE7;border:1px dashed #FBC02D;border-radius:8px;padding:8px 12px;font-size:11px;color:#5D4037;margin-top:8px;">
+              <b>💡 Dica:</b> Nunca mande só o valor solto. Sempre apresente como orçamento estruturado — passa mais credibilidade e facilita a comparação do cliente.
+            </div>
+          </div>
+
+          <!-- ETAPA 4 -->
+          <div class="panel" style="margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+              <div style="background:#E71787;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">4</div>
+              <div>
+                <div style="font-weight:700;font-size:13px;">Objeção: "Tá caro" / "Vou pensar"</div>
+                <div style="font-size:11px;color:var(--text2);">Se o cliente hesitar no preço ou no prazo</div>
+              </div>
+            </div>
+            <div style="background:#FFF0F5;border-radius:10px;padding:14px 16px;font-size:12px;line-height:1.8;color:#333;position:relative;">
+              <div style="font-size:10px;font-weight:600;color:#E71787;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">💬 Mensagem — Objeção de preço</div>
+              Entendo, [nome]! O preço do copo personalizado pode parecer alto à primeira vista, mas vale considerar que:<br><br>
+              ✅ Seu logo fica em cada copo que sai pro cliente<br>
+              ✅ Copo personalizado aumenta o ticket médio (cliente consome mais quando o ambiente tem identidade)<br>
+              ✅ Nosso produto tem <b>impressão de alta qualidade</b> — sem desbotar<br><br>
+              Você trabalha com quantos clientes por dia? Posso calcular o retorno pra você 😊
+              <button onclick="copyScript(this)" style="position:absolute;top:10px;right:10px;background:#E71787;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:10px;cursor:pointer;">📋 Copiar</button>
+            </div>
+            <div style="background:#FFF0F5;border-radius:10px;padding:14px 16px;font-size:12px;line-height:1.8;color:#333;position:relative;margin-top:8px;">
+              <div style="font-size:10px;font-weight:600;color:#E71787;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">💬 Mensagem — "Vou pensar"</div>
+              Claro, sem pressão! Só te aviso que nossa produção funciona com agendamento — hoje temos vaga para entrega em [prazo normal], mas dependendo da demanda esse prazo pode aumentar.<br><br>
+              Quer que eu reserve a sua posição na fila? É sem compromisso agora. 😊
+              <button onclick="copyScript(this)" style="position:absolute;top:10px;right:10px;background:#E71787;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:10px;cursor:pointer;">📋 Copiar</button>
+            </div>
+            <div style="background:#FFFDE7;border:1px dashed #FBC02D;border-radius:8px;padding:8px 12px;font-size:11px;color:#5D4037;margin-top:8px;">
+              <b>💡 Dica:</b> Nunca dê desconto na primeira objeção. Primeiro defenda o valor — desconto é o último recurso.
+            </div>
+          </div>
+
+          <!-- ETAPA 5 -->
+          <div class="panel" style="margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+              <div style="background:#085041;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">5</div>
+              <div>
+                <div style="font-weight:700;font-size:13px;">Fechamento — Confirmar o pedido</div>
+                <div style="font-size:11px;color:var(--text2);">Quando o cliente demonstrar interesse em fechar</div>
+              </div>
+            </div>
+            <div style="background:#F0FDF4;border-radius:10px;padding:14px 16px;font-size:12px;line-height:1.8;color:#333;position:relative;">
+              <div style="font-size:10px;font-weight:600;color:#085041;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">💬 Mensagem</div>
+              Ótimo, [nome]! Vamos confirmar seu pedido então 🎉<br><br>
+              Preciso de mais algumas informações:<br>
+              📍 <b>CEP de entrega</b> para calcular o frete<br>
+              🧾 <b>CNPJ ou CPF</b> para emissão da nota<br>
+              🎨 <b>Arquivo da arte</b> (logo em PNG ou AI com fundo transparente)<br><br>
+              Assim que eu receber confirmo o prazo exato e te mando o link para pagamento. 😊
+              <button onclick="copyScript(this)" style="position:absolute;top:10px;right:10px;background:#085041;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:10px;cursor:pointer;">📋 Copiar</button>
+            </div>
+            <div style="background:#FFFDE7;border:1px dashed #FBC02D;border-radius:8px;padding:8px 12px;font-size:11px;color:#5D4037;margin-top:8px;">
+              <b>💡 Dica:</b> Após o fechamento, registre o cliente no CRM e crie o pedido. Não deixe pra depois — lead sem registro some.
+            </div>
+          </div>
+
+          <!-- ETAPA 6 — Follow-up se sumir -->
+          <div class="panel" style="margin-bottom:4px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+              <div style="background:#7B5800;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">↩</div>
+              <div>
+                <div style="font-weight:700;font-size:13px;">Follow-up — Lead sumiu após orçamento</div>
+                <div style="font-size:11px;color:var(--text2);">Enviar 24–48h depois se não houver resposta</div>
+              </div>
+            </div>
+            <div style="background:#FFF8E1;border-radius:10px;padding:14px 16px;font-size:12px;line-height:1.8;color:#333;position:relative;">
+              <div style="font-size:10px;font-weight:600;color:#7B5800;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">💬 Mensagem — 24h depois</div>
+              Oi [nome], tudo bem? 👋<br>
+              Só passando para ver se ficou alguma dúvida sobre o orçamento que te mandei.<br>
+              Estou à disposição! 😊
+              <button onclick="copyScript(this)" style="position:absolute;top:10px;right:10px;background:#7B5800;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:10px;cursor:pointer;">📋 Copiar</button>
+            </div>
+            <div style="background:#FFF8E1;border-radius:10px;padding:14px 16px;font-size:12px;line-height:1.8;color:#333;position:relative;margin-top:8px;">
+              <div style="font-size:10px;font-weight:600;color:#7B5800;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">💬 Mensagem — 72h depois (última tentativa)</div>
+              Oi [nome]! Última mensagem, prometo 😄<br>
+              Caso ainda tenha interesse em copos personalizados, estarei aqui.<br>
+              Abraço! 👋
+              <button onclick="copyScript(this)" style="position:absolute;top:10px;right:10px;background:#7B5800;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:10px;cursor:pointer;">📋 Copiar</button>
+            </div>
+            <div style="background:#FFFDE7;border:1px dashed #FBC02D;border-radius:8px;padding:8px 12px;font-size:11px;color:#5D4037;margin-top:8px;">
+              <b>💡 Dica:</b> Após 3 tentativas sem resposta, marque como <b>Inativo</b> no CRM e aguarde 30 dias para tentar reativar com outra abordagem.
+            </div>
+          </div>
+
+        </div><!-- /script-lead-novo -->
+      </div><!-- /page-script -->
+
       <!-- FINANCEIRO -->
       <div id="page-financeiro" class="page">
         <div class="page-title">Financeiro — Contas a pagar
@@ -1552,7 +1732,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // Fix: mover páginas novas para dentro do content-area
   (function(){
     var ca = document.querySelector('.content-area');
-    ['page-pedidos','page-producao','page-estoque','page-clientes','page-acoes','page-financeiro','page-notasfiscais'].forEach(function(id){
+    ['page-pedidos','page-producao','page-estoque','page-clientes','page-acoes','page-financeiro','page-notasfiscais','page-script'].forEach(function(id){
       var el = document.getElementById(id);
       if(el && el.parentElement && !el.parentElement.classList.contains('content-area')){
         ca.appendChild(el);
@@ -2350,6 +2530,34 @@ document.addEventListener('DOMContentLoaded',function(){
       document.getElementById('abrir-preview').style.display='none';
       toast('📦 Caixa aberta! -1cx / +' + sobra + ' pct avulsos de ' + tam);
     });
+  }
+
+
+  // Script de vendas — copiar mensagem
+  function copyScript(btn) {
+    var box = btn.parentElement;
+    var lines = Array.from(box.childNodes)
+      .filter(function(n){ return n.nodeType === Node.TEXT_NODE || (n.nodeType === Node.ELEMENT_NODE && n.tagName !== 'BUTTON' && n.tagName !== 'DIV'); })
+      .map(function(n){ return n.textContent; }).join('');
+    // Pegar texto completo do box sem o botão e sem o label
+    var full = box.innerText || box.textContent;
+    // Remover a primeira linha (label) e o botão
+    var cleaned = full.replace(/^.*?Mensagem.*?\n/,'').replace('📋 Copiar','').trim();
+    navigator.clipboard.writeText(cleaned).then(function(){
+      btn.textContent = '✅ Copiado!';
+      setTimeout(function(){ btn.textContent = '📋 Copiar'; }, 2000);
+    }).catch(function(){
+      toast('Selecione e copie manualmente.');
+    });
+  }
+
+  function switchScriptTab(btn) {
+    document.querySelectorAll('.script-tab-btn').forEach(function(b){ b.classList.remove('active'); });
+    document.querySelectorAll('.script-tab-content').forEach(function(d){ d.style.display='none'; });
+    btn.classList.add('active');
+    var tab = btn.getAttribute('data-tab');
+    var el = document.getElementById('script-' + tab);
+    if(el) el.style.display = 'block';
   }
 
   // Hook nas páginas para renderizar ao abrir
