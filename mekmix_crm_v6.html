@@ -407,6 +407,74 @@ input, textarea { cursor: text; }
   .cliente-card{flex-wrap:wrap;}
 }
 
+
+/* ACCORDION AÇÕES */
+.acao-accordion-btn{width:100%;text-align:left;background:var(--bg);border:none;border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;}
+.acao-accordion-btn:hover{background:#f0e8f5;}
+.acao-accordion-btn .acc-arrow{transition:transform .2s;font-size:10px;}
+.acao-accordion-btn.open .acc-arrow{transform:rotate(180deg);}
+.acao-accordion-body{display:none;padding:0 4px 8px 4px;}
+.acao-accordion-body.open{display:block;}
+.acao-accordion-body .acao-regra{margin-bottom:0;}
+/* CLIENTES POR BENEFÍCIO */
+.beneficio-grupo{margin-top:10px;}
+.beneficio-grupo-titulo{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;padding-left:2px;}
+.cli-beneficio-pill{display:inline-flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:5px 10px;margin:3px;font-size:12px;cursor:default;}
+.cli-beneficio-pill .cpill-nome{font-weight:500;}
+.cli-beneficio-pill .cpill-detalhe{color:var(--text2);font-size:11px;}
+
+
+/* EQUIPE / USUÁRIOS */
+.usuario-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;}
+.usuario-card:hover{border-color:var(--rosa);}
+.usuario-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;}
+.usuario-info{flex:1;}
+.usuario-nome{font-size:13px;font-weight:600;}
+.usuario-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.badge-admin{background:#FBEAF0;color:#72243E;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;}
+.badge-socio{background:#EEEDFE;color:#3C3489;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;}
+.badge-vendedor{background:#E1F5EE;color:#085041;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;}
+.badge-inativo-u{background:#f0f0f2;color:#666;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;}
+
+/* FINANCEIRO */
+.fin-resumo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.fin-resumo-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;}
+.fin-resumo-val{font-size:20px;font-weight:700;}
+.fin-resumo-lbl{font-size:11px;color:var(--text2);margin-top:3px;}
+.conta-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border);font-size:12px;}
+.conta-row:last-child{border-bottom:none;}
+.conta-row:hover{background:var(--bg);}
+.conta-venc{font-size:11px;color:var(--text2);white-space:nowrap;}
+.conta-venc.vencida{color:#791F1F;font-weight:600;}
+.conta-venc.hoje{color:#E87000;font-weight:600;}
+.conta-venc.proxima{color:#633806;font-weight:500;}
+.conta-status-pill{font-size:10px;padding:2px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0;}
+.cs-pago{background:#E1F5EE;color:#085041;}
+.cs-pendente{background:#FBEAF0;color:#72243E;}
+.cs-vencida{background:#FCEBEB;color:#791F1F;}
+.conta-valor{font-size:13px;font-weight:600;color:var(--rosa);white-space:nowrap;flex-shrink:0;}
+
+/* NOTAS FISCAIS */
+.nf-drop-area{border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg);margin-bottom:16px;}
+.nf-drop-area:hover,.nf-drop-area.dragover{border-color:var(--rosa);background:#FDF0F7;}
+.nf-drop-icon{font-size:36px;margin-bottom:8px;}
+.nf-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border);font-size:12px;}
+.nf-row:last-child{border-bottom:none;}
+.nf-row:hover{background:var(--bg);}
+.nf-chave{font-size:10px;color:var(--text3);font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;}
+.nf-status-pill{font-size:10px;padding:2px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0;}
+.nfs-autorizada{background:#E1F5EE;color:#085041;}
+.nfs-pendente{background:#FBEAF0;color:#72243E;}
+.nfs-cancelada{background:#f0f0f2;color:#666;}
+.sefaz-link-btn{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;cursor:pointer;text-decoration:none;color:var(--text);}
+.sefaz-link-btn:hover{border-color:var(--rosa);color:var(--rosa);}
+
+@media(max-width:768px){
+  .fin-resumo-grid{grid-template-columns:1fr 1fr;}
+  .nf-chave{max-width:120px;}
+  .conta-row{flex-wrap:wrap;}
+}
+
 </style>
 
 </head>
@@ -446,6 +514,8 @@ input, textarea { cursor: text; }
       <button class="sb-btn admin-only" data-page="templates"><i class="ti ti-template"></i><span class="sb-btn-lbl">Templates</span></button>
       <div class="sb-sec admin-only">Config</div>
       <button class="sb-btn admin-only" data-page="whatsapp"><i class="ti ti-brand-whatsapp"></i><span class="sb-btn-lbl">Conexões WA</span></button>
+      <button class="sb-btn admin-only" data-page="financeiro"><i class="ti ti-cash"></i><span class="sb-btn-lbl">Financeiro</span></button>
+      <button class="sb-btn admin-only" data-page="notasfiscais"><i class="ti ti-file-invoice"></i><span class="sb-btn-lbl">Notas Fiscais</span></button>
       <button class="sb-btn admin-only" data-page="equipe"><i class="ti ti-users-group"></i><span class="sb-btn-lbl">Equipe</span></button>
       <button class="sb-btn admin-only" data-page="config"><i class="ti ti-settings"></i><span class="sb-btn-lbl">Configurações</span></button>
     </div>
@@ -709,6 +779,347 @@ input, textarea { cursor: text; }
       </div>
 
     </div><!-- /content-area -->
+
+      <!-- CLIENTES -->
+      <div id="page-clientes" class="page">
+        <div class="page-title">Clientes
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <button class="btn btn-sm" id="btn-export-clientes" style="background:#217346;color:#fff;border-color:#217346;"><i class="ti ti-file-spreadsheet" style="font-size:12px;"></i> Exportar Excel</button>
+            <button class="btn btn-rosa btn-sm" id="btn-novo-cliente"><i class="ti ti-user-plus" style="font-size:12px;"></i> Novo cliente</button>
+          </div>
+        </div>
+        <div class="panel" style="margin-bottom:10px;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <div class="search-wrap" style="flex:1;max-width:300px;"><i class="ti ti-search" style="font-size:14px;color:#aaa;"></i><input type="search" id="cliente-search" placeholder="Nome, CNPJ/CPF ou cidade..."/></div>
+            <select class="sel" style="width:120px;" id="filter-cli-status"><option value="">Todos</option><option value="ativo">Ativos</option><option value="inativo">Inativos</option><option value="vip">VIP</option></select>
+            <select class="sel" style="width:130px;" id="filter-cli-vend"><option value="">Todos vendedores</option><option>João</option><option>Maria</option><option>Pedro</option></select>
+          </div>
+        </div>
+        <div id="clientes-list"></div>
+        <div id="clientes-empty" style="display:none;text-align:center;padding:40px;color:var(--text3);">
+          <i class="ti ti-users" style="font-size:40px;display:block;margin-bottom:10px;"></i>
+          Nenhum cliente encontrado
+        </div>
+      </div>
+
+      <!-- AÇÕES DE VENDAS -->
+      <div id="page-acoes" class="page">
+        <div class="page-title">Ações de vendas
+          <span style="font-size:12px;color:var(--text2);font-weight:400;">Benefícios automáticos para seus clientes</span>
+        </div>
+
+        <!-- Alertas resumo -->
+        <div class="panel" style="background:linear-gradient(135deg,#772583,#E31787);border:none;margin-bottom:16px;">
+          <div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:10px;">🔔 Alertas pendentes hoje</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+            <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px;text-align:center;">
+              <div style="font-size:22px;font-weight:700;color:#fff;">2</div>
+              <div style="font-size:10px;color:rgba(255,255,255,.8);">Brindes a oferecer</div>
+            </div>
+            <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px;text-align:center;">
+              <div style="font-size:22px;font-weight:700;color:#fff;">3</div>
+              <div style="font-size:10px;color:rgba(255,255,255,.8);">Descontos pendentes</div>
+            </div>
+            <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px;text-align:center;">
+              <div style="font-size:22px;font-weight:700;color:#fff;">1</div>
+              <div style="font-size:10px;color:rgba(255,255,255,.8);">Aniversários</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AÇÃO 1 -->
+        <div class="acao-card">
+          <div class="acao-header">
+            <div class="acao-ico" style="background:#FBEAF0;">🎁</div>
+            <div style="flex:1;">
+              <div class="acao-titulo">Brinde na 11ª caixa</div>
+              <div class="acao-subtitulo">A cada 10 caixas compradas em 30 dias</div>
+            </div>
+          </div>
+          <button class="acao-accordion-btn" onclick="toggleAcc(this)">
+            📋 Ver regras e condições <span class="acc-arrow">▼</span>
+          </button>
+          <div class="acao-accordion-body">
+            <div class="acao-regra">
+              <b>Regra:</b> Cliente que comprar <b>10 ou mais caixas</b> (qualquer tamanho) em um período de <b>30 dias corridos</b> ganha <b>1 caixa de 330ml de brinde</b> na próxima compra.<br><br>
+              <b>Condição importante:</b> Só vale para pedidos com <b>preço de tabela normal</b>. Clientes com condição de preço especial negociada anteriormente <b>não</b> têm direito ao brinde.<br><br>
+              <b>O que o sistema faz:</b> Detecta automaticamente quando o cliente atingiu 10 caixas no período e gera um alerta para o vendedor.<br>
+              <b>O que o vendedor faz:</b> Entra em contato e oferece o brinde no próximo pedido.
+            </div>
+            <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;"></i>
+              <span><b>Para vendedores:</b> Verifique sempre se o cliente possui condição especial de preço antes de oferecer o brinde.</span>
+            </div>
+          </div>
+          <div class="beneficio-grupo">
+            <div class="beneficio-grupo-titulo">Clientes com alerta ativo</div>
+            <div>
+              <div class="alerta-item">
+                <div class="alerta-item-info">
+                  <div class="alerta-item-nome">Thiago Costa</div>
+                  <div class="alerta-item-desc">12 caixas em 30 dias · João · Preço tabela ✓</div>
+                </div>
+                <span class="alerta-status st-pendente">Pendente</span>
+                <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
+              </div>
+              <div class="alerta-item">
+                <div class="alerta-item-info">
+                  <div class="alerta-item-nome">Fernanda Cruz</div>
+                  <div class="alerta-item-desc">10 caixas em 28 dias · Pedro · Preço tabela ✓</div>
+                </div>
+                <span class="alerta-status st-pendente">Pendente</span>
+                <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AÇÃO 2 -->
+        <div class="acao-card">
+          <div class="acao-header">
+            <div class="acao-ico" style="background:#E1F5EE;">💰</div>
+            <div style="flex:1;">
+              <div class="acao-titulo">10% de desconto na próxima compra</div>
+              <div class="acao-subtitulo">A cada 5 caixas compradas em 30 dias</div>
+            </div>
+          </div>
+          <button class="acao-accordion-btn" onclick="toggleAcc(this)">
+            📋 Ver regras e condições <span class="acc-arrow">▼</span>
+          </button>
+          <div class="acao-accordion-body">
+            <div class="acao-regra">
+              <b>Regra:</b> Cliente que comprar <b>5 ou mais caixas</b> em <b>30 dias corridos</b> ganha <b>10% de desconto</b> na próxima compra.<br><br>
+              <b>Condição:</b> O desconto só é válido para pedidos com <b>no mínimo 3 caixas</b>. Pedidos de unidades avulsas não ativam nem recebem esse benefício.<br><br>
+              <b>Validade:</b> O desconto expira após <b>30 dias</b> caso não seja utilizado.
+            </div>
+            <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;"></i>
+              <span><b>Para vendedores:</b> Ao abrir novo pedido para cliente com esse benefício, aplique o desconto de 10% e marque como utilizado.</span>
+            </div>
+          </div>
+          <div class="beneficio-grupo">
+            <div class="beneficio-grupo-titulo">Clientes com desconto pendente</div>
+            <div>
+              <div class="alerta-item">
+                <div class="alerta-item-info">
+                  <div class="alerta-item-nome">Rafael Silva</div>
+                  <div class="alerta-item-desc">5 caixas em 20 dias · Maria · Expira em 10 dias</div>
+                </div>
+                <span class="alerta-status st-pendente">Pendente</span>
+                <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
+              </div>
+              <div class="alerta-item">
+                <div class="alerta-item-info">
+                  <div class="alerta-item-nome">Carlos Mota</div>
+                  <div class="alerta-item-desc">6 caixas em 15 dias · Pedro · Expira em 5 dias</div>
+                </div>
+                <span class="alerta-status st-pendente">Pendente</span>
+                <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
+              </div>
+              <div class="alerta-item">
+                <div class="alerta-item-info">
+                  <div class="alerta-item-nome">Beatriz Alves</div>
+                  <div class="alerta-item-desc">5 caixas em 30 dias · João · Expirou</div>
+                </div>
+                <span class="alerta-status st-expirado">Expirado</span>
+                <button class="btn btn-sm" disabled style="opacity:.5;">Expirado</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AÇÃO 3 -->
+        <div class="acao-card">
+          <div class="acao-header">
+            <div class="acao-ico" style="background:#EEEDFE;">📅</div>
+            <div style="flex:1;">
+              <div class="acao-titulo">5% de desconto no 3º mês consecutivo</div>
+              <div class="acao-subtitulo">Cliente fiel que compra mês a mês</div>
+            </div>
+          </div>
+          <button class="acao-accordion-btn" onclick="toggleAcc(this)">
+            📋 Ver regras e condições <span class="acc-arrow">▼</span>
+          </button>
+          <div class="acao-accordion-body">
+            <div class="acao-regra">
+              <b>Regra:</b> Cliente que realizar pelo menos <b>1 pedido de caixas fechadas</b> nos <b>2 meses anteriores consecutivos</b> ganha <b>5% de desconto automático</b> no 3º mês.<br><br>
+              <b>Condição:</b> Não vale para unidades avulsas. O pedido precisa ter no mínimo 1 caixa.<br><br>
+              → Mês 1: cliente compra 2cx ✓ · Mês 2: cliente compra 1cx ✓ · Mês 3: 5% aplicado automaticamente ✓
+            </div>
+            <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;"></i>
+              <span><b>Para vendedores:</b> O desconto de 5% já estará pré-aplicado ao abrir o pedido.</span>
+            </div>
+          </div>
+          <div class="beneficio-grupo">
+            <div class="beneficio-grupo-titulo">Clientes no ciclo de fidelidade</div>
+            <div>
+              <div class="alerta-item">
+                <div class="alerta-item-info">
+                  <div class="alerta-item-nome">Luana Reis</div>
+                  <div class="alerta-item-desc">3 meses seguidos · Maria · Desconto aplicado no último pedido</div>
+                </div>
+                <span class="alerta-status st-aplicado">Aplicado</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AÇÃO 4 -->
+        <div class="acao-card">
+          <div class="acao-header">
+            <div class="acao-ico" style="background:#FEF3C7;">🎂</div>
+            <div style="flex:1;">
+              <div class="acao-titulo">Aniversário de cadastro</div>
+              <div class="acao-subtitulo">A cada 12 meses de relacionamento</div>
+            </div>
+          </div>
+          <button class="acao-accordion-btn" onclick="toggleAcc(this)">
+            📋 Ver regras e condições <span class="acc-arrow">▼</span>
+          </button>
+          <div class="acao-accordion-body">
+            <div class="acao-regra">
+              <b>Regra:</b> A cada <b>12 meses completos</b> desde o cadastro, o sistema gera um alerta de aniversário de relacionamento.<br><br>
+              <b>Antecedência:</b> O alerta aparece <b>7 dias antes</b> da data de aniversário.<br><br>
+              <b>O cliente ganha:</b> Um brinde surpresa definido pelo gestor.
+            </div>
+            <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;"></i>
+              <span><b>Para vendedores:</b> Personalize a mensagem — mencione o tempo de parceria e valorize o cliente.</span>
+            </div>
+          </div>
+          <div class="beneficio-grupo">
+            <div class="beneficio-grupo-titulo">Próximos aniversários</div>
+            <div>
+              <div class="alerta-item">
+                <div class="alerta-item-info">
+                  <div class="alerta-item-nome">Pedro Lima</div>
+                  <div class="alerta-item-desc">1 ano de cadastro · Aniversário em 3 dias (28/06)</div>
+                </div>
+                <span class="alerta-status st-pendente">Em 3 dias</span>
+                <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar enviado</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AÇÃO 5 -->
+        <div class="acao-card">
+          <div class="acao-header">
+            <div class="acao-ico" style="background:#F0FDF4;">🤝</div>
+            <div style="flex:1;">
+              <div class="acao-titulo">Programa de indicação</div>
+              <div class="acao-subtitulo">Cliente que indica ganha 10% na próxima compra</div>
+            </div>
+          </div>
+          <button class="acao-accordion-btn" onclick="toggleAcc(this)">
+            📋 Ver regras e condições <span class="acc-arrow">▼</span>
+          </button>
+          <div class="acao-accordion-body">
+            <div class="acao-regra">
+              <b>Regra:</b> Quando um cliente indica outro e o indicado fecha o <b>primeiro pedido</b>, o cliente que indicou ganha <b>10% de desconto</b> no próximo pedido.<br><br>
+              <b>Como registrar:</b> No cadastro de cada cliente há o campo <b>"Indicado por"</b>.<br><br>
+              <b>Validade:</b> O desconto de 10% expira em <b>60 dias</b>.
+            </div>
+            <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;"></i>
+              <span><b>Para vendedores:</b> Sempre pergunte ao cadastrar um novo cliente se ele foi indicado por alguém.</span>
+            </div>
+          </div>
+          <div class="beneficio-grupo">
+            <div class="beneficio-grupo-titulo">Indicações com benefício pendente</div>
+            <div>
+              <div class="alerta-item">
+                <div class="alerta-item-info">
+                  <div class="alerta-item-nome">Ana Clara</div>
+                  <div class="alerta-item-desc">Indicou Marina Fonseca · Primeiro pedido fechado · 10% pendente · expira em 60 dias</div>
+                </div>
+                <span class="alerta-status st-pendente">Pendente</span>
+                <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AÇÃO 6 -->
+        <div class="acao-card">
+          <div class="acao-header">
+            <div class="acao-ico" style="background:#EFF6FF;">🔄</div>
+            <div style="flex:1;">
+              <div class="acao-titulo">Alerta de pedido recorrente</div>
+              <div class="acao-subtitulo">Cliente com padrão de compra mensal</div>
+            </div>
+          </div>
+          <button class="acao-accordion-btn" onclick="toggleAcc(this)">
+            📋 Ver regras e condições <span class="acc-arrow">▼</span>
+          </button>
+          <div class="acao-accordion-body">
+            <div class="acao-regra">
+              <b>Regra:</b> Cliente que realizou pedidos nos <b>2 meses consecutivos anteriores</b> recebe um alerta para contato proativo.<br><br>
+              <b>Importante:</b> A mensagem de contato <b>não deve mencionar preços</b>. Os valores são negociados na conversa.<br><br>
+              <i>"Oi [Nome]! 👋 Vi que você tem pedido copos todo mês — posso já verificar disponibilidade para você?"</i>
+            </div>
+            <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;"></i>
+              <span><b>Para vendedores:</b> Nunca mencione preços na mensagem de prospecção recorrente.</span>
+            </div>
+          </div>
+          <div class="beneficio-grupo">
+            <div class="beneficio-grupo-titulo">Clientes a contatar este mês</div>
+            <div>
+              <div class="alerta-item">
+                <div class="alerta-item-info">
+                  <div class="alerta-item-nome">Thiago Costa</div>
+                  <div class="alerta-item-desc">Pediu em Abril e Maio · João · Contato sugerido para Junho</div>
+                </div>
+                <span class="alerta-status st-pendente">Contatar</span>
+                <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar contatado</button>
+              </div>
+              <div class="alerta-item">
+                <div class="alerta-item-info">
+                  <div class="alerta-item-nome">Rafael Silva</div>
+                  <div class="alerta-item-desc">Pediu em Abril e Maio · Maria · Contato sugerido para Junho</div>
+                </div>
+                <span class="alerta-status st-pendente">Contatar</span>
+                <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar contatado</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AÇÃO 7 -->
+        <div class="acao-card">
+          <div class="acao-header">
+            <div class="acao-ico" style="background:#FFF7ED;">⏰</div>
+            <div style="flex:1;">
+              <div class="acao-titulo">Reativação de cliente inativo</div>
+              <div class="acao-subtitulo">Cliente sem compras há 60 ou mais dias</div>
+            </div>
+          </div>
+          <button class="acao-accordion-btn" onclick="toggleAcc(this)">
+            📋 Ver regras e condições <span class="acc-arrow">▼</span>
+          </button>
+          <div class="acao-accordion-body">
+            <div class="acao-regra">
+              <b>Regra:</b> Cliente que não compra há <b>60 dias ou mais</b> entra na lista de reativação.<br><br>
+              <i>"Oi [Nome]! 👋 Faz um tempinho que não nos falamos. Temos novidades este mês. Posso te ajudar?"</i><br><br>
+              <b>Atenção:</b> Condições especiais de reativação precisam de autorização do Bruno.
+            </div>
+            <div class="vendedor-note"><i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;"></i>
+              <span><b>Para vendedores:</b> Não ofereça descontos por conta própria. Sempre peça autorização ao Bruno.</span>
+            </div>
+          </div>
+          <div class="beneficio-grupo">
+            <div class="beneficio-grupo-titulo">Clientes inativos</div>
+            <div>
+              <div class="alerta-item">
+                <div class="alerta-item-info">
+                  <div class="alerta-item-nome">Beatriz Alves</div>
+                  <div class="alerta-item-desc">Último pedido: 15/03 · 72 dias inativa · João</div>
+                </div>
+                <span class="alerta-status st-pendente">72 dias</span>
+                <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar contatado</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
 
       <!-- CLIENTES -->
       <div id="page-clientes" class="page">
@@ -1015,6 +1426,65 @@ input, textarea { cursor: text; }
 
       </div>
 
+      <!-- FINANCEIRO -->
+      <div id="page-financeiro" class="page">
+        <div class="page-title">Financeiro — Contas a pagar
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-sm" id="btn-export-fin" style="background:#217346;color:#fff;border-color:#217346;"><i class="ti ti-file-spreadsheet" style="font-size:12px;"></i> Exportar Excel</button>
+            <button class="btn btn-rosa btn-sm" id="btn-nova-conta"><i class="ti ti-plus" style="font-size:12px;"></i> Nova conta</button>
+          </div>
+        </div>
+        <div class="fin-resumo-grid">
+          <div class="fin-resumo-card"><div class="fin-resumo-val" style="color:#791F1F;" id="fin-total-vencidas">R$ 0</div><div class="fin-resumo-lbl">Vencidas</div></div>
+          <div class="fin-resumo-card"><div class="fin-resumo-val" style="color:#E87000;" id="fin-total-proximas">R$ 0</div><div class="fin-resumo-lbl">Vencem em 7 dias</div></div>
+          <div class="fin-resumo-card"><div class="fin-resumo-val" style="color:var(--rosa);" id="fin-total-mes">R$ 0</div><div class="fin-resumo-lbl">Total do mes</div></div>
+        </div>
+        <div class="panel" style="margin-bottom:10px;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <div class="search-wrap" style="flex:1;max-width:260px;"><i class="ti ti-search" style="font-size:14px;color:#aaa;"></i><input type="search" id="fin-search" placeholder="Fornecedor ou descricao..."/></div>
+            <select class="sel" style="width:130px;" id="fin-filter-status"><option value="">Todos</option><option value="pendente">Pendentes</option><option value="vencida">Vencidas</option><option value="pago">Pagas</option></select>
+            <select class="sel" style="width:140px;" id="fin-filter-cat"><option value="">Todas categorias</option><option>Fornecedor</option><option>Aluguel</option><option>Servicos</option><option>Impostos</option><option>Folha</option><option>Outros</option></select>
+          </div>
+        </div>
+        <div class="panel" style="padding:0;overflow:hidden;">
+          <div id="fin-list"></div>
+          <div id="fin-empty" style="display:none;text-align:center;padding:40px;color:var(--text3);"><i class="ti ti-cash-off" style="font-size:40px;display:block;margin-bottom:10px;"></i>Nenhuma conta encontrada</div>
+        </div>
+      </div>
+
+      <!-- NOTAS FISCAIS -->
+      <div id="page-notasfiscais" class="page">
+        <div class="page-title">Notas Fiscais
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a href="https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx?tipoConsulta=completa&tipoConteudo=XbSeqxE8pl8=" target="_blank" class="sefaz-link-btn"><i class="ti ti-external-link" style="font-size:14px;"></i> Consultar NF-e (SEFAZ)</a>
+            <a href="https://nfe.fazenda.mg.gov.br/portalnfe" target="_blank" class="sefaz-link-btn"><i class="ti ti-external-link" style="font-size:14px;"></i> Portal NF-e MG</a>
+          </div>
+        </div>
+        <div style="background:#FFFDE7;border:1px solid #FBC02D;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:#5D4037;display:flex;gap:10px;align-items:flex-start;">
+          <i class="ti ti-alert-triangle" style="font-size:18px;flex-shrink:0;color:#E87000;"></i>
+          <div><b>Monitoramento parcial:</b> Para alertas automaticos de NF-e emitidas contra seu CNPJ, e necessario um servico externo (NFe.io ou Focus NF-e). Por enquanto, consulte manualmente nos links acima ou importe o XML recebido por e-mail.<br><b>Seu CNPJ:</b> <span id="cnpj-empresa" style="font-family:monospace;background:#fff;padding:1px 6px;border-radius:4px;border:1px solid #ddd;">nao configurado</span> <button class="btn btn-sm" style="margin-left:6px;padding:2px 8px;" id="btn-config-cnpj">Configurar</button></div>
+        </div>
+        <div class="nf-drop-area" id="nf-drop-area">
+          <div class="nf-drop-icon">XML</div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px;">Arraste o XML da NF-e aqui</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:12px;">ou clique para selecionar o arquivo .xml</div>
+          <input type="file" id="nf-xml-input" accept=".xml" multiple style="display:none;">
+          <button class="btn btn-rosa btn-sm" onclick="document.getElementById('nf-xml-input').click()"><i class="ti ti-upload" style="font-size:12px;"></i> Selecionar XML</button>
+        </div>
+        <div class="panel" style="margin-bottom:10px;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <div class="search-wrap" style="flex:1;max-width:260px;"><i class="ti ti-search" style="font-size:14px;color:#aaa;"></i><input type="search" id="nf-search" placeholder="Emitente, CNPJ ou numero..."/></div>
+            <select class="sel" style="width:130px;" id="nf-filter-tipo"><option value="">Todos os tipos</option><option value="entrada">Entrada (compra)</option><option value="saida">Saida (venda)</option></select>
+            <select class="sel" style="width:120px;" id="nf-filter-status"><option value="">Todos</option><option value="autorizada">Autorizada</option><option value="pendente">Pendente</option><option value="cancelada">Cancelada</option></select>
+            <button class="btn btn-sm" id="btn-export-nf" style="background:#217346;color:#fff;border-color:#217346;"><i class="ti ti-file-spreadsheet" style="font-size:12px;"></i> Exportar</button>
+          </div>
+        </div>
+        <div class="panel" style="padding:0;overflow:hidden;">
+          <div id="nf-list"></div>
+          <div id="nf-empty" style="text-align:center;padding:40px;color:var(--text3);"><i class="ti ti-file-off" style="font-size:40px;display:block;margin-bottom:10px;"></i>Nenhuma nota fiscal importada. Arraste um XML acima para comecar.</div>
+        </div>
+      </div>
+
     <div class="mob-nav"><div class="mob-nav-row">
       <button class="mob-nav-btn" data-mob-page="dashboard" data-mob-title="Início"><i class="ti ti-home"></i><span>Início</span></button>
       <button class="mob-nav-btn active" data-mob-page="chats" data-mob-title="Chats"><i class="ti ti-message-circle"></i><span>Chats</span><span class="mob-badge">8</span></button>
@@ -1044,6 +1514,78 @@ input, textarea { cursor: text; }
 <div class="modal-overlay" id="modal-hist"><div class="modal"><div class="modal-head"><span class="modal-title" id="hist-title">Histórico</span><button class="modal-close" data-close="modal-hist">×</button></div><div class="modal-body" id="hist-body"></div></div></div>
 <div class="modal-overlay" id="modal-template"><div class="modal"><div class="modal-head"><span class="modal-title" id="tpl-modal-title">Novo template</span><button class="modal-close" data-close="modal-template">×</button></div><div class="modal-body"><div class="form-group"><label class="form-label">Atalho (ex: /orcamento)</label><input class="form-input" id="tpl-key" placeholder="/atalho" autocapitalize="none"/></div><div class="form-group"><label class="form-label">Texto da mensagem</label><textarea class="form-textarea" id="tpl-text" placeholder="Texto completo..."></textarea></div></div><div class="modal-footer"><button class="btn" data-close="modal-template">Cancelar</button><button class="btn btn-rosa" id="btn-save-tpl">Salvar</button></div></div></div>
 <div class="modal-overlay" id="modal-contact"><div class="modal"><div class="modal-head"><span class="modal-title">Novo contato</span><button class="modal-close" data-close="modal-contact">×</button></div><div class="modal-body"><div class="form-group"><label class="form-label">Nome completo</label><input class="form-input" id="nc-nome" placeholder="Nome do cliente"/></div><div class="form-group"><label class="form-label">WhatsApp</label><input class="form-input" type="tel" id="nc-wapp" placeholder="(99) 99999-9999"/></div><div class="form-group"><label class="form-label">Cidade / Estado</label><input class="form-input" id="nc-cidade" placeholder="Cidade/UF"/></div><div class="form-group"><label class="form-label">Atribuir vendedor</label><select class="form-input"><option>João</option><option>Maria</option><option>Pedro</option></select></div></div><div class="modal-footer"><button class="btn" data-close="modal-contact">Cancelar</button><button class="btn btn-rosa" id="btn-save-contact">Criar contato</button></div></div></div>
+
+
+
+<!-- MODAL: NOVO/EDITAR USUARIO -->
+<div class="modal-overlay" id="modal-novo-usuario">
+  <div class="modal" style="max-width:440px;">
+    <div class="modal-head">
+      <div><div class="modal-title" id="usr-modal-title">Novo usuario</div></div>
+      <button class="modal-close" data-close="modal-novo-usuario">x</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Nome completo *</label><input class="form-input" id="usr-nome" placeholder="Nome do usuario"/></div>
+        <div class="form-group"><label class="form-label">Login *</label><input class="form-input" id="usr-login" placeholder="nomeusuario"/></div>
+        <div class="form-group"><label class="form-label">Senha *</label><input class="form-input" type="password" id="usr-senha" placeholder="Minimo 6 caracteres"/></div>
+        <div class="form-group"><label class="form-label">Perfil de acesso</label><select class="form-input" id="usr-perfil"><option value="admin">Admin (acesso total)</option><option value="socio">Socio (acesso total)</option><option value="vendedor">Vendedor (ve apenas seus leads)</option></select></div>
+        <div class="form-group"><label class="form-label">E-mail</label><input class="form-input" type="email" id="usr-email" placeholder="email@mekmix.com.br"/></div>
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-top:8px;background:var(--bg);padding:8px 10px;border-radius:6px;">
+        <b>Niveis de acesso:</b><br>
+        Admin/Socio: ve todos os chats, clientes, financeiro e NF.<br>
+        Vendedor: ve apenas seus proprios chats e leads.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-close="modal-novo-usuario">Cancelar</button>
+      <button class="btn btn-rosa" id="btn-salvar-usuario">Salvar usuario</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NOVA CONTA A PAGAR -->
+<div class="modal-overlay" id="modal-nova-conta">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-head">
+      <div><div class="modal-title" id="conta-modal-title">Nova conta a pagar</div></div>
+      <button class="modal-close" data-close="modal-nova-conta">x</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Descricao *</label><input class="form-input" id="conta-desc" placeholder="Ex: Fornecedor de copos - NF 1234"/></div>
+        <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Fornecedor</label><input class="form-input" id="conta-forn" placeholder="Nome da empresa ou pessoa"/></div>
+        <div class="form-group"><label class="form-label">Valor *</label><input class="form-input" type="number" step="0.01" id="conta-valor" placeholder="0,00"/></div>
+        <div class="form-group"><label class="form-label">Vencimento *</label><input class="form-input" type="date" id="conta-venc"/></div>
+        <div class="form-group"><label class="form-label">Categoria</label><select class="form-input" id="conta-cat"><option>Fornecedor</option><option>Aluguel</option><option>Servicos</option><option>Impostos</option><option>Folha</option><option>Outros</option></select></div>
+        <div class="form-group"><label class="form-label">Recorrencia</label><select class="form-input" id="conta-recorr"><option value="unica">Unica</option><option value="mensal">Mensal</option><option value="trimestral">Trimestral</option><option value="anual">Anual</option></select></div>
+        <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Observacao</label><textarea class="form-textarea" id="conta-obs" rows="2" placeholder="Numero da NF, detalhes..."></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-close="modal-nova-conta">Cancelar</button>
+      <button class="btn btn-rosa" id="btn-salvar-conta">Salvar conta</button>
+    </div>
+  </div>
+</div>
+<!-- MODAL: CONFIG CNPJ -->
+<div class="modal-overlay" id="modal-config-cnpj">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-head">
+      <div><div class="modal-title">Configurar CNPJ da empresa</div></div>
+      <button class="modal-close" data-close="modal-config-cnpj">x</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">CNPJ da MekMix Serigrafia</label><input class="form-input" id="input-cnpj-empresa" placeholder="XX.XXX.XXX/0001-XX"/></div>
+      <div style="font-size:11px;color:var(--text2);margin-top:8px;">Este CNPJ sera exibido na tela de Notas Fiscais para referencia nas consultas manuais na SEFAZ.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-close="modal-config-cnpj">Cancelar</button>
+      <button class="btn btn-rosa" id="btn-salvar-cnpj">Salvar</button>
+    </div>
+  </div>
+</div>
 
 <script>
 var USERS={bruno:{pass:'admin123',name:'Bruno',role:'Admin',av:'BR',color:'#E31787',isAdmin:true},joao:{pass:'joao123',name:'João',role:'Vendedor',av:'JO',color:'#3C3489',isAdmin:false},maria:{pass:'maria123',name:'Maria',role:'Vendedor',av:'MA',color:'#633806',isAdmin:false},pedro:{pass:'pedro123',name:'Pedro',role:'Vendedor',av:'PE',color:'#085041',isAdmin:false}};
@@ -1328,7 +1870,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // Fix: mover páginas novas para dentro do content-area
   (function(){
     var ca = document.querySelector('.content-area');
-    ['page-pedidos','page-producao','page-estoque'].forEach(function(id){
+    ['page-pedidos','page-producao','page-estoque','page-clientes','page-acoes','page-financeiro','page-notasfiscais'].forEach(function(id){
       var el = document.getElementById(id);
       if(el && el.parentElement && !el.parentElement.classList.contains('content-area')){
         ca.appendChild(el);
@@ -1339,13 +1881,19 @@ document.addEventListener('DOMContentLoaded',function(){
 
 
   // Clientes
-  var btnNovoCli = document.getElementById('btn-novo-cliente');
-  if(btnNovoCli) btnNovoCli.addEventListener('click', function(){
-    editingClienteIdx=-1;
-    document.getElementById('cliente-modal-title').textContent='Novo cliente';
-    document.getElementById('cliente-modal-sub').textContent='Preencha os dados cadastrais';
-    ['cli-nome','cli-doc','cli-wapp','cli-email','cli-endereco','cli-cidade','cli-obs'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
-    openModal('modal-novo-cliente');
+  // Bind botão novo cliente — também via delegação para garantir
+  document.addEventListener('click', function(e){
+    if(e.target && (e.target.id === 'btn-novo-cliente' || e.target.closest('#btn-novo-cliente'))) {
+      editingClienteIdx=-1;
+      document.getElementById('cliente-modal-title').textContent='Novo cliente';
+      document.getElementById('cliente-modal-sub').textContent='Preencha os dados cadastrais';
+      ['cli-nome','cli-doc','cli-wapp','cli-email','cli-endereco','cli-cidade','cli-obs'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+      document.getElementById('cli-segmento').value='';
+      document.getElementById('cli-vendedor').value='João';
+      document.getElementById('cli-indicado').value='';
+      document.querySelectorAll('input[name="preco-esp"]').forEach(function(r){ r.checked = r.value === 'nao'; });
+      openModal('modal-novo-cliente');
+    }
   });
 
   var btnSalvarCli = document.getElementById('btn-salvar-cliente');
@@ -1404,6 +1952,127 @@ document.addEventListener('DOMContentLoaded',function(){
     if(this.value === 'PJ') { lbl.textContent='CNPJ'; inp.placeholder='00.000.000/0001-00'; }
     else { lbl.textContent='CPF'; inp.placeholder='000.000.000-00'; }
   });
+
+
+
+  // FINANCEIRO
+  document.addEventListener('click', function(e) {
+    if(e.target && (e.target.id==='btn-nova-conta' || e.target.closest('#btn-nova-conta'))) {
+      editingContaIdx=-1;
+      ['conta-desc','conta-forn','conta-obs'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+      var iv=document.getElementById('conta-valor'); if(iv) iv.value='';
+      var vd=document.getElementById('conta-venc'); if(vd) vd.value='';
+      openModal('modal-nova-conta');
+    }
+    if(e.target && (e.target.id==='btn-export-fin' || e.target.closest('#btn-export-fin'))) { exportarFinanceiro(); }
+    if(e.target && (e.target.id==='btn-export-nf' || e.target.closest('#btn-export-nf'))) { exportarNF(); }
+    if(e.target && (e.target.id==='btn-config-cnpj' || e.target.closest('#btn-config-cnpj'))) {
+      var inp=document.getElementById('input-cnpj-empresa'); if(inp) inp.value=CNPJ_EMPRESA;
+      openModal('modal-config-cnpj');
+    }
+    if(e.target && (e.target.id==='btn-novo-usuario' || e.target.closest('#btn-novo-usuario'))) {
+      editingUsrIdx=-1;
+      document.getElementById('usr-modal-title').textContent='Novo usuario';
+      ['usr-nome','usr-login','usr-senha','usr-email'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+      document.getElementById('usr-perfil').value='vendedor';
+      openModal('modal-novo-usuario');
+    }
+  });
+
+  var btnSalvarConta = document.getElementById('btn-salvar-conta');
+  if(btnSalvarConta) btnSalvarConta.addEventListener('click', function(){
+    var desc=(document.getElementById('conta-desc').value||'').trim();
+    var val=parseFloat(document.getElementById('conta-valor').value||'0');
+    var venc=document.getElementById('conta-venc').value;
+    if(!desc||!val||!venc){toast('Preencha descricao, valor e vencimento!');return;}
+    var c={
+      id:'CNT-'+String(CONTAS.length+1).padStart(3,'0'),
+      desc:desc,forn:document.getElementById('conta-forn').value||'',
+      valor:val,venc:venc,
+      cat:document.getElementById('conta-cat').value,
+      recorr:document.getElementById('conta-recorr').value,
+      obs:document.getElementById('conta-obs').value||'',
+      status:'pendente'
+    };
+    CONTAS.push(c);
+    closeModal('modal-nova-conta');
+    renderFinanceiro('','','');
+    toast('Conta adicionada!');
+  });
+
+  var btnSalvarCNPJ = document.getElementById('btn-salvar-cnpj');
+  if(btnSalvarCNPJ) btnSalvarCNPJ.addEventListener('click', function(){
+    var v=(document.getElementById('input-cnpj-empresa').value||'').trim();
+    CNPJ_EMPRESA=v;
+    try{localStorage.setItem('mekmix_cnpj',v);}catch(e){}
+    var el=document.getElementById('cnpj-empresa'); if(el) el.textContent=v||'nao configurado';
+    closeModal('modal-config-cnpj');
+    toast('CNPJ salvo!');
+  });
+
+  var btnSalvarUsr = document.getElementById('btn-salvar-usuario');
+  if(btnSalvarUsr) btnSalvarUsr.addEventListener('click', function(){
+    var nome=(document.getElementById('usr-nome').value||'').trim();
+    var login=(document.getElementById('usr-login').value||'').trim().toLowerCase().replace(/\s/g,'');
+    var senha=document.getElementById('usr-senha').value||'';
+    if(!nome||!login){toast('Preencha nome e login!');return;}
+    if(editingUsrIdx<0 && !senha){toast('Informe uma senha para o novo usuario!');return;}
+    if(senha && senha.length<6){toast('Senha deve ter pelo menos 6 caracteres!');return;}
+    // Verificar login duplicado
+    var dup=USUARIOS.find(function(u,i){ return u.login===login && i!==editingUsrIdx; });
+    if(dup){toast('Login ja existe. Escolha outro.');return;}
+    if(editingUsrIdx>=0){
+      USUARIOS[editingUsrIdx].nome=nome;
+      USUARIOS[editingUsrIdx].login=login;
+      if(senha) USUARIOS[editingUsrIdx].senha=senha;
+      USUARIOS[editingUsrIdx].perfil=document.getElementById('usr-perfil').value;
+      USUARIOS[editingUsrIdx].email=document.getElementById('usr-email').value||'';
+    } else {
+      USUARIOS.push({id:'USR-'+String(USUARIOS.length+1).padStart(3,'0'),nome:nome,login:login,senha:senha,perfil:document.getElementById('usr-perfil').value,ativo:true,email:document.getElementById('usr-email').value||'',cadastro:new Date().toISOString().split('T')[0]});
+    }
+    closeModal('modal-novo-usuario');
+    renderEquipe();
+    toast('Usuario '+(editingUsrIdx>=0?'atualizado':'cadastrado')+': '+nome);
+  });
+
+  // NF: drag & drop e input file
+  var nfDrop = document.getElementById('nf-drop-area');
+  var nfInput = document.getElementById('nf-xml-input');
+  if(nfDrop) {
+    nfDrop.addEventListener('dragover',function(e){e.preventDefault();nfDrop.classList.add('dragover');});
+    nfDrop.addEventListener('dragleave',function(){nfDrop.classList.remove('dragover');});
+    nfDrop.addEventListener('drop',function(e){
+      e.preventDefault(); nfDrop.classList.remove('dragover');
+      Array.from(e.dataTransfer.files).forEach(function(f){
+        if(f.name.endsWith('.xml')){
+          var r=new FileReader(); r.onload=function(ev){ processarXML(ev.target.result,f.name); }; r.readAsText(f);
+        }
+      });
+    });
+  }
+  if(nfInput) {
+    nfInput.addEventListener('change',function(){
+      Array.from(this.files).forEach(function(f){
+        var r=new FileReader(); r.onload=function(ev){ processarXML(ev.target.result,f.name); }; r.readAsText(f);
+      });
+    });
+  }
+
+  // Filtros financeiro
+  var finSearch=document.getElementById('fin-search');
+  var finStatus=document.getElementById('fin-filter-status');
+  var finCat=document.getElementById('fin-filter-cat');
+  if(finSearch) finSearch.addEventListener('input',function(){ renderFinanceiro(this.value,finStatus.value,finCat.value); });
+  if(finStatus) finStatus.addEventListener('change',function(){ renderFinanceiro(finSearch.value,this.value,finCat.value); });
+  if(finCat) finCat.addEventListener('change',function(){ renderFinanceiro(finSearch.value,finStatus.value,this.value); });
+
+  // Filtros NF
+  var nfSearch=document.getElementById('nf-search');
+  var nfTipo=document.getElementById('nf-filter-tipo');
+  var nfStatus=document.getElementById('nf-filter-status');
+  if(nfSearch) nfSearch.addEventListener('input',function(){ renderNF(this.value,nfTipo.value,nfStatus.value); });
+  if(nfTipo) nfTipo.addEventListener('change',function(){ renderNF(nfSearch.value,this.value,nfStatus.value); });
+  if(nfStatus) nfStatus.addEventListener('change',function(){ renderNF(nfSearch.value,nfTipo.value,this.value); });
 
 
   // Login — tratado por onclick inline (iOS Safari file://)
@@ -2439,7 +3108,8 @@ document.addEventListener('DOMContentLoaded',function(){
     if(!list) return;
 
     var filtered = CLIENTES.filter(function(cli) {
-      if(!currentUser.isAdmin && cli.vendedor !== currentUser.name) return false;
+      // Todos veem todos os clientes (privacidade futura por vendedor)
+      // if(!currentUser.isAdmin && cli.vendedor !== currentUser.name) return false;
       if(search) {
         var s = search.toLowerCase();
         if(cli.nome.toLowerCase().indexOf(s) < 0 && cli.doc.indexOf(s) < 0 && cli.cidade.toLowerCase().indexOf(s) < 0 && cli.wapp.indexOf(s) < 0) return false;
@@ -2534,16 +3204,58 @@ document.addEventListener('DOMContentLoaded',function(){
   }
 
   function exportarExcel() {
+    // Carregar SheetJS dinamicamente
+    if(typeof XLSX === 'undefined') {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js';
+      script.onload = function(){ gerarXLSX(); };
+      script.onerror = function(){ exportarCSV(); };
+      document.head.appendChild(script);
+    } else {
+      gerarXLSX();
+    }
+  }
+  function gerarXLSX() {
+    try {
+      var rows = [['ID','Nome','Tipo','CNPJ/CPF','WhatsApp','Email','Segmento','Cidade','Estado','Vendedor','Indicado por','Preço especial','Pedidos','Caixas','Data cadastro','Último pedido']];
+      CLIENTES.forEach(function(cli) {
+        rows.push([cli.id,cli.nome,cli.tipo,cli.doc,cli.wapp,cli.email,cli.segmento,cli.cidade,cli.estado,cli.vendedor,cli.indicado||'—',cli.preco_esp?'Sim':'Não',cli.total_pedidos,cli.total_caixas,cli.cadastro,cli.ultimo_pedido||'—']);
+      });
+      var wb = XLSX.utils.book_new();
+      var ws = XLSX.utils.aoa_to_sheet(rows);
+      // Largura das colunas
+      ws['!cols'] = [{wch:8},{wch:25},{wch:4},{wch:20},{wch:16},{wch:25},{wch:18},{wch:15},{wch:5},{wch:10},{wch:20},{wch:14},{wch:8},{wch:7},{wch:12},{wch:12}];
+      XLSX.utils.book_append_sheet(wb, ws, 'Clientes');
+      XLSX.writeFile(wb, 'clientes_mekmix.xlsx');
+      toast('✅ Excel exportado com sucesso!');
+    } catch(e) {
+      exportarCSV();
+    }
+  }
+  function exportarCSV() {
     var rows = [['ID','Nome','Tipo','CNPJ/CPF','WhatsApp','Email','Segmento','Cidade','Estado','Vendedor','Indicado por','Preço especial','Pedidos','Caixas','Cadastro','Último pedido']];
     CLIENTES.forEach(function(cli) {
-      rows.push([cli.id,cli.nome,cli.tipo,cli.doc,cli.wapp,cli.email,cli.segmento,cli.cidade,cli.estado,cli.vendedor,cli.indicado,cli.preco_esp?'Sim':'Não',cli.total_pedidos,cli.total_caixas,cli.cadastro,cli.ultimo_pedido]);
+      rows.push([cli.id,cli.nome,cli.tipo,cli.doc,cli.wapp,cli.email,cli.segmento,cli.cidade,cli.estado,cli.vendedor,cli.indicado||'—',cli.preco_esp?'Sim':'Não',cli.total_pedidos,cli.total_caixas,cli.cadastro,cli.ultimo_pedido||'—']);
     });
-    var csv = rows.map(function(r){ return r.map(function(v){ return '"'+String(v||'').replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+    var bom = '\uFEFF';
+    var csv = bom + rows.map(function(r){
+      return r.map(function(v){
+        var s = String(v||'').replace(/"/g,'""');
+        return '"' + s + '"';
+      }).join(',');
+    }).join('\n');
     var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a'); a.href=url; a.download='clientes_mekmix.csv';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    toast('✅ Exportado! Abra o arquivo no Excel.');
+    toast('✅ Exportado como CSV (abra no Excel).');
+  }
+
+
+  function toggleAcc(btn) {
+    var body = btn.nextElementSibling;
+    btn.classList.toggle('open');
+    body.classList.toggle('open');
   }
 
   function marcarAcao(btn, status) {
@@ -2560,10 +3272,309 @@ document.addEventListener('DOMContentLoaded',function(){
   var _goPageOrig = goPage;
   goPage = function(id, title) {
     _goPageOrig(id, title);
-    if(id === 'clientes') {
-      renderClientes('','','');
-    }
+    if(id === 'clientes') { renderClientes('','',''); }
+    if(id === 'financeiro') { renderFinanceiro('','',''); }
+    if(id === 'notasfiscais') { renderNF('','',''); initNF(); }
+    if(id === 'equipe') { renderEquipe(); }
   };
+
+
+
+  // ══════════════════════════════════════
+  // FINANCEIRO — CONTAS A PAGAR
+  // ══════════════════════════════════════
+  var CONTAS = [
+    {id:'CNT-001',desc:'Fornecedor de copos 330ml',forn:'Plastipak Industria',valor:4800,venc:'2025-06-28',cat:'Fornecedor',recorr:'unica',obs:'NF 8821',status:'pendente'},
+    {id:'CNT-002',desc:'Aluguel do galpao - Junho',forn:'Imobiliaria Central',valor:2200,venc:'2025-06-10',cat:'Aluguel',recorr:'mensal',obs:'',status:'pago'},
+    {id:'CNT-003',desc:'Energia eletrica - Maio',forn:'CEMIG',valor:680,venc:'2025-06-05',cat:'Servicos',recorr:'mensal',obs:'',status:'pago'},
+    {id:'CNT-004',desc:'Parcelamento DAS MEI - Junho',forn:'Receita Federal',valor:360,venc:'2025-06-20',cat:'Impostos',recorr:'mensal',obs:'',status:'pendente'},
+    {id:'CNT-005',desc:'Tinta para impressao serigrafica',forn:'Colorink Suprimentos',valor:1250,venc:'2025-06-02',cat:'Fornecedor',recorr:'unica',obs:'NF 3344',status:'vencida'},
+    {id:'CNT-006',desc:'Conta de agua - Maio',forn:'COPASA',valor:180,venc:'2025-06-15',cat:'Servicos',recorr:'mensal',obs:'',status:'pendente'},
+    {id:'CNT-007',desc:'Aluguel do galpao - Julho',forn:'Imobiliaria Central',valor:2200,venc:'2025-07-10',cat:'Aluguel',recorr:'mensal',obs:'',status:'pendente'},
+  ];
+  var editingContaIdx = -1;
+
+  function getContaStatus(conta) {
+    if(conta.status === 'pago') return 'pago';
+    var hoje = new Date(); hoje.setHours(0,0,0,0);
+    var venc = new Date(conta.venc + 'T00:00:00');
+    if(venc < hoje) return 'vencida';
+    return 'pendente';
+  }
+
+  function renderFinanceiro(search, statusF, catF) {
+    var list = document.getElementById('fin-list');
+    var empty = document.getElementById('fin-empty');
+    if(!list) return;
+    var hoje = new Date(); hoje.setHours(0,0,0,0);
+    var em7 = new Date(hoje); em7.setDate(hoje.getDate()+7);
+
+    var filtered = CONTAS.filter(function(c) {
+      var st = getContaStatus(c);
+      if(search) { var s=search.toLowerCase(); if(c.desc.toLowerCase().indexOf(s)<0 && c.forn.toLowerCase().indexOf(s)<0) return false; }
+      if(statusF && st !== statusF) return false;
+      if(catF && c.cat !== catF) return false;
+      return true;
+    });
+
+    // Calcular resumos
+    var totVencidas=0, totProximas=0, totMes=0;
+    var mesAtual = hoje.getMonth(); var anoAtual = hoje.getFullYear();
+    CONTAS.forEach(function(c) {
+      var st=getContaStatus(c); var venc=new Date(c.venc+'T00:00:00');
+      if(st==='vencida') totVencidas+=c.valor;
+      if(st==='pendente' && venc<=em7) totProximas+=c.valor;
+      if(venc.getMonth()===mesAtual && venc.getFullYear()===anoAtual) totMes+=c.valor;
+    });
+    var fmt = function(v){ return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2}); };
+    var el;
+    el=document.getElementById('fin-total-vencidas'); if(el) el.textContent=fmt(totVencidas);
+    el=document.getElementById('fin-total-proximas'); if(el) el.textContent=fmt(totProximas);
+    el=document.getElementById('fin-total-mes'); if(el) el.textContent=fmt(totMes);
+
+    if(!filtered.length) { list.innerHTML=''; if(empty) empty.style.display='block'; return; }
+    if(empty) empty.style.display='none';
+
+    // Ordenar por vencimento
+    filtered.sort(function(a,b){ return new Date(a.venc)-new Date(b.venc); });
+
+    list.innerHTML = filtered.map(function(c,i) {
+      var st = getContaStatus(c);
+      var venc = new Date(c.venc+'T00:00:00');
+      var diasDiff = Math.ceil((venc-hoje)/86400000);
+      var vencClass = st==='vencida' ? 'vencida' : (diasDiff<=3 ? 'hoje' : (diasDiff<=7 ? 'proxima' : ''));
+      var vencTxt = st==='pago' ? 'Pago' : (st==='vencida' ? 'Vencida '+Math.abs(diasDiff)+'d' : (diasDiff===0 ? 'Hoje!' : 'Em '+diasDiff+'d'));
+      var stPill = st==='pago'?'cs-pago':st==='vencida'?'cs-vencida':'cs-pendente';
+      var stTxt = st==='pago'?'Pago':st==='vencida'?'Vencida':'Pendente';
+      return '<div class="conta-row">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-weight:500;font-size:12px;">'+esc(c.desc)+'</div>' +
+          '<div style="font-size:11px;color:var(--text2);">'+esc(c.forn||'—')+(c.obs?' · '+esc(c.obs):'')+(c.recorr!=='unica'?' · <span style="color:var(--rosa);">'+esc(c.recorr)+'</span>':'')+'</div>' +
+        '</div>' +
+        '<span style="font-size:11px;background:var(--bg);padding:2px 8px;border-radius:12px;flex-shrink:0;">'+esc(c.cat)+'</span>' +
+        '<span class="conta-venc '+vencClass+'" style="padding:0 8px;">'+esc(c.venc.split('-').reverse().join('/'))+'<br><span style="font-size:10px;">'+vencTxt+'</span></span>' +
+        '<span class="conta-valor">'+fmt(c.valor)+'</span>' +
+        '<span class="conta-status-pill '+stPill+'">'+stTxt+'</span>' +
+        (st!=='pago'?'<button class="btn btn-sm" style="padding:2px 8px;font-size:11px;" data-pagar-idx="'+CONTAS.indexOf(c)+'">Marcar pago</button>':'<button class="btn btn-sm" style="padding:2px 8px;font-size:11px;opacity:.5;" data-unpagar-idx="'+CONTAS.indexOf(c)+'">Desfazer</button>') +
+      '</div>';
+    }).join('');
+
+    // Bind pagar
+    list.querySelectorAll('[data-pagar-idx]').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var idx=parseInt(this.getAttribute('data-pagar-idx'));
+        CONTAS[idx].status='pago';
+        renderFinanceiro(document.getElementById('fin-search').value, document.getElementById('fin-filter-status').value, document.getElementById('fin-filter-cat').value);
+        toast('Conta marcada como paga!');
+      });
+    });
+    list.querySelectorAll('[data-unpagar-idx]').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var idx=parseInt(this.getAttribute('data-unpagar-idx'));
+        CONTAS[idx].status='pendente';
+        renderFinanceiro(document.getElementById('fin-search').value, document.getElementById('fin-filter-status').value, document.getElementById('fin-filter-cat').value);
+        toast('Pagamento desfeito.');
+      });
+    });
+  }
+
+  function exportarFinanceiro() {
+    var rows = [['ID','Descricao','Fornecedor','Valor','Vencimento','Categoria','Recorrencia','Status','Obs']];
+    CONTAS.forEach(function(c) {
+      rows.push([c.id,c.desc,c.forn,c.valor,c.venc,c.cat,c.recorr,getContaStatus(c),c.obs]);
+    });
+    exportCSVGenerico(rows, 'contas_pagar_mekmix.csv');
+  }
+
+  function exportCSVGenerico(rows, filename) {
+    var q = String.fromCharCode(34);
+    var bom = String.fromCharCode(0xFEFF);
+    var csv = bom + rows.map(function(r){
+      return r.map(function(v){
+        return q + String(v||'').split(q).join(q+q) + q;
+      }).join(',');
+    }).join(String.fromCharCode(10));
+    var blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href=url; a.download=filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    toast('Exportado!');
+  }
+
+  // ══════════════════════════════════════
+  // NOTAS FISCAIS
+  // ══════════════════════════════════════
+  var NOTAS = [
+    {id:'NF-001',tipo:'entrada',numero:'000008821',emitente:'Plastipak Industria Ltda',cnpj_emit:'12.345.678/0001-90',dest:'MekMix Serigrafia',cnpj_dest:'XX.XXX.XXX/0001-XX',emissao:'2025-06-15',valor:4800,chave:'35250612345678000190550010000088211000000001',status:'autorizada',obs:'Compra copos 330ml'},
+    {id:'NF-002',tipo:'entrada',numero:'000003344',emitente:'Colorink Suprimentos Eireli',cnpj_emit:'98.765.432/0001-10',dest:'MekMix Serigrafia',cnpj_dest:'XX.XXX.XXX/0001-XX',emissao:'2025-06-02',valor:1250,chave:'35250698765432000110550010000033441000000002',status:'autorizada',obs:'Tintas serigrafia'},
+    {id:'NF-003',tipo:'saida',numero:'000000045',emitente:'MekMix Serigrafia',cnpj_emit:'XX.XXX.XXX/0001-XX',dest:'Thiago Costa Adega',cnpj_dest:'11.222.333/0001-44',emissao:'2025-06-15',valor:2245,chave:'35250600000000000000550010000000451000000003',status:'autorizada',obs:'Copos personalizados 500ml'},
+  ];
+  var CNPJ_EMPRESA = localStorage.getItem('mekmix_cnpj') || '';
+
+  function initNF() {
+    var cnpjEl = document.getElementById('cnpj-empresa');
+    if(cnpjEl) cnpjEl.textContent = CNPJ_EMPRESA || 'nao configurado';
+  }
+
+  function renderNF(search, tipoF, statusF) {
+    var list = document.getElementById('nf-list');
+    var empty = document.getElementById('nf-empty');
+    if(!list) return;
+
+    var filtered = NOTAS.filter(function(n) {
+      if(search) { var s=search.toLowerCase(); if(n.emitente.toLowerCase().indexOf(s)<0 && n.cnpj_emit.indexOf(s)<0 && n.numero.indexOf(s)<0 && n.dest.toLowerCase().indexOf(s)<0) return false; }
+      if(tipoF && n.tipo !== tipoF) return false;
+      if(statusF && n.status !== statusF) return false;
+      return true;
+    });
+
+    if(!filtered.length) { list.innerHTML=''; if(empty) empty.style.display='block'; return; }
+    if(empty) empty.style.display='none';
+
+    list.innerHTML = filtered.map(function(n) {
+      var tipoIco = n.tipo==='entrada' ? '⬇️' : '⬆️';
+      var tipoTxt = n.tipo==='entrada' ? 'Entrada' : 'Saida';
+      var tipoClr = n.tipo==='entrada' ? '#085041' : '#72243E';
+      var stPill = n.status==='autorizada'?'nfs-autorizada':n.status==='cancelada'?'nfs-cancelada':'nfs-pendente';
+      var stTxt = n.status==='autorizada'?'Autorizada':n.status==='cancelada'?'Cancelada':'Pendente';
+      var parteNome = n.tipo==='entrada' ? n.emitente : n.dest;
+      var parteCNPJ = n.tipo==='entrada' ? n.cnpj_emit : n.cnpj_dest;
+      return '<div class="nf-row">' +
+        '<span style="font-size:16px;padding-right:8px;">'+tipoIco+'</span>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-weight:500;font-size:12px;color:'+tipoClr+';">'+tipoTxt+' — '+esc(parteNome)+'</div>' +
+          '<div class="nf-chave">'+esc(parteCNPJ)+(n.obs?' · '+esc(n.obs):'')+'</div>' +
+        '</div>' +
+        '<span style="padding:0 8px;font-size:12px;font-weight:500;">Nº '+esc(n.numero)+'</span>' +
+        '<span style="padding:0 8px;font-size:11px;color:var(--text2);">'+esc(n.emissao.split('-').reverse().join('/'))+'</span>' +
+        '<span style="text-align:right;padding:0 8px;font-weight:600;color:var(--rosa);">R$ '+n.valor.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</span>' +
+        '<span class="nf-status-pill '+stPill+'">'+stTxt+'</span>' +
+        '<button class="btn btn-sm" style="padding:2px 8px;font-size:11px;" data-ver-nf="'+n.id+'">Ver</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  function verNF(id) {
+    var n = NOTAS.find(function(x){ return x.id===id; });
+    if(!n) return;
+    var lb = '\n';
+    var msg = ['NF '+n.numero, 'Emitente: '+n.emitente, 'CNPJ: '+n.cnpj_emit,
+      'Destinatario: '+n.dest, 'Emissao: '+n.emissao,
+      'Valor: R$ '+n.valor.toLocaleString('pt-BR',{minimumFractionDigits:2}),
+      'Status: '+n.status, 'Chave: '+n.chave].join(lb);
+    alert(msg);
+  }
+
+  function processarXML(xmlText, filename) {
+    try {
+      var parser = new DOMParser();
+      var xml = parser.parseFromString(xmlText, 'text/xml');
+      var nfe = xml.querySelector('NFe infNFe') || xml.querySelector('infNFe');
+      if(!nfe) { toast('XML invalido ou nao e uma NF-e.'); return; }
+
+      var get = function(sel){ var el=nfe.querySelector(sel); return el?el.textContent.trim():''; };
+      var chave = nfe.getAttribute('Id') || '';
+      if(chave.startsWith('NFe')) chave=chave.substring(3);
+      var numero = get('ide nNF') || get('nNF');
+      var emissao = (get('ide dhEmi') || get('dhEmi') || get('dEmi')).substring(0,10);
+      var emitNome = get('emit xNome') || get('xNome');
+      var emitCNPJ = get('emit CNPJ') || get('CNPJ');
+      var destNome = get('dest xNome');
+      var destCNPJ = get('dest CNPJ');
+      var valorTotal = parseFloat(get('ICMSTot vNF') || get('vNF') || '0');
+      var tpNF = get('ide tpNF');
+      var tipo = tpNF==='1' ? 'saida' : 'entrada';
+
+      // Formatar CNPJ
+      var fmtCNPJ = function(s){ s=s.replace(/\D/g,''); return s.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'); };
+      emitCNPJ = fmtCNPJ(emitCNPJ);
+      destCNPJ = fmtCNPJ(destCNPJ);
+
+      var nova = {
+        id:'NF-'+String(NOTAS.length+1).padStart(3,'0'),
+        tipo: tipo,
+        numero: numero.padStart(9,'0'),
+        emitente: emitNome, cnpj_emit: emitCNPJ,
+        dest: destNome, cnpj_dest: destCNPJ,
+        emissao: emissao,
+        valor: valorTotal,
+        chave: chave,
+        status: 'autorizada',
+        obs: filename
+      };
+      NOTAS.unshift(nova);
+      renderNF('','','');
+      toast('NF-e importada: ' + emitNome + ' — R$ ' + valorTotal.toLocaleString('pt-BR',{minimumFractionDigits:2}));
+    } catch(e) {
+      toast('Erro ao processar XML: ' + e.message);
+    }
+  }
+
+  function exportarNF() {
+    var rows = [['ID','Tipo','Numero','Emitente','CNPJ Emit','Destinatario','CNPJ Dest','Emissao','Valor','Status','Chave','Obs']];
+    NOTAS.forEach(function(n){ rows.push([n.id,n.tipo,n.numero,n.emitente,n.cnpj_emit,n.dest,n.cnpj_dest,n.emissao,n.valor,n.status,n.chave,n.obs]); });
+    exportCSVGenerico(rows,'notas_fiscais_mekmix.csv');
+  }
+
+  // ══════════════════════════════════════
+  // GESTAO DE USUARIOS (Equipe)
+  // ══════════════════════════════════════
+  var USUARIOS = [
+    {id:'USR-001',nome:'Bruno',login:'bruno',senha:'admin123',perfil:'admin',ativo:true,email:'bruno@mekmix.com.br',cadastro:'2024-01-01'},
+    {id:'USR-002',nome:'Joao',login:'joao',senha:'joao123',perfil:'socio',ativo:true,email:'joao@mekmix.com.br',cadastro:'2024-01-01'},
+    {id:'USR-003',nome:'Maria',login:'maria',senha:'maria123',perfil:'socio',ativo:true,email:'maria@mekmix.com.br',cadastro:'2024-01-01'},
+    {id:'USR-004',nome:'Pedro',login:'pedro',senha:'pedro123',perfil:'socio',ativo:true,email:'pedro@mekmix.com.br',cadastro:'2024-01-01'},
+  ];
+
+  function renderEquipe() {
+    var list = document.getElementById('equipe-list');
+    if(!list) return;
+    var perfilLabel = {admin:'Admin',socio:'Socio',vendedor:'Vendedor'};
+    var perfilBadge = {admin:'badge-admin',socio:'badge-socio',vendedor:'badge-vendedor'};
+    list.innerHTML = USUARIOS.map(function(u) {
+      var cores = ['#E31787','#772583','#3C3489','#085041','#633806'];
+      var cor = cores[USUARIOS.indexOf(u)%cores.length];
+      var ini = u.nome.substring(0,2).toUpperCase();
+      return '<div class="usuario-card">' +
+        '<div class="usuario-av" style="background:'+cor+';">'+ini+'</div>' +
+        '<div class="usuario-info">' +
+          '<div class="usuario-nome">'+esc(u.nome)+(u.login==='bruno'?' <i class="ti ti-crown" style="color:#E87000;font-size:11px;"></i>':'')+
+            (u.ativo?'':' <span class="badge-inativo-u">Inativo</span>')+'</div>' +
+          '<div class="usuario-sub">@'+esc(u.login)+(u.email?' · '+esc(u.email):'')+'</div>' +
+          '<div style="margin-top:4px;"><span class="'+perfilBadge[u.perfil]+'">'+perfilLabel[u.perfil]+'</span></div>' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">' +
+          '<button class="btn btn-sm" data-usr-edit="'+u.id+'"><i class="ti ti-edit" style="font-size:11px;"></i> Editar</button>' +
+          (u.login!=='bruno'?'<button class="btn btn-sm" style="color:'+(u.ativo?'#791F1F':'#085041')+';" data-usr-toggle="'+u.id+'">'+(u.ativo?'Desativar':'Ativar')+'</button>':'') +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    list.querySelectorAll('[data-usr-edit]').forEach(function(btn){
+      btn.addEventListener('click',function(){ editarUsuario(this.getAttribute('data-usr-edit')); });
+    });
+    list.querySelectorAll('[data-usr-toggle]').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var u=USUARIOS.find(function(x){ return x.id===this.getAttribute('data-usr-toggle'); },this);
+        if(u){ u.ativo=!u.ativo; renderEquipe(); toast(u.nome+(u.ativo?' ativado!':', desativado.')); }
+      });
+    });
+  }
+
+  var editingUsrIdx = -1;
+  function editarUsuario(id) {
+    var u = USUARIOS.find(function(x){ return x.id===id; });
+    if(!u) return;
+    editingUsrIdx = USUARIOS.indexOf(u);
+    document.getElementById('usr-modal-title').textContent = 'Editar usuario';
+    document.getElementById('usr-nome').value = u.nome;
+    document.getElementById('usr-login').value = u.login;
+    document.getElementById('usr-senha').value = '';
+    document.getElementById('usr-senha').placeholder = 'Deixe em branco para manter';
+    document.getElementById('usr-email').value = u.email||'';
+    document.getElementById('usr-perfil').value = u.perfil;
+    openModal('modal-novo-usuario');
+  }
 
 
   // Notif demo após 6s
