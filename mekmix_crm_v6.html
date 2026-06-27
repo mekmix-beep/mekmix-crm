@@ -567,9 +567,9 @@ input, textarea { cursor: text; }
     <div class="login-error" id="login-error">Usuário ou senha incorretos</div>
     <button class="login-btn" id="login-btn" ontouchstart="" onclick="doLogin()">Entrar</button>
     <div class="login-divider">Acesso rápido (demo)</div>
-    <button class="quick-user" data-u="bruno" data-p="admin123" ontouchstart="" onclick="qlLogin('bruno','admin123')"><div class="qu-av" style="background:#E31787;">BR</div><div><div class="qu-name">Bruno</div><div class="qu-role">Admin — acesso total</div></div><i class="ti ti-arrow-right" style="color:#aaa;font-size:14px;margin-left:auto;"></i></button>
-    <button class="quick-user" data-u="joao" data-p="joao123" ontouchstart="" onclick="qlLogin('joao','joao123')"><div class="qu-av" style="background:#3C3489;">JO</div><div><div class="qu-name">João</div><div class="qu-role">Vendedor — vê seus leads</div></div><i class="ti ti-arrow-right" style="color:#aaa;font-size:14px;margin-left:auto;"></i></button>
-    <button class="quick-user" data-u="maria" data-p="maria123" ontouchstart="" onclick="qlLogin('maria','maria123')"><div class="qu-av" style="background:#633806;">MA</div><div><div class="qu-name">Maria</div><div class="qu-role">Vendedor — vê seus leads</div></div><i class="ti ti-arrow-right" style="color:#aaa;font-size:14px;margin-left:auto;"></i></button>
+    <button class="quick-user" data-u="bruno" data-p="1234" ontouchstart="" onclick="qlLogin('bruno','1234')"><div class="qu-av" style="background:#E31787;">BR</div><div><div class="qu-name">Bruno</div><div class="qu-role">Admin — acesso total</div></div><i class="ti ti-arrow-right" style="color:#aaa;font-size:14px;margin-left:auto;"></i></button>
+    <button class="quick-user" data-u="maykon" data-p="1234" ontouchstart="" onclick="qlLogin('maykon','1234')"><div class="qu-av" style="background:#772D83;">MK</div><div><div class="qu-name">Maykon</div><div class="qu-role">Usuário 1</div></div><i class="ti ti-arrow-right" style="color:#aaa;font-size:14px;margin-left:auto;"></i></button>
+    <button class="quick-user" data-u="karla" data-p="1234" ontouchstart="" onclick="qlLogin('karla','1234')"><div class="qu-av" style="background:#085041;">KA</div><div><div class="qu-name">Karla</div><div class="qu-role">Usuário 2</div></div><i class="ti ti-arrow-right" style="color:#aaa;font-size:14px;margin-left:auto;"></i></button>
   </div>
 </div>
 <div class="app" id="app">
@@ -601,6 +601,7 @@ input, textarea { cursor: text; }
     </div>
     <div class="sb-bottom">
       <div class="sb-user"><div class="sb-av" id="sb-av" style="background:#E31787;">BR</div><div><div style="color:#fff;font-size:12px;font-weight:500;" id="sb-name">Bruno</div><div style="color:rgba(255,255,255,.5);font-size:10px;" id="sb-role">Admin</div></div></div>
+      <button class="sb-logout" id="btn-minha-conta" style="color:rgba(255,255,255,.6);border-bottom:1px solid rgba(255,255,255,.1);"><i class="ti ti-user-cog" style="font-size:14px;"></i> Minha conta</button>
       <button class="sb-logout" id="btn-logout"><i class="ti ti-logout" style="font-size:14px;"></i> Sair</button>
     </div>
   </div>
@@ -1574,7 +1575,7 @@ input, textarea { cursor: text; }
 </div>
 
 <script>
-var USERS={bruno:{pass:'admin123',name:'Bruno',role:'Admin',av:'BR',color:'#E31787',isAdmin:true},joao:{pass:'joao123',name:'João',role:'Vendedor',av:'JO',color:'#3C3489',isAdmin:false},maria:{pass:'maria123',name:'Maria',role:'Vendedor',av:'MA',color:'#633806',isAdmin:false},pedro:{pass:'pedro123',name:'Pedro',role:'Vendedor',av:'PE',color:'#085041',isAdmin:false}};
+var USERS={bruno:{pass:'1234',name:'Bruno',role:'Admin',av:'BR',color:'#E31787',isAdmin:true},maykon:{pass:'1234',name:'Maykon',role:'Usuário 1',av:'MK',color:'#772D83',isAdmin:true},karla:{pass:'1234',name:'Karla',role:'Usuário 2',av:'KA',color:'#085041',isAdmin:false},joao:{pass:'joao123',name:'João',role:'Vendedor',av:'JO',color:'#3C3489',isAdmin:false},maria:{pass:'maria123',name:'Maria',role:'Vendedor',av:'MA',color:'#633806',isAdmin:false},pedro:{pass:'pedro123',name:'Pedro',role:'Vendedor',av:'PE',color:'#085041',isAdmin:false}};
 var currentUser=null,currentPage='chats',mobState='list',resolveOn=false,recOn=false,currentKey='AC',editTplIdx=-1;
 
 var TEMPLATES=[
@@ -1633,7 +1634,7 @@ function tryLogin(u,p){
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').classList.add('visible');
     applyRole();renderConvList();renderTemplates();renderQR();openConv('AC');
-    setTimeout(renderDashboard, 100);
+    setTimeout(renderDashboard, 300);
     if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
     return true;
   }
@@ -1866,7 +1867,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // Fix: mover páginas novas para dentro do content-area
   (function(){
     var ca = document.querySelector('.content-area');
-    ['page-pedidos','page-producao','page-estoque','page-clientes','page-acoes','page-financeiro','page-notasfiscais','page-script'].forEach(function(id){
+    ['page-pedidos','page-producao','page-estoque','page-clientes','page-acoes','page-financeiro','page-notasfiscais','page-script','page-followup','page-relatorio','page-broadcast','page-templates','page-whatsapp','page-equipe','page-config'].forEach(function(id){
       var el = document.getElementById(id);
       if(el && el.parentElement && !el.parentElement.classList.contains('content-area')){
         ca.appendChild(el);
@@ -2074,6 +2075,47 @@ document.addEventListener('DOMContentLoaded',function(){
   // Login — tratado por onclick inline (iOS Safari file://)
   document.getElementById('login-pass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
   document.getElementById('btn-logout').addEventListener('click',logout);
+
+  // Minha conta — abrir modal
+  var btnConta = document.getElementById('btn-minha-conta');
+  if(btnConta) btnConta.addEventListener('click', function(){
+    document.getElementById('mc-av').textContent   = currentUser.av;
+    document.getElementById('mc-av').style.background = currentUser.color;
+    document.getElementById('mc-nome').textContent = currentUser.name;
+    document.getElementById('mc-role').textContent = currentUser.role;
+    document.getElementById('mc-senha-atual').value  = '';
+    document.getElementById('mc-nova-senha').value   = '';
+    document.getElementById('mc-confirma-senha').value = '';
+    document.getElementById('mc-erro').style.display = 'none';
+    openModal('modal-minha-conta');
+  });
+
+  // Salvar nova senha
+  var btnSalvarSenha = document.getElementById('btn-salvar-senha');
+  if(btnSalvarSenha) btnSalvarSenha.addEventListener('click', function(){
+    var erro = document.getElementById('mc-erro');
+    var atual    = document.getElementById('mc-senha-atual').value;
+    var nova     = document.getElementById('mc-nova-senha').value;
+    var confirma = document.getElementById('mc-confirma-senha').value;
+    erro.style.display = 'none';
+    if(!atual || !nova || !confirma){
+      erro.textContent = 'Preencha todos os campos.'; erro.style.display = 'block'; return;
+    }
+    if(atual !== currentUser.pass){
+      erro.textContent = 'Senha atual incorreta.'; erro.style.display = 'block'; return;
+    }
+    if(nova.length < 4){
+      erro.textContent = 'A nova senha precisa ter pelo menos 4 caracteres.'; erro.style.display = 'block'; return;
+    }
+    if(nova !== confirma){
+      erro.textContent = 'A nova senha e a confirmação não coincidem.'; erro.style.display = 'block'; return;
+    }
+    // Atualizar senha no USERS e no currentUser
+    USERS[currentUser.key].pass = nova;
+    currentUser.pass = nova;
+    closeModal('modal-minha-conta');
+    toast('✅ Senha alterada com sucesso!');
+  });
 
   // Sidebar nav
   document.querySelectorAll('.sb-btn[data-page]').forEach(function(btn){
@@ -2810,7 +2852,7 @@ document.addEventListener('DOMContentLoaded',function(){
   var _goPage = goPage;
   goPage = function(id, title) {
     _goPage(id, title);
-    if(id === 'dashboard') renderDashboard();
+    if(id === 'dashboard' || id === 'inicio') renderDashboard();
     if(id === 'pedidos') renderOrders();
     if(id === 'producao') renderProdQueue();
     if(id === 'estoque') initEstoque();
@@ -4055,6 +4097,46 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="modal-footer">
       <button class="btn" data-close="modal-novo-cliente">Cancelar</button>
       <button class="btn btn-rosa" id="btn-salvar-cliente"><i class="ti ti-check" style="font-size:12px;"></i> Salvar cliente</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL: MINHA CONTA / TROCA DE SENHA -->
+<div class="modal-overlay" id="modal-minha-conta">
+  <div class="modal" style="max-width:400px;width:100%;">
+    <div class="modal-head">
+      <span class="modal-title">Minha conta</span>
+      <button class="modal-close" data-close="modal-minha-conta">×</button>
+    </div>
+    <div class="modal-body">
+      <!-- Info do usuário -->
+      <div style="display:flex;align-items:center;gap:14px;background:var(--bg);border-radius:12px;padding:14px;margin-bottom:20px;">
+        <div id="mc-av" style="width:44px;height:44px;border-radius:50%;background:#E31787;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:700;flex-shrink:0;">BR</div>
+        <div>
+          <div id="mc-nome" style="font-weight:700;font-size:14px;">Bruno</div>
+          <div id="mc-role" style="font-size:12px;color:var(--text2);margin-top:2px;">Admin</div>
+        </div>
+      </div>
+      <!-- Troca de senha -->
+      <div style="font-weight:600;font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Alterar senha</div>
+      <div class="form-group">
+        <label class="form-label">Senha atual</label>
+        <input class="form-input" type="password" id="mc-senha-atual" placeholder="Digite sua senha atual"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nova senha</label>
+        <input class="form-input" type="password" id="mc-nova-senha" placeholder="Mínimo 4 caracteres"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirmar nova senha</label>
+        <input class="form-input" type="password" id="mc-confirma-senha" placeholder="Repita a nova senha"/>
+      </div>
+      <div id="mc-erro" style="display:none;background:#FBEAF0;color:#A0184E;border-radius:8px;padding:8px 12px;font-size:12px;margin-top:4px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-close="modal-minha-conta">Cancelar</button>
+      <button class="btn btn-rosa" id="btn-salvar-senha"><i class="ti ti-lock" style="font-size:12px;"></i> Salvar nova senha</button>
     </div>
   </div>
 </div>
