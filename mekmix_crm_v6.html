@@ -3727,17 +3727,16 @@ document.addEventListener('DOMContentLoaded',function(){
   // GESTAO DE USUARIOS (Equipe)
   // ══════════════════════════════════════
   var USUARIOS = [
-    {id:'USR-001',nome:'Bruno',login:'bruno',senha:'admin123',perfil:'admin',ativo:true,email:'bruno@mekmix.com.br',cadastro:'2024-01-01'},
-    {id:'USR-002',nome:'Joao',login:'joao',senha:'joao123',perfil:'socio',ativo:true,email:'joao@mekmix.com.br',cadastro:'2024-01-01'},
-    {id:'USR-003',nome:'Maria',login:'maria',senha:'maria123',perfil:'socio',ativo:true,email:'maria@mekmix.com.br',cadastro:'2024-01-01'},
-    {id:'USR-004',nome:'Pedro',login:'pedro',senha:'pedro123',perfil:'socio',ativo:true,email:'pedro@mekmix.com.br',cadastro:'2024-01-01'},
+    {id:'USR-001',nome:'Bruno',login:'bruno',senha:'1234',perfil:'admin',ativo:true,email:'bruno@mekmix.com.br',cadastro:'2024-01-01'},
+    {id:'USR-002',nome:'Maykon',login:'maykon',senha:'1234',perfil:'usuario1',ativo:true,email:'maykon@mekmix.com.br',cadastro:'2024-01-01'},
+    {id:'USR-003',nome:'Karla',login:'karla',senha:'1234',perfil:'usuario2',ativo:true,email:'karla@mekmix.com.br',cadastro:'2024-01-01'},
   ];
 
   function renderEquipe() {
     var list = document.getElementById('equipe-list');
     if(!list) return;
-    var perfilLabel = {admin:'Admin',socio:'Socio',vendedor:'Vendedor'};
-    var perfilBadge = {admin:'badge-admin',socio:'badge-socio',vendedor:'badge-vendedor'};
+    var perfilLabel = {admin:'Admin',usuario1:'Usuário 1',usuario2:'Usuário 2',socio:'Sócio',vendedor:'Vendedor'};
+    var perfilBadge = {admin:'badge-admin',usuario1:'badge-socio',usuario2:'badge-vendedor',socio:'badge-socio',vendedor:'badge-vendedor'};
     list.innerHTML = USUARIOS.map(function(u) {
       var cores = ['#E31787','#772583','#3C3489','#085041','#633806'];
       var cor = cores[USUARIOS.indexOf(u)%cores.length];
