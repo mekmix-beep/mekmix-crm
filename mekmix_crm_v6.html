@@ -254,18 +254,54 @@ button { cursor: pointer !important; touch-action: manipulation; }
 
 
 @media(max-width:768px){
-  /* SCROLL MOBILE — correção definitiva */
-  body { overflow: auto !important; overflow-x: hidden !important; height: auto !important; min-height: 100vh; }
-  .app { height: auto !important; min-height: 100vh; overflow: visible !important; }
-  .main { height: auto !important; overflow: visible !important; }
-  .content-area { height: auto !important; overflow: visible !important; flex-direction: column; }
+  /* SCROLL MOBILE iOS/Android — reset completo */
+  html, body {
+    overflow: auto !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+    min-height: 100% !important;
+    position: static !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .app.visible {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow: visible !important;
+    position: static !important;
+  }
+  .main {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    overflow: visible !important;
+    min-height: 0 !important;
+  }
+  .content-area {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    overflow: visible !important;
+    min-height: 0 !important;
+  }
   .page.visible {
     display: block !important;
-    overflow-y: visible !important;
+    flex: 1 !important;
     height: auto !important;
-    min-height: calc(100vh - 106px);
-    padding: 16px;
-    padding-bottom: 80px;
+    min-height: calc(100dvh - 106px) !important;
+    overflow-y: visible !important;
+    overflow-x: hidden !important;
+    padding: 16px !important;
+    padding-bottom: 80px !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  /* Chat precisa de tratamento especial — mantém scroll interno */
+  .page.visible .chat-layout {
+    height: calc(100dvh - 160px) !important;
+    overflow: hidden !important;
   }
 }
 
@@ -1721,7 +1757,16 @@ function goPage(id,title){
     if(pg){ pg.classList.add('visible'); pg.style.flex='1'; }
   }
   var sb=document.querySelector('.sb-btn[data-page="'+id+'"]');if(sb)sb.classList.add('active');
-  if(isMob){document.getElementById('mob-title').textContent=title||id;document.getElementById('mob-back').style.visibility='hidden';document.querySelectorAll('.mob-nav-btn').forEach(function(b){b.classList.remove('active');});var mnb=document.querySelector('.mob-nav-btn[data-mob-page="'+id+'"]');if(mnb)mnb.classList.add('active');}
+  if(isMob){
+    document.getElementById('mob-title').textContent=title||id;
+    document.getElementById('mob-back').style.visibility='hidden';
+    document.querySelectorAll('.mob-nav-btn').forEach(function(b){b.classList.remove('active');});
+    var mnb=document.querySelector('.mob-nav-btn[data-mob-page="'+id+'"]');if(mnb)mnb.classList.add('active');
+    // Rolar para o topo ao trocar de página no mobile
+    window.scrollTo(0,0);
+    document.documentElement.scrollTop=0;
+    document.body.scrollTop=0;
+  }
 }
 
 function updateMobView(){
