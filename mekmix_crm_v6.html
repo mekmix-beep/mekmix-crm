@@ -84,6 +84,9 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;}
 .p-follow{background:#FCEBEB;color:#791F1F;}
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
 .metric{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.metric-click{transition:transform .15s,box-shadow .15s,border-color .15s;}
+.metric-click:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(119,45,131,.15);border-color:#772D83 !important;}
+.metric-click:active{transform:translateY(0);}
 .metric-ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
 .metric-val{font-size:22px;font-weight:600;}
 .metric-lbl{font-size:11px;color:var(--text2);margin-top:2px;}
@@ -687,13 +690,59 @@ input, textarea { cursor: text; }
       </div>
       <div id="page-dashboard" class="page">
         <div class="page-title">Visão geral</div>
-        <div class="metrics">
-          <div class="metric"><div class="metric-ico" style="background:#FBEAF0;"><i class="ti ti-users" style="font-size:16px;color:#E31787;"></i></div><div class="metric-val">12</div><div class="metric-lbl">Leads hoje</div><div class="metric-change up">↑ 3 vs ontem</div></div>
-          <div class="metric"><div class="metric-ico" style="background:#FAEEDA;"><i class="ti ti-package" style="font-size:16px;color:#633806;"></i></div><div class="metric-val">4</div><div class="metric-lbl">Em produção</div></div>
-          <div class="metric"><div class="metric-ico" style="background:#FCEBEB;"><i class="ti ti-bell" style="font-size:16px;color:#791F1F;"></i></div><div class="metric-val" style="color:#E31787;">3</div><div class="metric-lbl">Follow-up</div><div class="metric-change dn">↑ urgente</div></div>
-          <div class="metric"><div class="metric-ico" style="background:#E1F5EE;"><i class="ti ti-currency-dollar" style="font-size:16px;color:#085041;"></i></div><div class="metric-val">R$7.840</div><div class="metric-lbl">Faturamento mês</div><div class="metric-change up">↑ 12%</div></div>
+
+        <!-- CARDS DINÂMICOS -->
+        <div class="metrics" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));">
+          <div class="metric metric-click" id="card-chats" onclick="dashCardClick('chats')" style="cursor:pointer;" title="Ver chats ao vivo">
+            <div class="metric-ico" style="background:#FBEAF0;"><i class="ti ti-message-circle" style="font-size:16px;color:#E31787;"></i></div>
+            <div class="metric-val" id="dash-chats">0</div>
+            <div class="metric-lbl">Chats abertos</div>
+            <div class="metric-change" id="dash-chats-sub" style="color:#E31787;"></div>
+          </div>
+          <div class="metric metric-click" id="card-prod" onclick="dashCardClick('prod')" style="cursor:pointer;" title="Ver pedidos em produção">
+            <div class="metric-ico" style="background:#FAEEDA;"><i class="ti ti-package" style="font-size:16px;color:#633806;"></i></div>
+            <div class="metric-val" id="dash-prod">0</div>
+            <div class="metric-lbl">Em produção</div>
+            <div class="metric-change" id="dash-prod-sub"></div>
+          </div>
+          <div class="metric metric-click" id="card-fila" onclick="dashCardClick('fila')" style="cursor:pointer;" title="Ver fila de produção">
+            <div class="metric-ico" style="background:#EDE3F5;"><i class="ti ti-list-numbers" style="font-size:16px;color:#772D83;"></i></div>
+            <div class="metric-val" id="dash-fila">0</div>
+            <div class="metric-lbl">Fila de produção</div>
+            <div class="metric-change" id="dash-fila-sub"></div>
+          </div>
+          <div class="metric metric-click" id="card-follow" onclick="goPage('followup30','Follow-up 30d')" style="cursor:pointer;" title="Ver follow-ups">
+            <div class="metric-ico" style="background:#FCEBEB;"><i class="ti ti-bell" style="font-size:16px;color:#791F1F;"></i></div>
+            <div class="metric-val" id="dash-follow" style="color:#E31787;">0</div>
+            <div class="metric-lbl">Follow-up</div>
+            <div class="metric-change dn" id="dash-follow-sub"></div>
+          </div>
+          <div class="metric" title="Faturamento dos pedidos entregues no mês atual">
+            <div class="metric-ico" style="background:#E1F5EE;"><i class="ti ti-currency-dollar" style="font-size:16px;color:#085041;"></i></div>
+            <div class="metric-val" id="dash-fat">R$0</div>
+            <div class="metric-lbl">Faturamento mês</div>
+            <div class="metric-change up" id="dash-fat-sub"></div>
+          </div>
         </div>
-        <div class="panel"><div class="panel-head"><span class="panel-title">Atendimentos recentes</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Cliente</th><th>Produto</th><th>Status</th><th>Vendedor</th></tr></thead><tbody><tr><td><b>Ana Clara</b><div style="font-size:11px;color:#666;">Campinas/SP</div></td><td>500ml·2cx</td><td><span class="pill p-novo">Novo lead</span></td><td>João</td></tr><tr><td><b>Rafael Silva</b><div style="font-size:11px;color:#666;">BH/MG</div></td><td>330ml·1cx</td><td><span class="pill p-orc">Orçamento</span></td><td>Maria</td></tr><tr><td><b>Pedro Lima</b><div style="font-size:11px;color:#666;">SP/SP</div></td><td>770ml·3cx</td><td><span class="pill p-prod">Produção</span></td><td>João</td></tr></tbody></table></div></div>
+
+        <!-- PAINEL EXPANSÍVEL DOS CARDS -->
+        <div id="dash-detail-panel" style="display:none;margin-bottom:12px;">
+          <div class="panel" style="border-left:4px solid #772D83;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <span style="font-weight:700;font-size:13px;" id="dash-detail-title">Detalhes</span>
+              <button onclick="document.getElementById('dash-detail-panel').style.display='none'" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text2);">×</button>
+            </div>
+            <div id="dash-detail-body"></div>
+            <button class="btn btn-sm" id="dash-detail-link" style="margin-top:10px;font-size:11px;" onclick="">Ver todos →</button>
+          </div>
+        </div>
+
+        <!-- ATENDIMENTOS RECENTES (dinâmico) -->
+        <div class="panel" style="margin-bottom:12px;">
+          <div class="panel-head"><span class="panel-title">Atendimentos recentes</span><span style="font-size:11px;color:var(--text2);">Últimos pedidos</span></div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Cliente</th><th>Produto</th><th>Status</th><th>Vendedor</th></tr></thead>
+          <tbody id="dash-recentes"></tbody></table></div>
+        </div>
         <div class="panel"><div class="panel-head"><span class="panel-title">⏰ Follow-up 30d</span><span style="font-size:11px;color:#E31787;font-weight:500;">3 pendentes</span></div>
           <div class="follow-item"><div style="display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:12px;font-weight:500;">Thiago Costa</div><div style="font-size:11px;color:#666;">Entregue 25/mai · <span style="background:#EDE3F5;color:#5A1E7A;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">João</span></div><div style="font-size:11px;color:#E31787;margin-top:2px;">🔔 Venceu há 1 dia</div></div><button class="btn btn-rosa btn-sm">Avisar João</button></div></div>
           <div class="follow-item" style="margin-top:4px;"><div style="display:flex;align-items:center;justify-content:space-between;"><div><div style="font-size:12px;font-weight:500;">Luana Reis</div><div style="font-size:11px;color:#666;">Entregue 27/mai · <span style="background:#FBEAF0;color:#A0184E;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">Maria</span></div><div style="font-size:11px;color:#E31787;margin-top:2px;">🔔 Venceu hoje</div></div><button class="btn btn-rosa btn-sm">Avisar Maria</button></div></div>
@@ -1584,6 +1633,7 @@ function tryLogin(u,p){
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').classList.add('visible');
     applyRole();renderConvList();renderTemplates();renderQR();openConv('AC');
+    setTimeout(renderDashboard, 100);
     if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
     return true;
   }
@@ -2651,11 +2701,128 @@ document.addEventListener('DOMContentLoaded',function(){
   window.toggleAcc           = toggleAcc;
   window.copyScript          = copyScript;
   window.switchScriptTab     = switchScriptTab;
+  window.dashCardClick       = dashCardClick;
+
+  // ── DASHBOARD DINÂMICO ──
+  function renderDashboard() {
+    var pillMap = {'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Entregue':'p-entregue','Follow-up 30d':'p-follow'};
+
+    // Calcular métricas reais
+    var emProd   = ORDERS.filter(function(o){ return o.status === 'Em produção'; });
+    var naFila   = PROD_QUEUE || [];
+    var entregues = ORDERS.filter(function(o){
+      return o.status === 'Entregue';
+    });
+    var fatMes   = entregues.reduce(function(s,o){ return s + (o.valor||0); }, 0);
+
+    // Chats abertos
+    var chatsAbertos = Object.keys(CHATS_DATA||{}).length;
+
+    // Follow-up vencidos/urgentes
+    var followUrgente = FOLLOW_DATA ? FOLLOW_DATA.filter(function(f){
+      return f.urgente || f.venceu;
+    }).length : 0;
+
+    // Preencher cards
+    var el = function(id){ return document.getElementById(id); };
+    if(el('dash-chats'))    el('dash-chats').textContent    = chatsAbertos;
+    if(el('dash-chats-sub'))el('dash-chats-sub').textContent= chatsAbertos > 0 ? chatsAbertos + ' aguardando' : '';
+    if(el('dash-prod'))     el('dash-prod').textContent     = emProd.length;
+    if(el('dash-prod-sub')) el('dash-prod-sub').textContent = emProd.length > 0 ? emProd.length + ' pedidos ativos' : 'Nenhum';
+    if(el('dash-fila'))     el('dash-fila').textContent     = naFila.length;
+    if(el('dash-fila-sub')) el('dash-fila-sub').textContent = naFila.length > 0 ? 'Próximo: ' + (naFila[0] ? naFila[0].client||naFila[0].nome : '') : 'Fila vazia';
+    if(el('dash-follow'))   el('dash-follow').textContent   = followUrgente || 0;
+    if(el('dash-follow-sub'))el('dash-follow-sub').textContent= followUrgente > 0 ? followUrgente + ' urgente(s)' : '';
+    if(el('dash-fat'))      el('dash-fat').textContent      = 'R$' + fatMes.toLocaleString('pt-BR');
+
+    // Atendimentos recentes — últimos 5 pedidos
+    var recTbody = el('dash-recentes');
+    if(recTbody) {
+      var recent = ORDERS.slice().sort(function(a,b){
+        return (b.data||'').localeCompare(a.data||'');
+      }).slice(0,5);
+      recTbody.innerHTML = recent.map(function(o){
+        var pill = pillMap[o.status] || 'p-novo';
+        return '<tr style="cursor:pointer;" onclick="goPage(\'pedidos\',\'Pedidos\')">' +
+          '<td><b>' + o.client + '</b><div style="font-size:11px;color:#666;">' + (o.cidade||'') + '</div></td>' +
+          '<td>' + o.prod + '·' + o.qtd + 'cx</td>' +
+          '<td><span class="pill ' + pill + '">' + o.status + '</span></td>' +
+          '<td>' + o.vendedor + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+  }
+
+  function dashCardClick(tipo) {
+    var panel = document.getElementById('dash-detail-panel');
+    var title = document.getElementById('dash-detail-title');
+    var body  = document.getElementById('dash-detail-body');
+    var link  = document.getElementById('dash-detail-link');
+    var pillMap = {'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Entregue':'p-entregue','Follow-up 30d':'p-follow'};
+    var vendTag = function(v){
+      var cfg = {João:{bg:'#EDE3F5',c:'#5A1E7A'},Maria:{bg:'#FBEAF0',c:'#A0184E'},Pedro:{bg:'#E0F0FF',c:'#1A5A9A'}};
+      var s = cfg[v]||{bg:'#f0f0f0',c:'#333'};
+      return '<span style="background:'+s.bg+';color:'+s.c+';font-size:10px;font-weight:600;padding:1px 8px;border-radius:20px;">'+v+'</span>';
+    };
+
+    var items = [], titleTxt = '', linkFn = '';
+
+    if(tipo === 'prod') {
+      titleTxt = '📦 Pedidos em produção';
+      items = ORDERS.filter(function(o){ return o.status === 'Em produção'; });
+      linkFn = "goPage('pedidos','Pedidos');document.getElementById('dash-detail-panel').style.display='none'";
+      body.innerHTML = items.length === 0
+        ? '<div style="color:var(--text2);font-size:12px;">Nenhum pedido em produção no momento.</div>'
+        : items.map(function(o){
+            return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">' +
+              '<div>' +
+                '<div style="font-weight:600;font-size:13px;">' + o.client + '</div>' +
+                '<div style="font-size:11px;color:var(--text2);margin-top:2px;">' + o.prod + ' · ' + o.qtd + ' cx · ' + (o.cidade||'') + '</div>' +
+                '<div style="font-size:11px;margin-top:3px;">Entrada: ' + (o.data||'—') + ' · ' + vendTag(o.vendedor) + '</div>' +
+              '</div>' +
+              '<div style="text-align:right;">' +
+                '<div style="font-size:14px;font-weight:700;color:#E31787;">R$' + (o.valor||0).toLocaleString('pt-BR') + '</div>' +
+                '<span class="pill p-prod" style="font-size:10px;">Em produção</span>' +
+              '</div>' +
+            '</div>';
+          }).join('');
+    }
+
+    if(tipo === 'fila') {
+      titleTxt = '🗂️ Fila de produção';
+      items = PROD_QUEUE || [];
+      linkFn = "goPage('producao','Fila de produção');document.getElementById('dash-detail-panel').style.display='none'";
+      body.innerHTML = items.length === 0
+        ? '<div style="color:var(--text2);font-size:12px;">Fila de produção vazia.</div>'
+        : items.map(function(o, i){
+            return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">' +
+              '<div style="background:#772D83;color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">' + (i+1) + '</div>' +
+              '<div style="flex:1;">' +
+                '<div style="font-weight:600;font-size:13px;">' + (o.client||o.nome||'—') + '</div>' +
+                '<div style="font-size:11px;color:var(--text2);margin-top:2px;">' + (o.prod||o.tamanho||'') + ' · ' + (o.qtd||o.caixas||0) + ' cx</div>' +
+              '</div>' +
+              '<div>' + vendTag(o.vendedor||'—') + '</div>' +
+            '</div>';
+          }).join('');
+    }
+
+    if(tipo === 'chats') {
+      goPage('chats','Chats ao vivo');
+      return;
+    }
+
+    title.textContent = titleTxt;
+    link.setAttribute('onclick', linkFn);
+    panel.style.display = 'block';
+    panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+  window.dashCardClick = dashCardClick;
 
   // Hook nas páginas para renderizar ao abrir
   var _goPage = goPage;
   goPage = function(id, title) {
     _goPage(id, title);
+    if(id === 'dashboard') renderDashboard();
     if(id === 'pedidos') renderOrders();
     if(id === 'producao') renderProdQueue();
     if(id === 'estoque') initEstoque();
