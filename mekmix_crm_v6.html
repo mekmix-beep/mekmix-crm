@@ -711,7 +711,7 @@ input, textarea { cursor: text; }
             <div class="metric-lbl">Fila de produção</div>
             <div class="metric-change" id="dash-fila-sub"></div>
           </div>
-          <div class="metric metric-click" id="card-follow" onclick="goPage('followup30','Follow-up 30d')" style="cursor:pointer;" title="Ver follow-ups">
+          <div class="metric metric-click" id="card-follow" onclick="dashCardClick('follow')" style="cursor:pointer;" title="Ver follow-ups">
             <div class="metric-ico" style="background:#FCEBEB;"><i class="ti ti-bell" style="font-size:16px;color:#791F1F;"></i></div>
             <div class="metric-val" id="dash-follow" style="color:#E31787;">0</div>
             <div class="metric-lbl">Follow-up</div>
@@ -2694,62 +2694,41 @@ document.addEventListener('DOMContentLoaded',function(){
     if(el) el.style.display = 'block';
   }
 
-  // Expor funções chamadas por onclick inline no escopo global
-  window.editarCliente       = editarCliente;
-  window.abrirPedidoCliente  = abrirPedidoCliente;
-  window.marcarAcao          = marcarAcao;
-  window.toggleAcc           = toggleAcc;
-  window.copyScript          = copyScript;
-  window.switchScriptTab     = switchScriptTab;
-  window.dashCardClick       = dashCardClick;
-
   // ── DASHBOARD DINÂMICO ──
   function renderDashboard() {
     var pillMap = {'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Entregue':'p-entregue','Follow-up 30d':'p-follow'};
-
-    // Calcular métricas reais
-    var emProd   = ORDERS.filter(function(o){ return o.status === 'Em produção'; });
-    var naFila   = PROD_QUEUE || [];
-    var entregues = ORDERS.filter(function(o){
-      return o.status === 'Entregue';
-    });
-    var fatMes   = entregues.reduce(function(s,o){ return s + (o.valor||0); }, 0);
-
-    // Chats abertos
-    var chatsAbertos = Object.keys(CHATS_DATA||{}).length;
-
-    // Follow-up vencidos/urgentes
-    var followUrgente = FOLLOW_DATA ? FOLLOW_DATA.filter(function(f){
-      return f.urgente || f.venceu;
-    }).length : 0;
-
-    // Preencher cards
+    var emProd  = ORDERS.filter(function(o){ return o.status === 'Em produção'; });
+    var naFila  = PROD_QUEUE || [];
+    var fatMes  = ORDERS.filter(function(o){ return o.status === 'Entregue'; })
+                        .reduce(function(s,o){ return s + (o.valor||0); }, 0);
+    var chatsN  = Object.keys(CONVDATA||{}).length;
+    // Follow-up urgentes: items do painel follow-up no dashboard (estáticos por ora)
+    var followN = document.querySelectorAll('.follow-item').length;
     var el = function(id){ return document.getElementById(id); };
-    if(el('dash-chats'))    el('dash-chats').textContent    = chatsAbertos;
-    if(el('dash-chats-sub'))el('dash-chats-sub').textContent= chatsAbertos > 0 ? chatsAbertos + ' aguardando' : '';
-    if(el('dash-prod'))     el('dash-prod').textContent     = emProd.length;
-    if(el('dash-prod-sub')) el('dash-prod-sub').textContent = emProd.length > 0 ? emProd.length + ' pedidos ativos' : 'Nenhum';
-    if(el('dash-fila'))     el('dash-fila').textContent     = naFila.length;
-    if(el('dash-fila-sub')) el('dash-fila-sub').textContent = naFila.length > 0 ? 'Próximo: ' + (naFila[0] ? naFila[0].client||naFila[0].nome : '') : 'Fila vazia';
-    if(el('dash-follow'))   el('dash-follow').textContent   = followUrgente || 0;
-    if(el('dash-follow-sub'))el('dash-follow-sub').textContent= followUrgente > 0 ? followUrgente + ' urgente(s)' : '';
-    if(el('dash-fat'))      el('dash-fat').textContent      = 'R$' + fatMes.toLocaleString('pt-BR');
-
-    // Atendimentos recentes — últimos 5 pedidos
+    if(el('dash-chats'))     el('dash-chats').textContent     = chatsN;
+    if(el('dash-chats-sub')) el('dash-chats-sub').textContent = chatsN + ' ativos';
+    if(el('dash-prod'))      el('dash-prod').textContent      = emProd.length;
+    if(el('dash-prod-sub'))  el('dash-prod-sub').textContent  = emProd.length > 0 ? emProd.length + ' pedido(s)' : 'Nenhum';
+    if(el('dash-fila'))      el('dash-fila').textContent      = naFila.length;
+    if(el('dash-fila-sub'))  el('dash-fila-sub').textContent  = naFila.length > 0 ? 'Próximo: ' + (naFila[0].client||naFila[0].nome||'—') : 'Fila vazia';
+    if(el('dash-follow'))    el('dash-follow').textContent    = followN;
+    if(el('dash-follow-sub'))el('dash-follow-sub').textContent= followN > 0 ? followN + ' pendente(s)' : '';
+    if(el('dash-fat'))       el('dash-fat').textContent       = 'R$' + fatMes.toLocaleString('pt-BR');
+    // Atendimentos recentes: últimos 5 pedidos por data
     var recTbody = el('dash-recentes');
     if(recTbody) {
-      var recent = ORDERS.slice().sort(function(a,b){
-        return (b.data||'').localeCompare(a.data||'');
-      }).slice(0,5);
-      recTbody.innerHTML = recent.map(function(o){
-        var pill = pillMap[o.status] || 'p-novo';
-        return '<tr style="cursor:pointer;" onclick="goPage(\'pedidos\',\'Pedidos\')">' +
-          '<td><b>' + o.client + '</b><div style="font-size:11px;color:#666;">' + (o.cidade||'') + '</div></td>' +
-          '<td>' + o.prod + '·' + o.qtd + 'cx</td>' +
-          '<td><span class="pill ' + pill + '">' + o.status + '</span></td>' +
-          '<td>' + o.vendedor + '</td>' +
-        '</tr>';
-      }).join('');
+      var recent = ORDERS.slice().sort(function(a,b){ return (b.data||'').localeCompare(a.data||''); }).slice(0,5);
+      recTbody.innerHTML = recent.length === 0
+        ? '<tr><td colspan="4" style="color:var(--text2);text-align:center;padding:12px;">Nenhum pedido cadastrado</td></tr>'
+        : recent.map(function(o){
+            var pill = pillMap[o.status]||'p-novo';
+            return '<tr style="cursor:pointer;" onclick="goPage(\'pedidos\',\'Pedidos\')">' +
+              '<td><b>' + o.client + '</b><div style="font-size:11px;color:#666;">' + (o.cidade||'') + '</div></td>' +
+              '<td>' + o.prod + '·' + o.qtd + 'cx</td>' +
+              '<td><span class="pill ' + pill + '">' + o.status + '</span></td>' +
+              '<td>' + o.vendedor + '</td>' +
+            '</tr>';
+          }).join('');
     }
   }
 
@@ -2758,12 +2737,14 @@ document.addEventListener('DOMContentLoaded',function(){
     var title = document.getElementById('dash-detail-title');
     var body  = document.getElementById('dash-detail-body');
     var link  = document.getElementById('dash-detail-link');
-    var pillMap = {'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Entregue':'p-entregue','Follow-up 30d':'p-follow'};
     var vendTag = function(v){
       var cfg = {João:{bg:'#EDE3F5',c:'#5A1E7A'},Maria:{bg:'#FBEAF0',c:'#A0184E'},Pedro:{bg:'#E0F0FF',c:'#1A5A9A'}};
       var s = cfg[v]||{bg:'#f0f0f0',c:'#333'};
       return '<span style="background:'+s.bg+';color:'+s.c+';font-size:10px;font-weight:600;padding:1px 8px;border-radius:20px;">'+v+'</span>';
     };
+
+    if(tipo === 'chats') { goPage('chats','Chats ao vivo'); return; }
+    if(tipo === 'follow') { goPage('followup','Follow-up 30d'); return; }
 
     var items = [], titleTxt = '', linkFn = '';
 
@@ -2772,7 +2753,7 @@ document.addEventListener('DOMContentLoaded',function(){
       items = ORDERS.filter(function(o){ return o.status === 'Em produção'; });
       linkFn = "goPage('pedidos','Pedidos');document.getElementById('dash-detail-panel').style.display='none'";
       body.innerHTML = items.length === 0
-        ? '<div style="color:var(--text2);font-size:12px;">Nenhum pedido em produção no momento.</div>'
+        ? '<div style="color:var(--text2);font-size:12px;padding:8px 0;">Nenhum pedido em produção no momento.</div>'
         : items.map(function(o){
             return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">' +
               '<div>' +
@@ -2793,22 +2774,17 @@ document.addEventListener('DOMContentLoaded',function(){
       items = PROD_QUEUE || [];
       linkFn = "goPage('producao','Fila de produção');document.getElementById('dash-detail-panel').style.display='none'";
       body.innerHTML = items.length === 0
-        ? '<div style="color:var(--text2);font-size:12px;">Fila de produção vazia.</div>'
+        ? '<div style="color:var(--text2);font-size:12px;padding:8px 0;">Fila de produção vazia.</div>'
         : items.map(function(o, i){
             return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">' +
               '<div style="background:#772D83;color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">' + (i+1) + '</div>' +
               '<div style="flex:1;">' +
                 '<div style="font-weight:600;font-size:13px;">' + (o.client||o.nome||'—') + '</div>' +
-                '<div style="font-size:11px;color:var(--text2);margin-top:2px;">' + (o.prod||o.tamanho||'') + ' · ' + (o.qtd||o.caixas||0) + ' cx</div>' +
+                '<div style="font-size:11px;color:var(--text2);margin-top:2px;">' + (o.prod||o.tamanho||'') + ' · ' + (o.qtd||o.caixas||0) + ' cx · ' + (o.cidade||'') + '</div>' +
               '</div>' +
-              '<div>' + vendTag(o.vendedor||'—') + '</div>' +
+              vendTag(o.vendedor||'—') +
             '</div>';
           }).join('');
-    }
-
-    if(tipo === 'chats') {
-      goPage('chats','Chats ao vivo');
-      return;
     }
 
     title.textContent = titleTxt;
@@ -2816,7 +2792,19 @@ document.addEventListener('DOMContentLoaded',function(){
     panel.style.display = 'block';
     panel.scrollIntoView({behavior:'smooth', block:'nearest'});
   }
+
   window.dashCardClick = dashCardClick;
+  window.renderDashboard = renderDashboard;
+
+  // Expor funções chamadas por onclick inline no escopo global
+  window.editarCliente       = editarCliente;
+  window.abrirPedidoCliente  = abrirPedidoCliente;
+  window.marcarAcao          = marcarAcao;
+  window.toggleAcc           = toggleAcc;
+  window.copyScript          = copyScript;
+  window.switchScriptTab     = switchScriptTab;
+  window.dashCardClick       = dashCardClick;
+
 
   // Hook nas páginas para renderizar ao abrir
   var _goPage = goPage;
