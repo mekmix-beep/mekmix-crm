@@ -3162,19 +3162,11 @@ document.addEventListener('DOMContentLoaded',function(){
           '<div><div class="cliente-stat-val">'+cli.total_caixas+'</div><div class="cliente-stat-lbl">Caixas</div></div>' +
         '</div>' +
         '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">' +
-          '<button class="btn btn-sm" data-cli-edit="'+cli.id+'"><i class="ti ti-edit" style="font-size:11px;"></i> Editar</button>' +
-          '<button class="btn btn-rosa btn-sm" data-cli-pedido="'+cli.id+'"><i class="ti ti-plus" style="font-size:11px;"></i> Pedido</button>' +
+          '<button class="btn btn-sm" onclick="editarCliente(\'' + cli.id + '\')"><i class="ti ti-edit" style="font-size:11px;"></i> Editar</button>' +
+          '<button class="btn btn-rosa btn-sm" onclick="abrirPedidoCliente(\'' + cli.id + '\')"><i class="ti ti-plus" style="font-size:11px;"></i> Pedido</button>' +
         '</div>' +
       '</div>';
     }).join('');
-
-    // Bind edit e pedido
-    list.querySelectorAll('[data-cli-edit]').forEach(function(btn) {
-      btn.addEventListener('click', function() { editarCliente(this.getAttribute('data-cli-edit')); });
-    });
-    list.querySelectorAll('[data-cli-pedido]').forEach(function(btn) {
-      btn.addEventListener('click', function() { abrirPedidoCliente(this.getAttribute('data-cli-pedido')); });
-    });
   }
 
   function editarCliente(id) {
