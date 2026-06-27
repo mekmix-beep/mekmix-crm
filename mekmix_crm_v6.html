@@ -2644,6 +2644,14 @@ document.addEventListener('DOMContentLoaded',function(){
     if(el) el.style.display = 'block';
   }
 
+  // Expor funções chamadas por onclick inline no escopo global
+  window.editarCliente       = editarCliente;
+  window.abrirPedidoCliente  = abrirPedidoCliente;
+  window.marcarAcao          = marcarAcao;
+  window.toggleAcc           = toggleAcc;
+  window.copyScript          = copyScript;
+  window.switchScriptTab     = switchScriptTab;
+
   // Hook nas páginas para renderizar ao abrir
   var _goPage = goPage;
   goPage = function(id, title) {
@@ -3793,5 +3801,108 @@ document.addEventListener('DOMContentLoaded',function(){
 </div>
 
 <!-- iOS touch handled via ontouchstart inline -->
+
+<div class="modal-overlay" id="modal-novo-cliente">
+  <div class="modal" style="max-width:560px;width:100%;">
+    <div class="modal-head">
+      <div>
+        <span class="modal-title" id="cliente-modal-title">Novo cliente</span>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px;" id="cliente-modal-sub"></div>
+      </div>
+      <button class="modal-close" data-close="modal-novo-cliente">×</button>
+    </div>
+    <div class="modal-body" style="max-height:70vh;overflow-y:auto;">
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Nome completo *</label>
+          <input class="form-input" id="cli-nome" placeholder="Nome do cliente"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipo</label>
+          <select class="form-input" id="cli-tipo">
+            <option>PJ</option>
+            <option>PF</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">CNPJ / CPF</label>
+          <input class="form-input" id="cli-doc" placeholder="00.000.000/0001-00"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">WhatsApp *</label>
+          <input class="form-input" type="tel" id="cli-wapp" placeholder="(35) 99999-0000"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input class="form-input" type="email" id="cli-email" placeholder="email@exemplo.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Segmento</label>
+          <select class="form-input" id="cli-segmento">
+            <option>Bar / Boteco</option>
+            <option>Adega</option>
+            <option>Eventos / Buffet</option>
+            <option>Distribuidora</option>
+            <option>Açaí</option>
+            <option>Restaurante</option>
+            <option>Outro</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">Endereço</label>
+          <input class="form-input" id="cli-endereco" placeholder="Rua, número, bairro"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cidade *</label>
+          <input class="form-input" id="cli-cidade" placeholder="Itajubá"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estado</label>
+          <select class="form-input" id="cli-estado">
+            <option>MG</option><option>SP</option><option>RJ</option><option>ES</option>
+            <option>PR</option><option>SC</option><option>RS</option><option>BA</option>
+            <option>GO</option><option>DF</option><option>MT</option><option>MS</option>
+            <option>AM</option><option>PA</option><option>CE</option><option>PE</option>
+            <option>PB</option><option>RN</option><option>MA</option><option>PI</option>
+            <option>AL</option><option>SE</option><option>TO</option><option>RO</option>
+            <option>AC</option><option>RR</option><option>AP</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Vendedor responsável</label>
+          <select class="form-input" id="cli-vendedor">
+            <option>João</option>
+            <option>Maria</option>
+            <option>Pedro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Indicado por</label>
+          <input class="form-input" id="cli-indicado" placeholder="Nome de quem indicou (opcional)"/>
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">Preço especial negociado?</label>
+          <div style="display:flex;gap:16px;margin-top:6px;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+              <input type="radio" name="preco-esp" value="nao" checked/> Não — preço de tabela
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+              <input type="radio" name="preco-esp" value="sim"/> Sim — preço negociado
+            </label>
+          </div>
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">Observações</label>
+          <textarea class="form-input" id="cli-obs" rows="3" placeholder="Anotações internas sobre o cliente..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-close="modal-novo-cliente">Cancelar</button>
+      <button class="btn btn-rosa" id="btn-salvar-cliente"><i class="ti ti-check" style="font-size:12px;"></i> Salvar cliente</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
