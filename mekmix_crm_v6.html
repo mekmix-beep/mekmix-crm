@@ -567,9 +567,10 @@ input, textarea { cursor: text; }
     <div class="login-error" id="login-error">Usuário ou senha incorretos</div>
     <button class="login-btn" id="login-btn" ontouchstart="" onclick="doLogin()">Entrar</button>
     <div class="login-divider">Acesso rápido (demo)</div>
-    <button class="quick-user" data-u="bruno" data-p="1234" ontouchstart="" onclick="qlLogin('bruno','1234')"><div class="qu-av" style="background:#E31787;">BR</div><div><div class="qu-name">Bruno</div><div class="qu-role">Admin — acesso total</div></div><i class="ti ti-arrow-right" style="color:#aaa;font-size:14px;margin-left:auto;"></i></button>
-    <button class="quick-user" data-u="maykon" data-p="1234" ontouchstart="" onclick="qlLogin('maykon','1234')"><div class="qu-av" style="background:#772D83;">MK</div><div><div class="qu-name">Maykon</div><div class="qu-role">Usuário 1</div></div><i class="ti ti-arrow-right" style="color:#aaa;font-size:14px;margin-left:auto;"></i></button>
-    <button class="quick-user" data-u="karla" data-p="1234" ontouchstart="" onclick="qlLogin('karla','1234')"><div class="qu-av" style="background:#085041;">KA</div><div><div class="qu-name">Karla</div><div class="qu-role">Usuário 2</div></div><i class="ti ti-arrow-right" style="color:#aaa;font-size:14px;margin-left:auto;"></i></button>
+    <button class="quick-user" ontouchstart="" onclick="qlLogin('bruno','123456')"><div class="qu-av" style="background:#E31787;">BR</div><div><div class="qu-name">Bruno</div><div class="qu-role">Admin</div></div><i class="ti ti-arrow-right" style="color:#aaa;font-size:14px;margin-left:auto;"></i></button>
+    <button class="quick-user" ontouchstart="" onclick="qlLogin('maykon','123456')"><div class="qu-av" style="background:#772D83;">MK</div><div><div class="qu-name">Maykon</div><div class="qu-role">Usuário 1</div></div><i class="ti ti-arrow-right" style="color:#aaa;font-size:14px;margin-left:auto;"></i></button>
+    <button class="quick-user" ontouchstart="" onclick="qlLogin('karla','123456')"><div class="qu-av" style="background:#085041;">KA</div><div><div class="qu-name">Karla</div><div class="qu-role">Usuário 2</div></div><i class="ti ti-arrow-right" style="color:#aaa;font-size:14px;margin-left:auto;"></i></button>
+    <button class="quick-user" ontouchstart="" onclick="qlLogin('gisella','123456')"><div class="qu-av" style="background:#3C3489;">GI</div><div><div class="qu-name">Gisella</div><div class="qu-role">Usuário 3</div></div><i class="ti ti-arrow-right" style="color:#aaa;font-size:14px;margin-left:auto;"></i></button>
   </div>
 </div>
 <div class="app" id="app">
@@ -816,13 +817,13 @@ input, textarea { cursor: text; }
         </div>
       </div>
       <div id="page-equipe" class="page">
-        <div class="page-title">Equipe <button class="btn btn-rosa btn-sm"><i class="ti ti-plus" style="font-size:12px;"></i> Adicionar</button></div>
-        <div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nome</th><th>Usuário</th><th>Perfil</th><th>Leads</th><th>Produção</th><th>Faturamento</th></tr></thead><tbody>
-          <tr><td><b>Bruno</b></td><td>bruno</td><td><span class="pill p-novo">Admin</span></td><td>—</td><td>—</td><td>—</td></tr>
-          <tr><td><b>João</b></td><td>joao</td><td><span class="pill p-orc">Vendedor</span></td><td>5</td><td>2</td><td style="color:#E31787;">R$8.120</td></tr>
-          <tr><td><b>Maria</b></td><td>maria</td><td><span class="pill p-orc">Vendedor</span></td><td>3</td><td>1</td><td style="color:#E31787;">R$6.890</td></tr>
-          <tr><td><b>Pedro</b></td><td>pedro</td><td><span class="pill p-orc">Vendedor</span></td><td>4</td><td>1</td><td style="color:#E31787;">R$3.330</td></tr>
-        </tbody></table></div></div>
+        <div class="page-title">Usuários
+          <button class="btn btn-rosa btn-sm" id="btn-novo-usuario" onclick="abrirModalUsuario(null)"><i class="ti ti-user-plus" style="font-size:12px;"></i> Novo usuário</button>
+        </div>
+        <div class="panel">
+          <div style="font-size:12px;color:var(--text2);margin-bottom:12px;">Gerencie usuários, senhas e permissões de acesso aos módulos do CRM.</div>
+          <div id="equipe-list"></div>
+        </div>
       </div>
       <div id="page-config" class="page">
         <div class="page-title">Configurações</div>
@@ -1575,7 +1576,15 @@ input, textarea { cursor: text; }
 </div>
 
 <script>
-var USERS={bruno:{pass:'1234',name:'Bruno',role:'Admin',av:'BR',color:'#E31787',isAdmin:true},maykon:{pass:'1234',name:'Maykon',role:'Usuário 1',av:'MK',color:'#772D83',isAdmin:true},karla:{pass:'1234',name:'Karla',role:'Usuário 2',av:'KA',color:'#085041',isAdmin:false},joao:{pass:'joao123',name:'João',role:'Vendedor',av:'JO',color:'#3C3489',isAdmin:false},maria:{pass:'maria123',name:'Maria',role:'Vendedor',av:'MA',color:'#633806',isAdmin:false},pedro:{pass:'pedro123',name:'Pedro',role:'Vendedor',av:'PE',color:'#085041',isAdmin:false}};
+var USERS={
+  bruno:   {pass:'123456',name:'Bruno',  role:'Admin',    av:'BR',color:'#E31787',isAdmin:true, modulos:['dashboard','chats','kanban','contatos','followup','clientes','acoes','pedidos','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script']},
+  maykon:  {pass:'123456',name:'Maykon', role:'Usuário 1',av:'MK',color:'#772D83',isAdmin:false,modulos:['dashboard','chats','kanban','contatos','followup','clientes','pedidos','producao','estoque','script']},
+  karla:   {pass:'123456',name:'Karla',  role:'Usuário 2',av:'KA',color:'#085041',isAdmin:false,modulos:['dashboard','chats','kanban','contatos','followup','clientes','pedidos','script']},
+  gisella: {pass:'123456',name:'Gisella',role:'Usuário 3',av:'GI',color:'#3C3489',isAdmin:false,modulos:['dashboard','chats','kanban','contatos','followup','clientes','pedidos','script']},
+  joao:    {pass:'joao123',name:'João',  role:'Vendedor', av:'JO',color:'#3C3489',isAdmin:false,modulos:['chats','kanban','contatos','followup','clientes','pedidos']},
+  maria:   {pass:'maria123',name:'Maria',role:'Vendedor', av:'MA',color:'#633806',isAdmin:false,modulos:['chats','kanban','contatos','followup','clientes','pedidos']},
+  pedro:   {pass:'pedro123',name:'Pedro',role:'Vendedor', av:'PE',color:'#085041',isAdmin:false,modulos:['chats','kanban','contatos','followup','clientes','pedidos']},
+};
 var currentUser=null,currentPage='chats',mobState='list',resolveOn=false,recOn=false,currentKey='AC',editTplIdx=-1;
 
 var TEMPLATES=[
@@ -1647,6 +1656,22 @@ function applyRole(){
   document.getElementById('sb-role-lbl').textContent=currentUser.role;
   var av=document.getElementById('sb-av');av.textContent=currentUser.av;av.style.background=currentUser.color;
   document.querySelectorAll('.admin-only').forEach(function(el){el.style.display=currentUser.isAdmin?'':'none';});
+  // Controle granular de módulos
+  var mods = currentUser.modulos || [];
+  document.querySelectorAll('.sb-btn[data-page]').forEach(function(btn){
+    var page = btn.getAttribute('data-page');
+    btn.style.display = (currentUser.isAdmin || mods.indexOf(page)>=0) ? '' : 'none';
+  });
+  document.querySelectorAll('.sb-sec').forEach(function(sec){
+    // Mostrar seção se ao menos um botão dela estiver visível
+    var next = sec.nextElementSibling;
+    var hasVisible = false;
+    while(next && !next.classList.contains('sb-sec')){
+      if(next.style.display !== 'none') hasVisible = true;
+      next = next.nextElementSibling;
+    }
+    sec.style.display = hasVisible ? '' : 'none';
+  });
 }
 
 function logout(){
@@ -1881,7 +1906,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // Bind botão novo cliente — também via delegação para garantir
   document.addEventListener('click', function(e){
     if(e.target && (e.target.id === 'btn-novo-cliente' || e.target.closest('#btn-novo-cliente'))) {
-      editingClienteIdx=-1;
+      editingClienteIdx=-1; if(window._setEditIdx) window._setEditIdx(-1);
       document.getElementById('cliente-modal-title').textContent='Novo cliente';
       document.getElementById('cliente-modal-sub').textContent='Preencha os dados cadastrais';
       ['cli-nome','cli-doc','cli-wapp','cli-email','cli-endereco','cli-cidade','cli-obs'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
@@ -1898,7 +1923,7 @@ document.addEventListener('DOMContentLoaded',function(){
     var nome = (document.getElementById('cli-nome').value||'').trim();
     if(!nome){toast('Informe o nome do cliente!');return;}
     var cli = {
-      id: editingClienteIdx >= 0 ? CLIENTES[editingClienteIdx].id : 'CLI-' + String(CLIENTES.length+1).padStart(3,'0'),
+      id: (window._editIdx&&window._editIdx()) >= 0 ? CLIENTES[window._editIdx()].id : 'CLI-' + String(CLIENTES.length+1).padStart(3,'0'),
       nome: nome,
       tipo: document.getElementById('cli-tipo').value,
       doc: document.getElementById('cli-doc').value||'',
@@ -1912,17 +1937,17 @@ document.addEventListener('DOMContentLoaded',function(){
       indicado: document.getElementById('cli-indicado').value||'',
       preco_esp: document.querySelector('input[name="preco-esp"]:checked').value === 'sim',
       obs: document.getElementById('cli-obs').value||'',
-      cadastro: editingClienteIdx>=0 ? CLIENTES[editingClienteIdx].cadastro : new Date().toISOString().split('T')[0],
-      ultimo_pedido: editingClienteIdx>=0 ? CLIENTES[editingClienteIdx].ultimo_pedido : '',
-      total_pedidos: editingClienteIdx>=0 ? CLIENTES[editingClienteIdx].total_pedidos : 0,
-      total_caixas: editingClienteIdx>=0 ? CLIENTES[editingClienteIdx].total_caixas : 0,
+      cadastro: (window._editIdx&&window._editIdx()>=0) ? CLIENTES[window._editIdx()].cadastro : new Date().toISOString().split('T')[0],
+      ultimo_pedido: (window._editIdx&&window._editIdx()>=0) ? CLIENTES[window._editIdx()].ultimo_pedido : '',
+      total_pedidos: (window._editIdx&&window._editIdx()>=0) ? CLIENTES[window._editIdx()].total_pedidos : 0,
+      total_caixas: (window._editIdx&&window._editIdx()>=0) ? CLIENTES[window._editIdx()].total_caixas : 0,
       status: 'ativo'
     };
-    if(editingClienteIdx>=0) CLIENTES[editingClienteIdx]=cli;
+    if(window._editIdx&&window._editIdx()>=0) CLIENTES[window._editIdx()]=cli;
     else CLIENTES.unshift(cli);
     closeModal('modal-novo-cliente');
     renderClientes('','','');
-    toast('✅ Cliente '+(editingClienteIdx>=0?'atualizado':'cadastrado')+': '+nome);
+    toast('✅ Cliente '+((window._editIdx&&window._editIdx()>=0)?'atualizado':'cadastrado')+': '+nome);
   });
 
   var btnExport = document.getElementById('btn-export-clientes');
@@ -2840,6 +2865,131 @@ document.addEventListener('DOMContentLoaded',function(){
 
   // Expor funções chamadas por onclick inline no escopo global
   window.editarCliente       = editarCliente;
+
+  // ══════════════════════════════════════
+  // GESTÃO DE USUÁRIOS (Admin)
+  // ══════════════════════════════════════
+  var ALL_MODULES_MAP = {
+    dashboard:'Início / Dashboard', chats:'Chats ao vivo', kanban:'Kanban',
+    contatos:'Contatos', followup:'Follow-up 30d', clientes:'Clientes',
+    acoes:'Ações de vendas', pedidos:'Pedidos', producao:'Fila de produção',
+    estoque:'Estoque', relatorio:'Relatórios', broadcast:'Broadcast',
+    templates:'Templates', financeiro:'Financeiro', notasfiscais:'Notas Fiscais',
+    equipe:'Equipe', config:'Configurações', script:'Script de vendas'
+  };
+  var editingUserKey = null;
+
+  function renderEquipeAdmin() {
+    var list = document.getElementById('equipe-list');
+    if(!list) return;
+    list.innerHTML = Object.keys(USERS).map(function(key) {
+      var u = USERS[key];
+      var ini = u.av || u.name.substring(0,2).toUpperCase();
+      var isMe = currentUser && currentUser.key === key;
+      var adminBadge = u.isAdmin
+        ? '<span style="background:#FBEAF0;color:#A0184E;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600;">Admin</span>'
+        : '<span style="background:#EDE3F5;color:#5A1E7A;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600;">' + (u.role||'Usuário') + '</span>';
+      var modCount = u.isAdmin ? 'Acesso total' : (u.modulos||[]).length + ' módulos';
+      return '<div class="usuario-card">' +
+        '<div class="usuario-av" style="background:' + u.color + ';">' + ini + '</div>' +
+        '<div class="usuario-info">' +
+          '<div class="usuario-nome">' + u.name + (isMe ? ' <span style="font-size:10px;color:#aaa;">(você)</span>' : '') + '</div>' +
+          '<div class="usuario-sub">@' + key + ' · ' + modCount + '</div>' +
+          '<div style="margin-top:4px;">' + adminBadge + '</div>' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">' +
+          '<button class="btn btn-sm" onclick="abrirModalUsuario(\'' + key + '\')"><i class="ti ti-edit" style="font-size:11px;"></i> Editar</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    // Botão novo usuário
+    var btnNovo = document.getElementById('btn-novo-usuario');
+    if(btnNovo) btnNovo.onclick = function(){ abrirModalUsuario(null); };
+  }
+
+  function abrirModalUsuario(key) {
+    editingUserKey = key;
+    var u = key ? USERS[key] : null;
+    var grid = document.getElementById('usr-modulos-grid');
+    var adminSel = document.getElementById('usr-admin');
+
+    document.getElementById('usr-modal-title').textContent = u ? 'Editar usuário' : 'Novo usuário';
+    document.getElementById('usr-nome').value   = u ? u.name : '';
+    document.getElementById('usr-login').value  = key || '';
+    document.getElementById('usr-login').disabled = !!key; // login não muda
+    document.getElementById('usr-senha').value  = '';
+    document.getElementById('usr-senha').placeholder = u ? 'Deixe em branco para manter' : 'Mínimo 6 caracteres';
+    document.getElementById('usr-cargo').value  = u ? (u.role||'') : '';
+    document.getElementById('usr-cor').value    = u ? u.color : '#772D83';
+    adminSel.value = (u && u.isAdmin) ? '1' : '0';
+
+    // Não pode excluir a si mesmo nem o único admin
+    var excluirBtn = document.getElementById('usr-btn-excluir');
+    var isMe = currentUser && currentUser.key === key;
+    excluirBtn.style.display = (key && !isMe) ? '' : 'none';
+
+    // Checkboxes de módulos
+    var mods = u ? (u.modulos||[]) : Object.keys(ALL_MODULES_MAP);
+    grid.innerHTML = Object.keys(ALL_MODULES_MAP).map(function(m){
+      var checked = (u && u.isAdmin) ? true : mods.indexOf(m)>=0;
+      return '<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;padding:4px 0;">' +
+        '<input type="checkbox" class="usr-mod-cb" value="' + m + '"' + (checked?' checked':'') + '> ' +
+        ALL_MODULES_MAP[m] + '</label>';
+    }).join('');
+
+    // Mostrar/esconder módulos conforme admin
+    adminSel.onchange = function(){
+      document.getElementById('usr-modulos-wrap').style.display = this.value==='1' ? 'none' : '';
+    };
+    document.getElementById('usr-modulos-wrap').style.display = adminSel.value==='1' ? 'none' : '';
+
+    openModal('modal-usuario');
+  }
+
+  document.getElementById('usr-btn-salvar').addEventListener('click', function(){
+    var nome  = document.getElementById('usr-nome').value.trim();
+    var login = (editingUserKey || document.getElementById('usr-login').value.trim()).toLowerCase().replace(/\s/g,'');
+    var senha = document.getElementById('usr-senha').value;
+    var cargo = document.getElementById('usr-cargo').value.trim();
+    var cor   = document.getElementById('usr-cor').value;
+    var isAdm = document.getElementById('usr-admin').value === '1';
+
+    if(!nome || !login){ toast('Preencha nome e login!'); return; }
+    if(!editingUserKey && !senha){ toast('Informe a senha!'); return; }
+    if(senha && senha.length < 6){ toast('Senha precisa ter ao menos 6 caracteres!'); return; }
+    if(!editingUserKey && USERS[login]){ toast('Login já existe. Escolha outro.'); return; }
+
+    var mods = isAdm ? Object.keys(ALL_MODULES_MAP) :
+      Array.from(document.querySelectorAll('.usr-mod-cb:checked')).map(function(cb){ return cb.value; });
+
+    var existing = editingUserKey ? USERS[editingUserKey] : {};
+    USERS[login] = {
+      pass:    senha || (existing.pass||'123456'),
+      name:    nome,
+      role:    cargo || existing.role || 'Usuário',
+      av:      nome.substring(0,2).toUpperCase(),
+      color:   cor,
+      isAdmin: isAdm,
+      modulos: mods
+    };
+
+    closeModal('modal-usuario');
+    renderEquipeAdmin();
+    toast('✅ Usuário ' + (editingUserKey ? 'atualizado' : 'criado') + ': ' + nome);
+  });
+
+  document.getElementById('usr-btn-excluir').addEventListener('click', function(){
+    if(!editingUserKey) return;
+    if(!confirm('Excluir o usuário ' + USERS[editingUserKey].name + '? Esta ação não pode ser desfeita.')) return;
+    delete USERS[editingUserKey];
+    closeModal('modal-usuario');
+    renderEquipeAdmin();
+    toast('🗑️ Usuário excluído.');
+  });
+
+  window.abrirModalUsuario = abrirModalUsuario;
+  window.renderEquipeAdmin = renderEquipeAdmin;
   window.abrirPedidoCliente  = abrirPedidoCliente;
   window.marcarAcao          = marcarAcao;
   window.toggleAcc           = toggleAcc;
@@ -3298,6 +3448,8 @@ document.addEventListener('DOMContentLoaded',function(){
 
   var CLI_CORES = ['#E31787','#772583','#3C3489','#633806','#085041','#0C447C','#791F1F','#633806'];
   var editingClienteIdx = -1;
+  window._editIdx = function(){ return editingClienteIdx; };
+  window._setEditIdx = function(v){ editingClienteIdx = v; };
 
   function getCliStatus(cli) {
     if(cli.status === 'vip') return '<span class="badge-vip">⭐ VIP</span>';
@@ -3377,7 +3529,7 @@ document.addEventListener('DOMContentLoaded',function(){
   function editarCliente(id) {
     var cli = CLIENTES.find(function(c){ return c.id === id; });
     if(!cli) return;
-    editingClienteIdx = CLIENTES.indexOf(cli);
+    editingClienteIdx = CLIENTES.indexOf(cli); if(window._setEditIdx) window._setEditIdx(editingClienteIdx);
     document.getElementById('cliente-modal-title').textContent = 'Editar cliente';
     document.getElementById('cliente-modal-sub').textContent = cli.id;
     document.getElementById('cli-nome').value = cli.nome;
@@ -3482,7 +3634,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if(id === 'clientes') { renderClientes('','',''); }
     if(id === 'financeiro') { renderFinanceiro('','',''); }
     if(id === 'notasfiscais') { renderNF('','',''); initNF(); }
-    if(id === 'equipe') { renderEquipe(); }
+    if(id === 'equipe') { renderEquipeAdmin ? renderEquipeAdmin() : renderEquipe(); }
   };
 
 
@@ -4136,6 +4288,65 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="modal-footer">
       <button class="btn" data-close="modal-minha-conta">Cancelar</button>
       <button class="btn btn-rosa" id="btn-salvar-senha"><i class="ti ti-lock" style="font-size:12px;"></i> Salvar nova senha</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL: EDITAR/CRIAR USUÁRIO (Admin) -->
+<div class="modal-overlay" id="modal-usuario">
+  <div class="modal" style="max-width:520px;width:100%;">
+    <div class="modal-head">
+      <span class="modal-title" id="usr-modal-title">Novo usuário</span>
+      <button class="modal-close" data-close="modal-usuario">×</button>
+    </div>
+    <div class="modal-body" style="max-height:75vh;overflow-y:auto;">
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Nome completo *</label>
+          <input class="form-input" id="usr-nome" placeholder="Nome do usuário"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Login (sem espaços) *</label>
+          <input class="form-input" id="usr-login" placeholder="ex: karla"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Senha *</label>
+          <input class="form-input" type="password" id="usr-senha" placeholder="Mínimo 6 caracteres"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cargo / Perfil</label>
+          <input class="form-input" id="usr-cargo" placeholder="ex: Vendedor, Gerente..."/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cor do avatar</label>
+          <select class="form-input" id="usr-cor">
+            <option value="#E31787">Rosa</option>
+            <option value="#772D83">Roxo</option>
+            <option value="#085041">Verde</option>
+            <option value="#3C3489">Azul</option>
+            <option value="#633806">Marrom</option>
+            <option value="#C0392B">Vermelho</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nível de acesso</label>
+          <select class="form-input" id="usr-admin">
+            <option value="0">Usuário — acesso por módulo</option>
+            <option value="1">Admin — acesso total</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="usr-modulos-wrap" style="margin-top:16px;">
+        <div style="font-weight:600;font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Módulos com acesso</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;" id="usr-modulos-grid"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="usr-btn-excluir" style="display:none;margin-right:auto;"><i class="ti ti-trash" style="font-size:12px;"></i> Excluir</button>
+      <button class="btn" data-close="modal-usuario">Cancelar</button>
+      <button class="btn btn-rosa" id="usr-btn-salvar"><i class="ti ti-check" style="font-size:12px;"></i> Salvar</button>
     </div>
   </div>
 </div>
