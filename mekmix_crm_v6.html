@@ -2396,6 +2396,10 @@ document.addEventListener('DOMContentLoaded',function(){
     {id:'PED-005',pos:4,priority:false,client:'Marina Fonseca',prod:'400ml · 2cx · 2.000un',tinta:'Verde',vendedor:'Pedro',data:'22/06',prazo:'07/07'},
   ];
 
+  // Expor para o dashboard
+  window._ORDERS    = function(){ return ORDERS; };
+  window._PRODQUEUE = function(){ return PROD_QUEUE; };
+
   // ── ESTOQUE ──
   var STOCK = {
     '330ml': {caixas: 8, unid: 350, minCaixas: 3},
@@ -2764,12 +2768,13 @@ document.addEventListener('DOMContentLoaded',function(){
   // ── DASHBOARD DINÂMICO ──
   function renderDashboard() {
     var pillMap = {'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Entregue':'p-entregue','Follow-up 30d':'p-follow'};
-    var emProd  = ORDERS.filter(function(o){ return o.status === 'Em produção'; });
-    var naFila  = PROD_QUEUE || [];
-    var fatMes  = ORDERS.filter(function(o){ return o.status === 'Entregue'; })
+    var orders  = (typeof ORDERS !== 'undefined' ? ORDERS : null) || (window._ORDERS ? window._ORDERS() : []);
+    var pqueue  = (typeof PROD_QUEUE !== 'undefined' ? PROD_QUEUE : null) || (window._PRODQUEUE ? window._PRODQUEUE() : []);
+    var emProd  = orders.filter(function(o){ return o.status === 'Em produção'; });
+    var naFila  = pqueue || [];
+    var fatMes  = orders.filter(function(o){ return o.status === 'Entregue'; })
                         .reduce(function(s,o){ return s + (o.valor||0); }, 0);
     var chatsN  = Object.keys(CONVDATA||{}).length;
-    // Follow-up urgentes: items do painel follow-up no dashboard (estáticos por ora)
     var followN = document.querySelectorAll('.follow-item').length;
     var el = function(id){ return document.getElementById(id); };
     if(el('dash-chats'))     el('dash-chats').textContent     = chatsN;
@@ -2784,7 +2789,7 @@ document.addEventListener('DOMContentLoaded',function(){
     // Atendimentos recentes: últimos 5 pedidos por data
     var recTbody = el('dash-recentes');
     if(recTbody) {
-      var recent = ORDERS.slice().sort(function(a,b){ return (b.data||'').localeCompare(a.data||''); }).slice(0,5);
+      var recent = orders.slice().sort(function(a,b){ return (b.data||'').localeCompare(a.data||''); }).slice(0,5);
       recTbody.innerHTML = recent.length === 0
         ? '<tr><td colspan="4" style="color:var(--text2);text-align:center;padding:12px;">Nenhum pedido cadastrado</td></tr>'
         : recent.map(function(o){
@@ -2817,7 +2822,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
     if(tipo === 'prod') {
       titleTxt = '📦 Pedidos em produção';
-      items = ORDERS.filter(function(o){ return o.status === 'Em produção'; });
+      items = ((typeof ORDERS!=='undefined'?ORDERS:null)||window._ORDERS&&window._ORDERS()||[]).filter(function(o){ return o.status === 'Em produção'; });
       linkFn = "goPage('pedidos','Pedidos');document.getElementById('dash-detail-panel').style.display='none'";
       body.innerHTML = items.length === 0
         ? '<div style="color:var(--text2);font-size:12px;padding:8px 0;">Nenhum pedido em produção no momento.</div>'
@@ -2838,7 +2843,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
     if(tipo === 'fila') {
       titleTxt = '🗂️ Fila de produção';
-      items = PROD_QUEUE || [];
+      items = (typeof PROD_QUEUE!=='undefined'?PROD_QUEUE:null)||(window._PRODQUEUE&&window._PRODQUEUE())||[];
       linkFn = "goPage('producao','Fila de produção');document.getElementById('dash-detail-panel').style.display='none'";
       body.innerHTML = items.length === 0
         ? '<div style="color:var(--text2);font-size:12px;padding:8px 0;">Fila de produção vazia.</div>'
