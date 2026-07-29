@@ -89,6 +89,7 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;}
 .p-novo{background:#FBEAF0;color:#72243E;}
 .p-orc{background:#EEEDFE;color:#3C3489;}
 .p-prod{background:#FAEEDA;color:#633806;}
+.p-despacho{background:#E0F0FF;color:#1A5A9A;}
 .p-entregue{background:#E1F5EE;color:#085041;}
 .p-arte{background:#E6F1FB;color:#0C447C;}
 .p-follow{background:#FCEBEB;color:#791F1F;}
@@ -607,6 +608,17 @@ input, textarea { cursor: text; }
 <div class="app" id="app">
   <div class="sidebar">
     <div class="sb-logo"><div class="sb-logo-ico">MM</div><div><div class="sb-logo-text">MekMix CRM</div><div style="color:rgba(255,255,255,.5);font-size:10px;" id="sb-role-lbl">Admin</div></div></div>
+    <div style="padding:10px 14px 0;position:relative;">
+      <button id="btn-notif-sino" style="width:100%;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 10px;color:#fff;cursor:pointer;font-size:12px;">
+        <i class="ti ti-bell" style="font-size:16px;"></i>
+        <span style="flex:1;text-align:left;">Notificações</span>
+        <span class="sb-badge" id="notif-sino-badge" style="display:none;">0</span>
+      </button>
+      <div id="notif-sino-painel" style="display:none;position:absolute;top:100%;left:14px;right:14px;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:50;max-height:400px;overflow-y:auto;margin-top:4px;">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);font-weight:600;font-size:12px;color:var(--text);">Notificações</div>
+        <div id="notif-sino-lista"></div>
+      </div>
+    </div>
     <div style="padding-top:6px;">
       <div class="sb-sec">Principal</div>
       <button class="sb-btn" data-page="dashboard"><i class="ti ti-home"></i><span class="sb-btn-lbl">Início</span></button>
@@ -644,7 +656,16 @@ input, textarea { cursor: text; }
     <div class="mob-top" id="mob-top">
       <button class="mob-back-btn" id="mob-back" style="visibility:hidden;"><i class="ti ti-arrow-left" style="font-size:18px;"></i> Voltar</button>
       <div class="mob-top-title" id="mob-title">Chats ao vivo</div>
-      <div class="mob-top-right"><button class="mob-back-btn" id="btn-mob-notif"><i class="ti ti-bell" style="font-size:20px;color:#fff;"></i></button></div>
+      <div class="mob-top-right"><button class="mob-back-btn" id="btn-mob-notif" style="position:relative;"><i class="ti ti-bell" style="font-size:20px;color:#fff;"></i><span class="sb-badge" id="notif-mob-badge" style="display:none;position:absolute;top:2px;right:2px;font-size:9px;padding:0 4px;">0</span></button></div>
+    </div>
+    <div id="notif-mob-painel" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;">
+      <div style="position:absolute;top:0;right:0;bottom:0;width:88%;max-width:340px;background:#fff;box-shadow:-4px 0 20px rgba(0,0,0,.2);display:flex;flex-direction:column;">
+        <div style="padding:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-weight:600;font-size:14px;">Notificações</span>
+          <button id="btn-fechar-notif-mob" style="background:none;border:none;font-size:20px;color:var(--text2);cursor:pointer;">×</button>
+        </div>
+        <div id="notif-mob-lista" style="flex:1;overflow-y:auto;"></div>
+      </div>
     </div>
     <div class="content-area">
       <div id="page-chats" class="chat-layout">
@@ -1103,7 +1124,7 @@ input, textarea { cursor: text; }
         <div class="page-title">Pedidos
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
             <button class="btn btn-rosa btn-sm" id="btn-novo-pedido"><i class="ti ti-plus" style="font-size:12px;"></i> Novo pedido</button>
-            <select class="sel" style="width:120px;" id="filter-ped-status"><option value="">Todos status</option><option>Novo lead</option><option>Orçamento enviado</option><option>Arte pendente</option><option>Em produção</option><option>Entregue</option><option>Cancelamento solicitado</option><option>Cancelado</option></select>
+            <select class="sel" style="width:120px;" id="filter-ped-status"><option value="">Todos status</option><option>Novo lead</option><option>Orçamento enviado</option><option>Arte pendente</option><option>Em produção</option><option>Pronto para despacho</option><option>Entregue</option><option>Cancelamento solicitado</option><option>Cancelado</option></select>
             <select class="sel" style="width:110px;" id="filter-ped-vend"><option value="">Todos vendedores</option><option>João</option><option>Maria</option><option>Pedro</option></select>
             <select class="sel" style="width:110px;" id="filter-ped-sort"><option value="data">↓ Data entrada</option><option value="valor">↓ Valor</option><option value="nome">A-Z Nome</option></select>
           </div>
@@ -1921,6 +1942,12 @@ function tryLogin(u,p){
     document.getElementById('app').classList.add('visible');
     applyRole();renderConvList();renderTemplates();renderQR();openConv('AC');
     if(typeof checkStockAlerts==='function') checkStockAlerts();
+    if(typeof renderNotificacoes==='function') renderNotificacoes();
+    // Sempre começa na aba Início — além de ser o comportamento desejado,
+    // isso também garante que só uma página fica visível de cada vez (sem
+    // essa chamada explícita, Chats ao vivo e Chat interno podiam aparecer
+    // juntos até o primeiro clique manual em alguma aba).
+    goPage('dashboard','Início');
     setTimeout(renderDashboard, 300);
     if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
     return true;
@@ -2532,7 +2559,33 @@ document.addEventListener('DOMContentLoaded',function(){
 
   // Mobile back
   document.getElementById('mob-back').addEventListener('click',mobBack);
-  document.getElementById('btn-mob-notif').addEventListener('click',function(){toast('Ana Clara: "Vou fechar sim! Como faço o pagamento?"');});
+  document.getElementById('btn-mob-notif').addEventListener('click',function(){
+    if(typeof renderNotificacoes==='function') renderNotificacoes();
+    document.getElementById('notif-mob-painel').style.display='block';
+  });
+  var btnFecharNotifMob = document.getElementById('btn-fechar-notif-mob');
+  if(btnFecharNotifMob) btnFecharNotifMob.addEventListener('click', function(){
+    document.getElementById('notif-mob-painel').style.display='none';
+  });
+  var notifMobPainel = document.getElementById('notif-mob-painel');
+  if(notifMobPainel) notifMobPainel.addEventListener('click', function(e){
+    if(e.target===this) this.style.display='none';
+  });
+
+  var btnNotifSino = document.getElementById('btn-notif-sino');
+  if(btnNotifSino) btnNotifSino.addEventListener('click', function(e){
+    e.stopPropagation();
+    if(typeof renderNotificacoes==='function') renderNotificacoes();
+    var painel = document.getElementById('notif-sino-painel');
+    painel.style.display = painel.style.display==='none' ? 'block' : 'none';
+  });
+  document.addEventListener('click', function(e){
+    var painel = document.getElementById('notif-sino-painel');
+    var sino = document.getElementById('btn-notif-sino');
+    if(painel && sino && painel.style.display==='block' && !painel.contains(e.target) && e.target!==sino && !sino.contains(e.target)){
+      painel.style.display='none';
+    }
+  });
 
   // Mobile nav
   document.querySelectorAll('.mob-nav-btn[data-mob-page]').forEach(function(btn){
@@ -2726,7 +2779,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
     list.innerHTML = orders.map(function(o) {
       var emFluxoCancelamento = o.status==='Cancelamento solicitado' || o.status==='Cancelado';
-      var opts = ['Novo lead','Orçamento enviado','Arte pendente','Em produção','Entregue']
+      var opts = ['Novo lead','Orçamento enviado','Arte pendente','Em produção','Pronto para despacho','Entregue']
         .map(function(s){ return '<option'+(s===o.status?' selected':'')+'>'+s+'</option>'; }).join('');
       var statusCel;
       if(emFluxoCancelamento){
@@ -2765,7 +2818,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if(!order) return;
     var oldStatus = order.status;
     order.status = newStatus;
-    var pillMap = {'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Entregue':'p-entregue','Follow-up 30d':'p-follow','Cancelamento solicitado':'p-follow','Cancelado':'p-cancelado'};
+    var pillMap = {'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Pronto para despacho':'p-despacho','Entregue':'p-entregue','Follow-up 30d':'p-follow','Cancelamento solicitado':'p-follow','Cancelado':'p-cancelado'};
     order.pill = pillMap[newStatus] || 'p-novo';
 
     // Baixa automática de estoque ao entrar em produção — só roda se este
@@ -2827,6 +2880,7 @@ document.addEventListener('DOMContentLoaded',function(){
     renderOrders();
     if(typeof renderProdQueue==='function') renderProdQueue();
     if(typeof renderCancelamentosPendentes==='function') renderCancelamentosPendentes();
+    if(typeof renderNotificacoes==='function') renderNotificacoes();
     toast('Cancelamento solicitado. Aguardando aprovação do Admin Geral/gerente comercial.');
     return true;
   }
@@ -2865,6 +2919,7 @@ document.addEventListener('DOMContentLoaded',function(){
     renderOrders();
     if(typeof renderProdQueue==='function') renderProdQueue();
     if(typeof renderCancelamentosPendentes==='function') renderCancelamentosPendentes();
+    if(typeof renderNotificacoes==='function') renderNotificacoes();
     toast('❌ Pedido '+orderId+' cancelado. Estoque estornado.');
   }
 
@@ -2878,12 +2933,13 @@ document.addEventListener('DOMContentLoaded',function(){
     order.cancelamento.decididoEm = Date.now();
     order.cancelamento.motivoDecisao = motivoDecisao||'';
     // Volta exatamente ao status que tinha antes da solicitação
-    var pillMap = {'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Entregue':'p-entregue'};
+    var pillMap = {'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Pronto para despacho':'p-despacho','Entregue':'p-entregue'};
     order.status = order.cancelamento.statusAnterior || 'Em produção';
     order.pill = pillMap[order.status] || 'p-prod';
 
     renderOrders();
     if(typeof renderCancelamentosPendentes==='function') renderCancelamentosPendentes();
+    if(typeof renderNotificacoes==='function') renderNotificacoes();
     toast('Cancelamento negado. Pedido '+orderId+' voltou para "'+order.status+'".');
   }
   window.pedSolicitarCancelamento = pedSolicitarCancelamento;
@@ -2975,8 +3031,28 @@ document.addEventListener('DOMContentLoaded',function(){
           '<button class="prod-priority-btn' + (item.priority ? ' on' : '') + '" data-pidx="' + idx + '">' +
             (item.priority ? '🔥 Urgente' : '⬜ Normal') +
           '</button>' +
+          '<button class="btn btn-rosa btn-sm" style="margin-top:6px;font-size:10px;padding:3px 8px;" data-pronto-id="' + item.id + '"><i class="ti ti-check" style="font-size:10px;"></i> Pronto p/ despacho</button>' +
         '</div>';
       queue.appendChild(card);
+    });
+
+    // Bind botão "Pronto para despacho": sai da fila, pedido muda de status
+    queue.querySelectorAll('[data-pronto-id]').forEach(function(btn){
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        var id = this.getAttribute('data-pronto-id');
+        var order = ORDERS.find(function(o){ return o.id===id; });
+        if(order){
+          order.status = 'Pronto para despacho';
+          order.pill = 'p-despacho';
+          if(typeof notifPedidoProntoDespacho==='function') notifPedidoProntoDespacho(order);
+        }
+        var idx = PROD_QUEUE.findIndex(function(p){ return p.id===id; });
+        if(idx>=0) PROD_QUEUE.splice(idx,1);
+        renderProdQueue();
+        if(typeof renderOrders==='function') renderOrders();
+        toast('✅ '+id+' marcado como pronto para despacho!');
+      });
     });
 
     // Bind botões ▲▼
@@ -3147,7 +3223,127 @@ document.addEventListener('DOMContentLoaded',function(){
       badge.textContent = total;
       badge.style.display = (podeVer && total>0) ? '' : 'none';
     }
+
+    // Mantém a central de notificações sincronizada com o estoque.
+    if(typeof renderNotificacoes==='function') renderNotificacoes();
   }
+
+  /* ============================================================
+     CENTRAL DE NOTIFICAÇÕES — agrega, num só lugar, tudo que precisa
+     de atenção de quem está logado, sem precisar abrir aba por aba.
+     Recalculado sob demanda (login, mudanças relevantes) — nunca fica
+     desatualizado nem precisa de "marcar como lido" manual: cada item
+     some sozinho quando a pendência é resolvida (mesmo espírito do
+     alerta de estoque).
+     ============================================================ */
+  function coletarNotificacoes(){
+    var itens = [];
+    if(!currentUser) return itens;
+
+    // 1) Cancelamentos de pedido aguardando aprovação — só quem decide vê.
+    if(typeof pedPodeAprovarCancelamento==='function' && pedPodeAprovarCancelamento() && typeof ORDERS!=='undefined'){
+      ORDERS.filter(function(o){ return o.cancelamento && o.cancelamento.status==='pendente'; }).forEach(function(o){
+        itens.push({
+          tipo:'cancelamento', icone:'ti-alert-triangle', cor:'#E31787',
+          titulo:'Cancelamento aguardando aprovação',
+          detalhe:o.id+' — '+o.client+' · solicitado por '+o.cancelamento.solicitadoPor,
+          pagina:'pedidos'
+        });
+      });
+    }
+
+    // 2) Estoque negativo/baixo — só quem gerencia estoque vê.
+    if(typeof estoquePodeGerenciar==='function' && estoquePodeGerenciar() && typeof STOCK!=='undefined'){
+      if(typeof stockTamanhosNegativos==='function'){
+        stockTamanhosNegativos().forEach(function(tam){
+          itens.push({tipo:'estoque', icone:'ti-package', cor:'#791F1F', titulo:'Estoque negativo', detalhe:tam+' ('+STOCK[tam].caixas+' cx)', pagina:'estoque'});
+        });
+      }
+      if(typeof stockTamanhosBaixos==='function'){
+        stockTamanhosBaixos().forEach(function(tam){
+          itens.push({tipo:'estoque', icone:'ti-package', cor:'#633806', titulo:'Estoque abaixo do mínimo', detalhe:tam+' ('+STOCK[tam].caixas+' cx)', pagina:'estoque'});
+        });
+      }
+    }
+
+    // 3) Pedidos prontos para despacho — o vendedor do pedido + quem gerencia.
+    if(typeof ORDERS!=='undefined'){
+      ORDERS.filter(function(o){ return o.status==='Pronto para despacho'; }).forEach(function(o){
+        var souVendedor = o.vendedor===currentUser.name;
+        var souGestor = currentUser.isAdminGeral || currentUser.isAdmin || currentUser.podeGerenciarEstoque;
+        if(souVendedor || souGestor){
+          itens.push({
+            tipo:'despacho', icone:'ti-truck-delivery', cor:'#1A5A9A',
+            titulo:'Pedido pronto para despacho',
+            detalhe:o.id+' — '+o.client+' · '+o.prod,
+            pagina:'pedidos'
+          });
+        }
+      });
+    }
+
+    // 4) Follow-up vencido — visível para todos (cada um já vê só os próprios
+    // clientes, seguindo a mesma regra de visibilidade da aba Follow-up).
+    // Aproveita os dados de exemplo já usados na tela de Follow-up 30d.
+    itens.push({tipo:'followup', icone:'ti-bell', cor:'#E31787', titulo:'Follow-up vencido', detalhe:'Thiago Costa · venceu há 1 dia', pagina:'followup'});
+    itens.push({tipo:'followup', icone:'ti-bell', cor:'#E31787', titulo:'Follow-up vencido', detalhe:'Luana Reis · venceu hoje', pagina:'followup'});
+
+    return itens;
+  }
+
+  function notifIconeTipo(tipo){
+    return {cancelamento:'ti-alert-triangle', estoque:'ti-package', despacho:'ti-truck-delivery', followup:'ti-bell'}[tipo] || 'ti-bell';
+  }
+
+  function renderNotificacoes(){
+    var itens = coletarNotificacoes();
+    var total = itens.length;
+
+    // Badge do sino — desktop e mobile, mesmo número.
+    var badgeDesktop = document.getElementById('notif-sino-badge');
+    var badgeMobile = document.getElementById('notif-mob-badge');
+    [badgeDesktop, badgeMobile].forEach(function(b){
+      if(!b) return;
+      b.textContent = total;
+      b.style.display = total>0 ? '' : 'none';
+    });
+
+    var htmlLista = !total
+      ? '<div style="padding:24px 16px;text-align:center;color:var(--text3);font-size:12px;font-style:italic;">Nenhuma notificação — tudo em dia 👍</div>'
+      : itens.map(function(n){
+          return '<button class="notif-item" data-notif-page="'+n.pagina+'" style="display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;padding:10px 14px;border:none;border-bottom:1px solid var(--border);background:#fff;cursor:pointer;">'+
+            '<i class="ti '+n.icone+'" style="font-size:16px;color:'+n.cor+';flex-shrink:0;margin-top:1px;"></i>'+
+            '<div style="min-width:0;"><div style="font-size:12px;font-weight:500;color:var(--text);">'+esc(n.titulo)+'</div><div style="font-size:11px;color:var(--text2);margin-top:1px;">'+esc(n.detalhe)+'</div></div>'+
+          '</button>';
+        }).join('');
+
+    var listaDesktop = document.getElementById('notif-sino-lista');
+    var listaMobile = document.getElementById('notif-mob-lista');
+    if(listaDesktop) listaDesktop.innerHTML = htmlLista;
+    if(listaMobile) listaMobile.innerHTML = htmlLista;
+
+    // Cada clique num item já leva direto pra página relacionada.
+    [listaDesktop, listaMobile].forEach(function(lista){
+      if(!lista) return;
+      lista.querySelectorAll('[data-notif-page]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var pagina = this.getAttribute('data-notif-page');
+          document.getElementById('notif-sino-painel').style.display='none';
+          document.getElementById('notif-mob-painel').style.display='none';
+          var sb = document.querySelector('.sb-btn[data-page="'+pagina+'"]');
+          goPage(pagina, sb ? sb.querySelector('.sb-btn-lbl').textContent : pagina);
+        });
+      });
+    });
+  }
+
+  // Chamado quando um pedido entra em "Pronto para despacho" — hoje só
+  // recalcula a central; se um dia tivermos notificação push real (com
+  // backend), é aqui que ela dispararia também.
+  function notifPedidoProntoDespacho(order){
+    renderNotificacoes();
+  }
+  window.notifPedidoProntoDespacho = notifPedidoProntoDespacho;
 
   // Bind estoque
   // Quem pode registrar entrada/baixa/abertura/ajuste de estoque: Admin Geral
@@ -3311,7 +3507,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
   // ── DASHBOARD DINÂMICO ──
   function renderDashboard() {
-    var pillMap = {'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Entregue':'p-entregue','Follow-up 30d':'p-follow'};
+    var pillMap = {'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Pronto para despacho':'p-despacho','Entregue':'p-entregue','Follow-up 30d':'p-follow'};
     var orders  = (typeof ORDERS !== 'undefined' ? ORDERS : null) || (window._ORDERS ? window._ORDERS() : []);
     var pqueue  = (typeof PROD_QUEUE !== 'undefined' ? PROD_QUEUE : null) || (window._PRODQUEUE ? window._PRODQUEUE() : []);
     var emProd  = orders.filter(function(o){ return o.status === 'Em produção'; });
