@@ -92,6 +92,7 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;}
 .p-entregue{background:#E1F5EE;color:#085041;}
 .p-arte{background:#E6F1FB;color:#0C447C;}
 .p-follow{background:#FCEBEB;color:#791F1F;}
+.p-cancelado{background:#f0f0f2;color:#666;}
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
 .metric{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
 .metric-click{transition:transform .15s,box-shadow .15s,border-color .15s;}
@@ -142,6 +143,7 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;}
 .msg-out .msg-bubble{background:var(--rosa);color:#fff;border-bottom-right-radius:3px;}
 .msg-meta{font-size:10px;color:var(--text3);margin-top:3px;}
 .msg-out .msg-meta{text-align:right;}
+.msg-author{font-size:10px;color:var(--text3);margin-bottom:2px;font-weight:500;}
 .audio-wrap{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;background:var(--white);border:1px solid var(--border);border-bottom-left-radius:3px;width:200px;}
 .audio-play{width:28px;height:28px;border-radius:50%;background:var(--rosa);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none;}
 .audio-wave{flex:1;height:24px;display:flex;align-items:center;gap:1.5px;}
@@ -360,7 +362,10 @@ button { cursor: pointer !important; touch-action: manipulation; }
 .stock-item-sub{font-size:10px;color:var(--text3);margin-top:2px;}
 .stock-item.low .stock-item-val{color:var(--rosa);}
 .stock-item.low .stock-item-label::after{content:' ⚠️';}
+.stock-item.negativo{background:#FCEBEB;border:1px solid #F5A3A3;}
+.stock-item.negativo .stock-item-val{color:#791F1F;}
 .stock-alert{background:#FBEAF0;border:1px solid #F5B8D0;border-radius:8px;padding:8px 12px;font-size:12px;color:#72243E;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.stock-alert.urgente{background:#FCEBEB;border-color:#791F1F;color:#791F1F;}
 .stock-log{font-size:11px;}
 .stock-log-item{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f5f5f7;}
 .stock-log-item:last-child{border-bottom:none;}
@@ -368,6 +373,7 @@ button { cursor: pointer !important; touch-action: manipulation; }
 .entrada{background:#E1F5EE;color:#085041;}
 .saida{background:#FBEAF0;color:#72243E;}
 .abertura{background:#FFF8E1;color:#7B5800;}
+.ajuste{background:#EEEDFE;color:#3C3489;}
 .stock-inp-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;}
 .stock-field{flex:1;min-width:80px;}
 .stock-field label{display:block;font-size:11px;color:var(--text2);margin-bottom:4px;}
@@ -530,18 +536,25 @@ input, textarea { cursor: text; }
 .fin-resumo-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;}
 .fin-resumo-val{font-size:20px;font-weight:700;}
 .fin-resumo-lbl{font-size:11px;color:var(--text2);margin-top:3px;}
-.conta-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border);font-size:12px;}
+/* Grid de colunas fixas (efeito planilha): Descrição flexível + 5 colunas de largura fixa.
+   Mesmas colunas usadas no cabeçalho (.conta-head-row) e em cada linha (.conta-row),
+   garantindo alinhamento vertical perfeito entre todas as linhas. */
+.conta-head-row{display:grid;grid-template-columns:1fr 130px 90px 100px 90px 100px;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border);font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;}
+.conta-head-row span:not(:first-child){text-align:center;}
+.conta-row{display:grid;grid-template-columns:1fr 130px 90px 100px 90px 100px;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--border);font-size:12px;}
 .conta-row:last-child{border-bottom:none;}
 .conta-row:hover{background:var(--bg);}
-.conta-venc{font-size:11px;color:var(--text2);white-space:nowrap;}
+.conta-cat-pill{font-size:11px;background:var(--bg);padding:2px 8px;border-radius:12px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.conta-venc{font-size:11px;color:var(--text2);white-space:nowrap;text-align:center;}
 .conta-venc.vencida{color:#791F1F;font-weight:600;}
 .conta-venc.hoje{color:#E87000;font-weight:600;}
 .conta-venc.proxima{color:#633806;font-weight:500;}
-.conta-status-pill{font-size:10px;padding:2px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0;}
+.conta-status-pill{font-size:10px;padding:2px 8px;border-radius:20px;white-space:nowrap;text-align:center;justify-self:center;}
 .cs-pago{background:#E1F5EE;color:#085041;}
 .cs-pendente{background:#FBEAF0;color:#72243E;}
 .cs-vencida{background:#FCEBEB;color:#791F1F;}
-.conta-valor{font-size:13px;font-weight:600;color:var(--rosa);white-space:nowrap;flex-shrink:0;}
+.conta-valor{font-size:13px;font-weight:600;color:var(--rosa);white-space:nowrap;text-align:right;}
+.conta-acao-cel{justify-self:center;}
 
 /* NOTAS FISCAIS */
 .nf-drop-area{border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg);margin-bottom:16px;}
@@ -561,7 +574,15 @@ input, textarea { cursor: text; }
 @media(max-width:768px){
   .fin-resumo-grid{grid-template-columns:1fr 1fr;}
   .nf-chave{max-width:120px;}
-  .conta-row{flex-wrap:wrap;}
+  .conta-head-row{display:none;} /* cabeçalho de coluna não faz sentido empilhado */
+  .conta-row{grid-template-columns:1fr auto;grid-template-areas:"desc desc" "cat venc" "valor status" "acao acao";row-gap:6px;}
+  .conta-row>:nth-child(1){grid-area:desc;}
+  .conta-row>:nth-child(2){grid-area:cat;justify-self:start;}
+  .conta-row>:nth-child(3){grid-area:venc;justify-self:start;text-align:left;}
+  .conta-row>:nth-child(4){grid-area:valor;justify-self:start;text-align:left;}
+  .conta-row>:nth-child(5){grid-area:status;justify-self:end;}
+  .conta-row>:nth-child(6){grid-area:acao;justify-self:stretch;}
+  .conta-row>:nth-child(6) button{width:100%;}
 }
 
 </style>
@@ -590,6 +611,7 @@ input, textarea { cursor: text; }
       <div class="sb-sec">Principal</div>
       <button class="sb-btn" data-page="dashboard"><i class="ti ti-home"></i><span class="sb-btn-lbl">Início</span></button>
       <button class="sb-btn active" data-page="chats"><i class="ti ti-message-circle"></i><span class="sb-btn-lbl">Chats ao vivo</span><span class="sb-badge">8</span></button>
+      <button class="sb-btn" data-page="chatinterno"><i class="ti ti-messages"></i><span class="sb-btn-lbl">Chat interno</span></button>
       <button class="sb-btn" data-page="kanban"><i class="ti ti-layout-kanban"></i><span class="sb-btn-lbl">Kanban</span></button>
       <button class="sb-btn" data-page="contatos"><i class="ti ti-users"></i><span class="sb-btn-lbl">Contatos</span></button>
       <button class="sb-btn" data-page="followup"><i class="ti ti-bell"></i><span class="sb-btn-lbl">Follow-up 30d</span><span class="sb-badge">3</span></button>
@@ -599,18 +621,18 @@ input, textarea { cursor: text; }
       <button class="sb-btn" data-page="clientes"><i class="ti ti-address-book"></i><span class="sb-btn-lbl">Clientes</span></button>
       <button class="sb-btn" data-page="acoes"><i class="ti ti-trophy"></i><span class="sb-btn-lbl">Ações de vendas</span></button>
       <button class="sb-btn" data-page="pedidos"><i class="ti ti-clipboard-list"></i><span class="sb-btn-lbl">Pedidos</span></button>
-      <button class="sb-btn admin-only" data-page="producao"><i class="ti ti-tools"></i><span class="sb-btn-lbl">Fila de produção</span></button>
-      <button class="sb-btn admin-only" data-page="estoque"><i class="ti ti-package"></i><span class="sb-btn-lbl">Estoque</span></button>
-      <button class="sb-btn admin-only" data-page="relatorio"><i class="ti ti-chart-bar"></i><span class="sb-btn-lbl">Relatórios</span></button>
-      <button class="sb-btn admin-only" data-page="broadcast"><i class="ti ti-send"></i><span class="sb-btn-lbl">Broadcast</span></button>
-      <button class="sb-btn admin-only" data-page="templates"><i class="ti ti-template"></i><span class="sb-btn-lbl">Templates</span></button>
+      <button class="sb-btn admin-only desktop-only" data-page="producao"><i class="ti ti-tools"></i><span class="sb-btn-lbl">Fila de produção</span></button>
+      <button class="sb-btn" data-page="estoque"><i class="ti ti-package"></i><span class="sb-btn-lbl">Estoque</span><span class="sb-badge" id="sb-estoque-badge" style="display:none;">0</span></button>
+      <button class="sb-btn admin-only desktop-only" data-page="relatorio"><i class="ti ti-chart-bar"></i><span class="sb-btn-lbl">Relatórios</span></button>
+      <button class="sb-btn admin-only desktop-only" data-page="broadcast"><i class="ti ti-send"></i><span class="sb-btn-lbl">Broadcast</span></button>
+      <button class="sb-btn" data-page="templates"><i class="ti ti-template"></i><span class="sb-btn-lbl">Templates</span></button>
       <button class="sb-btn" data-page="script"><i class="ti ti-script"></i><span class="sb-btn-lbl">Script de vendas</span></button>
       <div class="sb-sec admin-only">Config</div>
-      <button class="sb-btn admin-only" data-page="whatsapp"><i class="ti ti-brand-whatsapp"></i><span class="sb-btn-lbl">Conexões WA</span></button>
-      <button class="sb-btn admin-only" data-page="financeiro"><i class="ti ti-cash"></i><span class="sb-btn-lbl">Financeiro</span></button>
-      <button class="sb-btn admin-only" data-page="notasfiscais"><i class="ti ti-file-invoice"></i><span class="sb-btn-lbl">Notas Fiscais</span></button>
-      <button class="sb-btn admin-only" data-page="equipe"><i class="ti ti-users-group"></i><span class="sb-btn-lbl">Equipe</span></button>
-      <button class="sb-btn admin-only" data-page="config"><i class="ti ti-settings"></i><span class="sb-btn-lbl">Configurações</span></button>
+      <button class="sb-btn admin-only desktop-only" data-page="whatsapp"><i class="ti ti-brand-whatsapp"></i><span class="sb-btn-lbl">Conexões WA</span></button>
+      <button class="sb-btn admin-only desktop-only" data-page="financeiro"><i class="ti ti-cash"></i><span class="sb-btn-lbl">Financeiro</span></button>
+      <button class="sb-btn admin-only desktop-only" data-page="notasfiscais"><i class="ti ti-file-invoice"></i><span class="sb-btn-lbl">Notas Fiscais</span></button>
+      <button class="sb-btn admin-only desktop-only" data-page="equipe"><i class="ti ti-users-group"></i><span class="sb-btn-lbl">Equipe</span></button>
+      <button class="sb-btn admin-only desktop-only" data-page="config"><i class="ti ti-settings"></i><span class="sb-btn-lbl">Configurações</span></button>
     </div>
     <div class="sb-bottom">
       <div class="sb-user"><div class="sb-av" id="sb-av" style="background:#E31787;">BR</div><div><div style="color:#fff;font-size:12px;font-weight:500;" id="sb-name">Bruno</div><div style="color:rgba(255,255,255,.5);font-size:10px;" id="sb-role">Admin</div></div></div>
@@ -685,7 +707,7 @@ input, textarea { cursor: text; }
             <div class="info-row"><span class="info-lbl">Vendedor</span><span class="info-val" id="c3-vendedor"></span></div>
             <div class="info-row"><span class="info-lbl">Status</span><span class="pill p-novo" id="c3-status">Novo lead</span></div>
           </div>
-          <div class="col3-sec admin-only"><div class="col3-lbl">Atribuir vendedor</div>
+          <div class="col3-sec" id="wrap-atribuir-vendedor"><div class="col3-lbl">Atribuir vendedor</div>
             <select class="sel" id="sel-vendedor" style="margin-bottom:8px;"><option>João</option><option>Maria</option><option>Pedro</option><option>— Sem atribuição</option></select>
           </div>
           <div class="col3-sec"><div class="col3-lbl">Status do pedido</div>
@@ -798,6 +820,39 @@ input, textarea { cursor: text; }
           <tr><td><b>Luana Reis</b></td><td>330ml·2cx</td><td style="color:#E31787;">R$818</td><td>27/05</td><td>Maria</td><td><span class="pill p-follow">Venceu hoje</span></td><td><button class="btn btn-rosa btn-sm"><i class="ti ti-brand-whatsapp" style="font-size:11px;"></i> Avisar</button></td></tr>
           <tr><td><b>Carlos Mota</b></td><td>400ml·1cx</td><td style="color:#E31787;">R$489</td><td>01/06</td><td>Pedro</td><td><span class="pill p-prod">7 dias</span></td><td><button class="btn btn-sm">Lembrar</button></td></tr>
         </tbody></table></div></div>
+      </div>
+      <div id="page-chatinterno" class="chat-layout">
+        <div class="col1 mob-on" id="ci-col1">
+          <div class="col1-head">
+            <div class="col1-title">Chat interno <span style="font-size:11px;color:#aaa;font-weight:400;" id="ci-conv-count"></span></div>
+            <div class="search-wrap"><i class="ti ti-search" style="font-size:14px;color:#aaa;"></i><input type="search" id="ci-conv-search" placeholder="Buscar colega ou grupo..."/></div>
+          </div>
+          <div class="conv-list" id="ci-conv-list"></div>
+        </div>
+        <div class="col2" id="ci-col2">
+          <div class="chat-head">
+            <div class="chat-head-left">
+              <div class="chat-av" id="ci-ch-av" style="background:#EEEDFE;color:#3C3489;">?</div>
+              <div style="min-width:0;"><div class="chat-head-name" id="ci-ch-name">Selecione uma conversa</div><div class="chat-head-sub" id="ci-ch-sub"></div></div>
+            </div>
+          </div>
+          <div class="chat-body" id="ci-chat-body">
+            <div style="text-align:center;color:var(--text3);font-size:12px;font-style:italic;padding:40px 20px;">
+              Converse com outros colaboradores da MekMix — envie textos, combine detalhes de arte, avise sobre pedidos.<br>Escolha uma conversa ao lado para começar.
+            </div>
+          </div>
+          <div class="chat-footer">
+            <div style="font-size:10px;color:var(--text3);padding:0 4px 6px;display:none;" id="ci-anexo-aviso">
+              <i class="ti ti-info-circle" style="font-size:11px;"></i> Envio de imagem, arquivo e áudio chega em breve, assim que o armazenamento (Supabase) estiver ligado.
+            </div>
+            <div class="input-row">
+              <button class="icon-btn hide-mob" id="ci-btn-attach"><i class="ti ti-paperclip" style="font-size:15px;"></i></button>
+              <input type="text" class="msg-input" id="ci-msg-input" placeholder="Mensagem..." disabled/>
+              <button class="icon-btn" id="ci-btn-mic"><i class="ti ti-microphone" style="font-size:15px;"></i></button>
+              <button class="icon-btn send-btn" id="ci-btn-send" disabled><i class="ti ti-send" style="font-size:15px;"></i></button>
+            </div>
+          </div>
+        </div>
       </div>
       <div id="page-relatorio" class="page">
         <div class="page-title">Relatórios <div style="display:flex;gap:8px;"><select class="sel" style="width:130px;"><option>Junho 2025</option><option>Maio 2025</option></select><button class="btn btn-rosa btn-sm"><i class="ti ti-download" style="font-size:12px;"></i> Exportar</button></div></div>
@@ -1048,10 +1103,14 @@ input, textarea { cursor: text; }
         <div class="page-title">Pedidos
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
             <button class="btn btn-rosa btn-sm" id="btn-novo-pedido"><i class="ti ti-plus" style="font-size:12px;"></i> Novo pedido</button>
-            <select class="sel" style="width:120px;" id="filter-ped-status"><option value="">Todos status</option><option>Novo lead</option><option>Orçamento enviado</option><option>Arte pendente</option><option>Em produção</option><option>Entregue</option></select>
+            <select class="sel" style="width:120px;" id="filter-ped-status"><option value="">Todos status</option><option>Novo lead</option><option>Orçamento enviado</option><option>Arte pendente</option><option>Em produção</option><option>Entregue</option><option>Cancelamento solicitado</option><option>Cancelado</option></select>
             <select class="sel" style="width:110px;" id="filter-ped-vend"><option value="">Todos vendedores</option><option>João</option><option>Maria</option><option>Pedro</option></select>
             <select class="sel" style="width:110px;" id="filter-ped-sort"><option value="data">↓ Data entrada</option><option value="valor">↓ Valor</option><option value="nome">A-Z Nome</option></select>
           </div>
+        </div>
+        <div class="panel" id="ped-cancelamentos-painel" style="display:none;">
+          <div class="panel-head"><span class="panel-title"><i class="ti ti-alert-triangle" style="font-size:14px;color:#E31787;"></i> Cancelamentos aguardando aprovação <span class="sb-badge" id="ped-cancelamentos-badge" style="display:none;">0</span></span></div>
+          <div id="ped-cancelamentos-list" style="font-size:12px;color:var(--text2);">Nenhuma solicitação de cancelamento pendente.</div>
         </div>
         <div class="panel"><div id="orders-list"></div></div>
       </div>
@@ -1079,43 +1138,61 @@ input, textarea { cursor: text; }
           <span id="stock-alert-msg">Estoque baixo!</span>
         </div>
         <div class="stock-card">
-          <div class="stock-header"><span class="stock-title">Copos em estoque</span><button class="btn btn-rosa btn-sm" id="btn-entrada-estoque"><i class="ti ti-plus" style="font-size:12px;"></i> Registrar entrada</button></div>
+          <div class="stock-header"><span class="stock-title">Copos em estoque</span><button class="btn btn-rosa btn-sm" id="btn-entrada-estoque" style="display:none;"><i class="ti ti-plus" style="font-size:12px;"></i> Registrar entrada</button></div>
           <div class="stock-grid" id="stock-grid"></div>
         </div>
-        <div class="stock-card" id="form-entrada" style="display:none;">
-          <div class="panel-head"><span class="panel-title">Registrar entrada de estoque</span><button class="btn btn-icon" id="btn-close-entrada">×</button></div>
-          <div class="stock-inp-row">
-            <div class="stock-field"><label>Tamanho</label><select id="ent-tam"><option>330ml</option><option>400ml</option><option>500ml</option><option>770ml</option></select></div>
-            <div class="stock-field"><label>Caixas fechadas</label><input type="number" id="ent-caixas" min="0" placeholder="0"/></div>
-            <div class="stock-field"><label>Unidades avulsas</label><input type="number" id="ent-unid" min="0" placeholder="0"/></div>
-            <div class="stock-field"><label>Nota fiscal</label><input type="text" id="ent-nf" placeholder="NF 12345"/></div>
+
+        <div id="estoque-gestor-wrap" style="display:none;">
+          <div class="stock-card" id="form-entrada" style="display:none;">
+            <div class="panel-head"><span class="panel-title">Registrar entrada de estoque</span><button class="btn btn-icon" id="btn-close-entrada">×</button></div>
+            <div class="stock-inp-row">
+              <div class="stock-field"><label>Tamanho</label><select id="ent-tam"><option>330ml</option><option>400ml</option><option>500ml</option><option>770ml</option></select></div>
+              <div class="stock-field"><label>Caixas fechadas</label><input type="number" id="ent-caixas" min="0" placeholder="0"/></div>
+              <div class="stock-field"><label>Unidades avulsas</label><input type="number" id="ent-unid" min="0" placeholder="0"/></div>
+              <div class="stock-field"><label>Nota fiscal</label><input type="text" id="ent-nf" placeholder="NF 12345"/></div>
+            </div>
+            <button class="btn btn-rosa" id="btn-confirm-entrada" style="width:100%;justify-content:center;margin-top:12px;"><i class="ti ti-check" style="font-size:12px;"></i> Confirmar entrada</button>
           </div>
-          <button class="btn btn-rosa" id="btn-confirm-entrada" style="width:100%;justify-content:center;margin-top:12px;"><i class="ti ti-check" style="font-size:12px;"></i> Confirmar entrada</button>
-        </div>
-        <!-- ABRIR CAIXA -->
-        <div class="stock-card" style="border:1px solid #f0c040;">
-          <div class="panel-head"><span class="panel-title">📦 Abrir caixa (uso parcial)</span></div>
-          <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">Use quando abrir uma caixa fechada para retirar apenas alguns pacotes. O sistema baixa 1 caixa e credita os pacotes avulsos no estoque.</div>
-          <div class="stock-inp-row">
-            <div class="stock-field"><label>Tamanho</label><select id="abrir-tam"><option>330ml</option><option>400ml</option><option>500ml</option><option>770ml</option></select></div>
-            <div class="stock-field"><label>Pacotes na caixa</label><input type="number" id="abrir-total" min="1" placeholder="Ex: 25"/></div>
-            <div class="stock-field"><label>Pacotes usados agora</label><input type="number" id="abrir-usados" min="0" placeholder="0"/></div>
-            <div class="stock-field"><label>Motivo</label><input type="text" id="abrir-motivo" placeholder="Ex: Amostra cliente"/></div>
+          <!-- ABRIR CAIXA -->
+          <div class="stock-card" style="border:1px solid #f0c040;">
+            <div class="panel-head"><span class="panel-title">📦 Abrir caixa (uso parcial)</span></div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">Use quando abrir uma caixa fechada para retirar apenas alguns pacotes. O sistema baixa 1 caixa e credita os pacotes avulsos no estoque.</div>
+            <div class="stock-inp-row">
+              <div class="stock-field"><label>Tamanho</label><select id="abrir-tam"><option>330ml</option><option>400ml</option><option>500ml</option><option>770ml</option></select></div>
+              <div class="stock-field"><label>Pacotes na caixa</label><input type="number" id="abrir-total" min="1" placeholder="Ex: 25"/></div>
+              <div class="stock-field"><label>Pacotes usados agora</label><input type="number" id="abrir-usados" min="0" placeholder="0"/></div>
+              <div class="stock-field"><label>Motivo</label><input type="text" id="abrir-motivo" placeholder="Ex: Amostra cliente"/></div>
+            </div>
+            <div style="background:#FFFDE7;border-radius:8px;padding:8px 12px;font-size:11px;color:#5D4037;margin-top:8px;" id="abrir-preview" style="display:none;"></div>
+            <button class="btn" id="btn-confirm-abrir" style="width:100%;justify-content:center;margin-top:12px;background:#f0c040;color:#5D4037;border-color:#f0c040;font-weight:600;"><i class="ti ti-package-open" style="font-size:12px;"></i> Abrir caixa e lançar avulsos</button>
           </div>
-          <div style="background:#FFFDE7;border-radius:8px;padding:8px 12px;font-size:11px;color:#5D4037;margin-top:8px;" id="abrir-preview" style="display:none;"></div>
-          <button class="btn" id="btn-confirm-abrir" style="width:100%;justify-content:center;margin-top:12px;background:#f0c040;color:#5D4037;border-color:#f0c040;font-weight:600;"><i class="ti ti-package-open" style="font-size:12px;"></i> Abrir caixa e lançar avulsos</button>
+
+          <div class="stock-card">
+            <div class="panel-head"><span class="panel-title">Baixa manual de estoque</span></div>
+            <div class="stock-inp-row">
+              <div class="stock-field"><label>Tamanho</label><select id="baixa-tam"><option>330ml</option><option>400ml</option><option>500ml</option><option>770ml</option></select></div>
+              <div class="stock-field"><label>Caixas</label><input type="number" id="baixa-caixas" min="0" placeholder="0"/></div>
+              <div class="stock-field"><label>Unidades avulsas</label><input type="number" id="baixa-unid" min="0" placeholder="0"/></div>
+              <div class="stock-field"><label>Motivo</label><input type="text" id="baixa-motivo" placeholder="Ex: Amostras, descarte..."/></div>
+            </div>
+            <button class="btn btn-danger" id="btn-confirm-baixa" style="width:100%;justify-content:center;margin-top:12px;"><i class="ti ti-arrow-down" style="font-size:12px;"></i> Dar baixa</button>
+          </div>
+
+          <!-- AJUSTE / CORREÇÃO MANUAL — separado de entrada/baixa comuns -->
+          <div class="stock-card" style="border:1px solid #3C3489;">
+            <div class="panel-head"><span class="panel-title"><i class="ti ti-adjustments" style="font-size:14px;color:#3C3489;"></i> Ajuste / correção de inventário</span></div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">Use quando a contagem física não bate com o sistema — não é uma venda nem uma compra, é uma correção do número real em estoque. Fica registrado separadamente no histórico para não confundir com movimentações comerciais.</div>
+            <div class="stock-inp-row">
+              <div class="stock-field"><label>Tamanho</label><select id="ajuste-tam"><option>330ml</option><option>400ml</option><option>500ml</option><option>770ml</option></select></div>
+              <div class="stock-field"><label>Tipo de ajuste</label><select id="ajuste-tipo"><option value="somar">Somar ao estoque (achei a mais)</option><option value="subtrair">Subtrair do estoque (achei a menos)</option></select></div>
+              <div class="stock-field"><label>Caixas</label><input type="number" id="ajuste-caixas" min="0" placeholder="0"/></div>
+              <div class="stock-field"><label>Unidades avulsas</label><input type="number" id="ajuste-unid" min="0" placeholder="0"/></div>
+            </div>
+            <div class="stock-field" style="margin-top:8px;"><label>Motivo do ajuste *</label><input type="text" id="ajuste-motivo" placeholder="Ex: contagem física de fim de mês, avaria não lançada..."/></div>
+            <button class="btn" id="btn-confirm-ajuste" style="width:100%;justify-content:center;margin-top:12px;background:#3C3489;color:#fff;border-color:#3C3489;font-weight:600;"><i class="ti ti-adjustments" style="font-size:12px;"></i> Aplicar ajuste</button>
+          </div>
         </div>
 
-        <div class="stock-card">
-          <div class="panel-head"><span class="panel-title">Baixa manual de estoque</span></div>
-          <div class="stock-inp-row">
-            <div class="stock-field"><label>Tamanho</label><select id="baixa-tam"><option>330ml</option><option>400ml</option><option>500ml</option><option>770ml</option></select></div>
-            <div class="stock-field"><label>Caixas</label><input type="number" id="baixa-caixas" min="0" placeholder="0"/></div>
-            <div class="stock-field"><label>Unidades avulsas</label><input type="number" id="baixa-unid" min="0" placeholder="0"/></div>
-            <div class="stock-field"><label>Motivo</label><input type="text" id="baixa-motivo" placeholder="Ex: Amostras, descarte..."/></div>
-          </div>
-          <button class="btn btn-danger" id="btn-confirm-baixa" style="width:100%;justify-content:center;margin-top:12px;"><i class="ti ti-arrow-down" style="font-size:12px;"></i> Dar baixa</button>
-        </div>
         <div class="stock-card">
           <div class="panel-head"><span class="panel-title">Histórico de movimentações</span></div>
           <div class="stock-log" id="stock-log"></div>
@@ -1637,6 +1714,7 @@ input, textarea { cursor: text; }
           </div>
         </div>
         <div class="panel" style="padding:0;overflow:hidden;">
+          <div class="conta-head-row"><span>Descrição</span><span>Categoria</span><span>Vencimento</span><span>Valor</span><span>Status</span><span>Ação</span></div>
           <div id="fin-list"></div>
           <div id="fin-empty" style="display:none;text-align:center;padding:40px;color:var(--text3);"><i class="ti ti-cash-off" style="font-size:40px;display:block;margin-bottom:10px;"></i>Nenhuma conta encontrada</div>
         </div>
@@ -1776,13 +1854,13 @@ input, textarea { cursor: text; }
 
 <script>
 var USERS={
-  bruno:   {pass:'123456',name:'Bruno',  role:'Admin',    av:'BR',color:'#E31787',isAdmin:true, modulos:['dashboard','chats','kanban','contatos','followup','horario','clientes','acoes','pedidos','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script']},
-  maykon:  {pass:'123456',name:'Maykon', role:'Admin',    av:'MK',color:'#772D83',isAdmin:true, modulos:['dashboard','chats','kanban','contatos','followup','horario','clientes','acoes','pedidos','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script'],terceirizado:false,valorHora:0},
-  karla:   {pass:'123456',name:'Karla',  role:'Admin',    av:'KA',color:'#085041',isAdmin:true, modulos:['dashboard','chats','kanban','contatos','followup','horario','clientes','acoes','pedidos','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script'],terceirizado:false,valorHora:0},
-  gisella: {pass:'123456',name:'Gisella',role:'Admin',    av:'GI',color:'#3C3489',isAdmin:true, modulos:['dashboard','chats','kanban','contatos','followup','horario','clientes','acoes','pedidos','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script'],terceirizado:false,valorHora:0},
-  joao:    {pass:'joao123',name:'João',  role:'Vendedor', av:'JO',color:'#3C3489',isAdmin:false,modulos:['chats','kanban','contatos','followup','horario','clientes','pedidos'],terceirizado:true,valorHora:15},
-  maria:   {pass:'maria123',name:'Maria',role:'Vendedor', av:'MA',color:'#633806',isAdmin:false,modulos:['chats','kanban','contatos','followup','horario','clientes','pedidos'],terceirizado:true,valorHora:15},
-  pedro:   {pass:'pedro123',name:'Pedro',role:'Vendedor', av:'PE',color:'#085041',isAdmin:false,modulos:['chats','kanban','contatos','followup','horario','clientes','pedidos'],terceirizado:true,valorHora:15},
+  bruno:   {pass:'123456',name:'Bruno',  role:'Admin',    av:'BR',color:'#E31787',isAdmin:true, isAdminGeral:true, podeGerenciarEstoque:true, modulos:['dashboard','chats','chatinterno','kanban','contatos','followup','horario','clientes','acoes','pedidos','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script']},
+  maykon:  {pass:'123456',name:'Maykon', role:'Admin',    av:'MK',color:'#772D83',isAdmin:true, isAdminGeral:false, podeGerenciarEstoque:false, modulos:['dashboard','chats','chatinterno','kanban','contatos','followup','horario','clientes','acoes','pedidos','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script'],terceirizado:false,valorHora:0},
+  karla:   {pass:'123456',name:'Karla',  role:'Admin',    av:'KA',color:'#085041',isAdmin:true, isAdminGeral:false, podeGerenciarEstoque:true, modulos:['dashboard','chats','chatinterno','kanban','contatos','followup','horario','clientes','acoes','pedidos','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script'],terceirizado:false,valorHora:0},
+  gisella: {pass:'123456',name:'Gisella',role:'Admin',    av:'GI',color:'#3C3489',isAdmin:true, isAdminGeral:false, podeGerenciarEstoque:true, modulos:['dashboard','chats','chatinterno','kanban','contatos','followup','horario','clientes','acoes','pedidos','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script'],terceirizado:false,valorHora:0},
+  joao:    {pass:'joao123',name:'João',  role:'Vendedor', av:'JO',color:'#3C3489',isAdmin:false,podeVerTodosClientes:false,podeReatribuirVendedor:false,podeGerenciarEstoque:false,modulos:['chats','chatinterno','kanban','contatos','followup','horario','clientes','pedidos','estoque','templates','script'],terceirizado:true,valorHora:15},
+  maria:   {pass:'maria123',name:'Maria',role:'Vendedor', av:'MA',color:'#633806',isAdmin:false,podeVerTodosClientes:false,podeReatribuirVendedor:false,podeGerenciarEstoque:false,modulos:['chats','chatinterno','kanban','contatos','followup','horario','clientes','pedidos','estoque','templates','script'],terceirizado:true,valorHora:15},
+  pedro:   {pass:'pedro123',name:'Pedro',role:'Vendedor', av:'PE',color:'#085041',isAdmin:false,podeVerTodosClientes:false,podeReatribuirVendedor:false,podeGerenciarEstoque:false,modulos:['chats','chatinterno','kanban','contatos','followup','horario','clientes','pedidos','estoque','templates','script'],terceirizado:true,valorHora:15},
 };
 var currentUser=null,currentPage='chats',mobState='list',resolveOn=false,recOn=false,currentKey='AC',editTplIdx=-1;
 
@@ -1842,6 +1920,7 @@ function tryLogin(u,p){
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').classList.add('visible');
     applyRole();renderConvList();renderTemplates();renderQR();openConv('AC');
+    if(typeof checkStockAlerts==='function') checkStockAlerts();
     setTimeout(renderDashboard, 300);
     if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
     return true;
@@ -1855,12 +1934,28 @@ function applyRole(){
   document.getElementById('sb-role-lbl').textContent=currentUser.role;
   var av=document.getElementById('sb-av');av.textContent=currentUser.av;av.style.background=currentUser.color;
   document.querySelectorAll('.admin-only').forEach(function(el){el.style.display=currentUser.isAdmin?'':'none';});
+  // "Atribuir vendedor" segue permissão própria, não o admin-only genérico:
+  // só o Admin Geral e quem recebeu a permissão explícita "podeReatribuirVendedor"
+  // podem mexer nisso — nem um admin comum (Maykon, Karla, Gisella) tem esse poder
+  // por padrão, só se o Admin Geral conceder individualmente.
+  var wrapAtribVend = document.getElementById('wrap-atribuir-vendedor');
+  if(wrapAtribVend) wrapAtribVend.style.display = (currentUser.isAdminGeral || currentUser.podeReatribuirVendedor) ? '' : 'none';
   // Controle granular de módulos
   var mods = currentUser.modulos || [];
   document.querySelectorAll('.sb-btn[data-page]').forEach(function(btn){
     var page = btn.getAttribute('data-page');
     btn.style.display = (currentUser.isAdmin || mods.indexOf(page)>=0) ? '' : 'none';
   });
+  // Separação Mobile x Desktop: módulos de gestão pesada (Fila de produção,
+  // Relatórios, Broadcast, Conexões WA, Financeiro, Notas Fiscais, Equipe,
+  // Configurações) ficam reservados ao desktop — mesmo que a pessoa tenha
+  // acesso ao módulo, ele some da sidebar em telas de celular. No desktop,
+  // continua valendo a checagem normal de módulo/admin feita acima.
+  if(window.innerWidth<=768){
+    document.querySelectorAll('.sb-btn.desktop-only[data-page]').forEach(function(btn){
+      btn.style.display='none';
+    });
+  }
   document.querySelectorAll('.sb-sec').forEach(function(sec){
     // Mostrar seção se ao menos um botão dela estiver visível
     var next = sec.nextElementSibling;
@@ -1883,11 +1978,20 @@ function logout(){
 }
 
 // ── CONV LIST ──
+// Regra de visibilidade: só o Admin Geral (Bruno) vê tudo automaticamente,
+// por definição. Todo mundo mais — inclusive outros admins (Maykon, Karla,
+// Gisella) — só vê as conversas de todos os vendedores se tiver recebido a
+// permissão explícita "podeVerTodosClientes" do Admin Geral. Sem essa
+// permissão, cada um vê só os próprios clientes + os ainda não atribuídos.
+function horUsuarioVeTodosClientes(){
+  return currentUser && (currentUser.isAdminGeral || currentUser.podeVerTodosClientes);
+}
+
 function renderConvList(filter,search){
   var list=document.getElementById('conv-list');list.innerHTML='';var shown=0;
   CONVLIST.forEach(function(c){
     var d=CONVDATA[c.key];
-    if(!currentUser.isAdmin&&d.vendedor!==currentUser.name&&d.vendedor!=='—')return;
+    if(!horUsuarioVeTodosClientes()&&d.vendedor!==currentUser.name&&d.vendedor!=='—')return;
     if(search){var s=search.toLowerCase();if(d.name.toLowerCase().indexOf(s)<0&&d.wapp.indexOf(s)<0&&d.cidade.toLowerCase().indexOf(s)<0)return;}
     if(filter&&filter!=='todos'){
       if(filter==='meus'&&d.vendedor!==currentUser.name)return;
@@ -1900,7 +2004,7 @@ function renderConvList(filter,search){
     var btn=document.createElement('button');
     btn.className='conv-btn'+(c.key===currentKey?' sel':'');
     btn.setAttribute('data-key',c.key);
-    btn.innerHTML='<div class="conv-av" style="background:'+d.bg+';color:'+d.color+';">'+d.init+'<span class="ch-badge" style="background:'+c.chBg+';"><i class="ti '+c.chIcon+'" style="font-size:7px;color:#fff;"></i></span></div><div class="conv-body"><div class="conv-top"><span class="conv-name">'+d.name+'</span><span class="conv-time">'+c.time+'</span></div><div class="conv-preview">'+c.preview+'</div><div class="conv-foot"><span class="pill '+c.pill+'">'+c.pillTxt+'</span>'+(c.pill2?'<span class="pill '+c.pill2+'" style="margin-left:4px;">'+c.pill2Txt+'</span>':'')+(c.unread?'<span class="unread">'+c.unread+'</span>':'')+(c.vend&&currentUser.isAdmin?'<span class="vend-pill">'+c.vend+'</span>':'')+'</div></div>';
+    btn.innerHTML='<div class="conv-av" style="background:'+d.bg+';color:'+d.color+';">'+d.init+'<span class="ch-badge" style="background:'+c.chBg+';"><i class="ti '+c.chIcon+'" style="font-size:7px;color:#fff;"></i></span></div><div class="conv-body"><div class="conv-top"><span class="conv-name">'+d.name+'</span><span class="conv-time">'+c.time+'</span></div><div class="conv-preview">'+c.preview+'</div><div class="conv-foot"><span class="pill '+c.pill+'">'+c.pillTxt+'</span>'+(c.pill2?'<span class="pill '+c.pill2+'" style="margin-left:4px;">'+c.pill2Txt+'</span>':'')+(c.unread?'<span class="unread">'+c.unread+'</span>':'')+(c.vend&&horUsuarioVeTodosClientes()?'<span class="vend-pill">'+c.vend+'</span>':(!c.vend?'<span class="vend-pill" style="background:#f0f0f2;color:#888;">Sem vendedor</span>':''))+'</div></div>';
     list.appendChild(btn);
   });
   document.getElementById('conv-count').textContent=shown+' abertos';
@@ -2024,20 +2128,22 @@ function goPage(id,title){
     horAccResetarSessao();
   }
   currentPage=id;var isMob=window.innerWidth<=768;
-  document.getElementById('page-chats').style.display='none';
+  // Páginas com layout de chat (2-3 colunas fixas, sem depender de .page/.visible)
+  // precisam ser escondidas/mostradas manualmente via style, diferente das
+  // páginas comuns que usam .page{display:none} + .visible.
+  document.querySelectorAll('.chat-layout').forEach(function(cl){ cl.style.cssText='display:none;flex:0;height:0;overflow:hidden;'; });
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('visible');});
   document.querySelectorAll('.sb-btn').forEach(function(b){b.classList.remove('active');});
-  var pc = document.getElementById('page-chats');
-  if(id==='chats'){
-    pc.style.cssText='display:flex;flex:1;';
-    if(isMob){mobState='list';updateMobView();}
-  } else {
-    pc.style.cssText='display:none;flex:0;height:0;overflow:hidden;';
-    var pg=document.getElementById('page-'+id);
-    if(pg){ pg.classList.add('visible'); pg.style.flex='1'; }
+  var pg = document.getElementById('page-'+id);
+  if(pg && pg.classList.contains('chat-layout')){
+    pg.style.cssText='display:flex;flex:1;';
+    if(id==='chats' && isMob){mobState='list';updateMobView();}
+  } else if(pg){
+    pg.classList.add('visible'); pg.style.flex='1';
   }
   var sb=document.querySelector('.sb-btn[data-page="'+id+'"]');if(sb)sb.classList.add('active');
   if(id==='horario' && typeof renderHorarioPage==='function') renderHorarioPage();
+  if(id==='chatinterno' && typeof renderChatInternoPage==='function') renderChatInternoPage();
   if(isMob){
     document.getElementById('mob-title').textContent=title||id;
     document.getElementById('mob-back').style.visibility='hidden';
@@ -2097,7 +2203,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // Fix: mover páginas novas para dentro do content-area
   (function(){
     var ca = document.querySelector('.content-area');
-    ['page-pedidos','page-producao','page-estoque','page-clientes','page-acoes','page-financeiro','page-notasfiscais','page-script','page-followup','page-horario','page-relatorio','page-broadcast','page-templates','page-whatsapp','page-equipe','page-config'].forEach(function(id){
+    ['page-pedidos','page-producao','page-estoque','page-clientes','page-acoes','page-financeiro','page-notasfiscais','page-script','page-followup','page-horario','page-chatinterno','page-relatorio','page-broadcast','page-templates','page-whatsapp','page-equipe','page-config'].forEach(function(id){
       var el = document.getElementById(id);
       if(el && el.parentElement && !el.parentElement.classList.contains('content-area')){
         ca.appendChild(el);
@@ -2456,7 +2562,10 @@ document.addEventListener('DOMContentLoaded',function(){
     });
   });
 
-  window.addEventListener('resize',function(){if(currentPage==='chats'&&window.innerWidth<=768)updateMobView();});
+  window.addEventListener('resize',function(){
+    if(currentPage==='chats'&&window.innerWidth<=768)updateMobView();
+    if(currentUser) applyRole();
+  });
 
 
   // ── KANBAN DRAG & DROP ──
@@ -2616,17 +2725,35 @@ document.addEventListener('DOMContentLoaded',function(){
     if(!orders.length) { list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">Nenhum pedido encontrado</div>'; return; }
 
     list.innerHTML = orders.map(function(o) {
+      var emFluxoCancelamento = o.status==='Cancelamento solicitado' || o.status==='Cancelado';
       var opts = ['Novo lead','Orçamento enviado','Arte pendente','Em produção','Entregue']
         .map(function(s){ return '<option'+(s===o.status?' selected':'')+'>'+s+'</option>'; }).join('');
+      var statusCel;
+      if(emFluxoCancelamento){
+        var corTxt = o.status==='Cancelado' ? '#791F1F' : '#633806';
+        statusCel = '<span class="pill" style="background:'+(o.status==='Cancelado'?'#FCEBEB':'#FAEEDA')+';color:'+corTxt+';">'+o.status+'</span>';
+      } else {
+        statusCel = '<select class="order-sel" data-id="' + o.id + '" onchange="updateOrderStatus(this)">' + opts + '</select>';
+      }
+      var btnCancelar = (!emFluxoCancelamento)
+        ? '<button class="btn btn-sm" style="font-size:10px;padding:3px 7px;" onclick="pedAbrirSolicitarCancelamento(\''+o.id+'\')" title="Solicitar cancelamento"><i class="ti ti-x" style="font-size:10px;"></i></button>'
+        : '';
+      // Etiqueta de alerta de estoque: dinâmica, recalculada a cada render —
+      // some sozinha assim que o estoque daquele tamanho for reposto. Só faz
+      // sentido em pedidos ainda ativos (não cancelados/entregues).
+      var ativoParaAlerta = o.status!=='Cancelado' && o.status!=='Entregue';
+      var alertaEstoque = (ativoParaAlerta && typeof stockTemAlerta==='function' && stockTemAlerta(o.prod))
+        ? '<span class="pill" style="background:#FCEBEB;color:#791F1F;font-size:9px;" title="Estoque de '+o.prod+' insuficiente"><i class="ti ti-alert-triangle" style="font-size:9px;"></i> Estoque</span>'
+        : '';
       return '<div class="order-row">' +
         '<div class="order-num">' + o.id + '<div style="font-size:10px;color:var(--text3);">' + o.data + '</div></div>' +
         '<div class="order-client" style="min-width:0;">' +
-          '<div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + o.client + '</div>' +
+          '<div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + o.client + ' ' + alertaEstoque + '</div>' +
           '<div style="font-size:10px;color:var(--text2);">' + o.prod + ' · ' + o.qtd + 'cx · ' + o.unid.toLocaleString('pt-BR') + 'un</div>' +
         '</div>' +
         (currentUser.isAdmin ? '<div style="font-size:11px;color:var(--text2);width:50px;flex-shrink:0;">' + o.vendedor + '</div>' : '') +
         '<div style="width:76px;flex-shrink:0;font-weight:500;color:var(--rosa);">R$' + o.valor.toLocaleString('pt-BR') + '</div>' +
-        '<select class="order-sel" data-id="' + o.id + '" onchange="updateOrderStatus(this)">' + opts + '</select>' +
+        statusCel + btnCancelar +
       '</div>';
     }).join('');
   }
@@ -2638,20 +2765,26 @@ document.addEventListener('DOMContentLoaded',function(){
     if(!order) return;
     var oldStatus = order.status;
     order.status = newStatus;
-    var pillMap = {'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Entregue':'p-entregue','Follow-up 30d':'p-follow'};
+    var pillMap = {'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Entregue':'p-entregue','Follow-up 30d':'p-follow','Cancelamento solicitado':'p-follow','Cancelado':'p-cancelado'};
     order.pill = pillMap[newStatus] || 'p-novo';
 
-    // Baixa automática de estoque ao entrar em produção
-    if(newStatus === 'Em produção' && oldStatus !== 'Em produção') {
+    // Baixa automática de estoque ao entrar em produção — só roda se este
+    // pedido ainda não teve baixa alguma vez (evita duplicar a baixa quando
+    // o pedido já nasceu "Em produção" na criação, que já desconta sozinho).
+    // O estoque pode ficar negativo aqui de propósito: refletir a dívida real
+    // é mais útil do que travar em zero e perder a informação de quanto falta
+    // repor — a venda nunca é bloqueada por falta de estoque.
+    if(newStatus === 'Em produção' && oldStatus !== 'Em produção' && !order.estoqueBaixado) {
       var tam = order.prod;
       if(STOCK[tam]) {
         var totalUnid = order.unid;
         var upCx = UNID_PER_CX[tam];
         var caixasBaixar = Math.floor(totalUnid / upCx);
         var unidBaixar = totalUnid % upCx;
-        STOCK[tam].caixas = Math.max(0, STOCK[tam].caixas - caixasBaixar);
-        STOCK[tam].unid = Math.max(0, STOCK[tam].unid - unidBaixar);
-        STOCK_LOG.unshift({tipo:'saida',tam:tam,caixas:caixasBaixar,unid:unidBaixar,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:'Produção '+id+' (auto)'});
+        STOCK[tam].caixas -= caixasBaixar;
+        STOCK[tam].unid -= unidBaixar;
+        STOCK_LOG.unshift({tipo:'saida',tam:tam,caixas:caixasBaixar,unid:unidBaixar,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:'Produção '+id+' (auto)',lancadoPor:'Sistema (automático)'});
+        order.estoqueBaixado = true;
         // Adicionar à fila de produção
         if(!PROD_QUEUE.find(function(p){ return p.id===id; })) {
           PROD_QUEUE.push({id:id,pos:PROD_QUEUE.length+1,priority:false,client:order.client,prod:order.prod+' · '+order.qtd+'cx · '+order.unid.toLocaleString('pt-BR')+'un',tinta:'—',vendedor:order.vendedor,data:order.data,prazo:'—'});
@@ -2664,6 +2797,148 @@ document.addEventListener('DOMContentLoaded',function(){
       }
     }
   }
+
+  // ── CANCELAMENTO DE PEDIDO (solicitação + aprovação) ──
+  // Regra: o vendedor NUNCA cancela um pedido sozinho. Ele só solicita, com
+  // justificativa obrigatória. Quem decide (aprovar ou negar) é o Admin Geral
+  // ou quem tiver a permissão "podeReatribuirVendedor" — a mesma permissão já
+  // usada para reatribuir vendedor no chat de clientes, reaproveitada aqui
+  // porque é o mesmo nível de responsabilidade comercial.
+  function pedPodeAprovarCancelamento(){
+    return currentUser && (currentUser.isAdminGeral || currentUser.podeReatribuirVendedor);
+  }
+
+  function pedSolicitarCancelamento(orderId, motivo){
+    var order = ORDERS.find(function(o){ return o.id === orderId; });
+    if(!order) return false;
+    if(!motivo || !motivo.trim()){ toast('Informe o motivo do cancelamento.'); return false; }
+    order.cancelamento = {
+      motivo: motivo.trim(),
+      solicitadoPor: currentUser.name,
+      solicitadoEm: Date.now(),
+      status: 'pendente',
+      statusAnterior: order.status, // para poder voltar exatamente a este status, se negado
+      decididoPor: null,
+      decididoEm: null,
+      motivoDecisao: ''
+    };
+    order.status = 'Cancelamento solicitado';
+    order.pill = 'p-follow';
+    renderOrders();
+    if(typeof renderProdQueue==='function') renderProdQueue();
+    if(typeof renderCancelamentosPendentes==='function') renderCancelamentosPendentes();
+    toast('Cancelamento solicitado. Aguardando aprovação do Admin Geral/gerente comercial.');
+    return true;
+  }
+
+  function pedAprovarCancelamento(orderId, motivoDecisao){
+    if(!pedPodeAprovarCancelamento()){ toast('Você não tem permissão para aprovar cancelamentos.'); return; }
+    var order = ORDERS.find(function(o){ return o.id === orderId; });
+    if(!order || !order.cancelamento || order.cancelamento.status!=='pendente') return;
+
+    // Estorno de estoque: só devolve se este pedido realmente tinha baixa feita.
+    if(order.estoqueBaixado){
+      (order.itens||[]).forEach(function(item){
+        if(STOCK[item.tam]){
+          if(item.tipo==='caixas'){ STOCK[item.tam].caixas += item.qtd; }
+          else { STOCK[item.tam].unid += item.qtd; }
+          STOCK_LOG.unshift({tipo:'entrada',tam:item.tam,caixas:item.tipo==='caixas'?item.qtd:0,unid:item.tipo==='unidades'?item.qtd:0,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:'Estorno — cancelamento '+orderId+' aprovado',lancadoPor:currentUser.name+' (aprovação de cancelamento)'});
+        }
+      });
+      order.estoqueBaixado = false;
+      if(typeof renderStockGrid==='function') renderStockGrid();
+      if(typeof renderStockLog==='function') renderStockLog();
+      if(typeof checkStockAlerts==='function') checkStockAlerts();
+    }
+
+    // Sai da fila de produção, se estava nela
+    var idxFila = PROD_QUEUE.findIndex(function(p){ return p.id===orderId; });
+    if(idxFila>=0) PROD_QUEUE.splice(idxFila,1);
+
+    order.cancelamento.status = 'aprovado';
+    order.cancelamento.decididoPor = currentUser.name;
+    order.cancelamento.decididoEm = Date.now();
+    order.cancelamento.motivoDecisao = motivoDecisao||'';
+    order.status = 'Cancelado';
+    order.pill = 'p-cancelado';
+
+    renderOrders();
+    if(typeof renderProdQueue==='function') renderProdQueue();
+    if(typeof renderCancelamentosPendentes==='function') renderCancelamentosPendentes();
+    toast('❌ Pedido '+orderId+' cancelado. Estoque estornado.');
+  }
+
+  function pedNegarCancelamento(orderId, motivoDecisao){
+    if(!pedPodeAprovarCancelamento()){ toast('Você não tem permissão para decidir sobre cancelamentos.'); return; }
+    var order = ORDERS.find(function(o){ return o.id === orderId; });
+    if(!order || !order.cancelamento || order.cancelamento.status!=='pendente') return;
+
+    order.cancelamento.status = 'negado';
+    order.cancelamento.decididoPor = currentUser.name;
+    order.cancelamento.decididoEm = Date.now();
+    order.cancelamento.motivoDecisao = motivoDecisao||'';
+    // Volta exatamente ao status que tinha antes da solicitação
+    var pillMap = {'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Entregue':'p-entregue'};
+    order.status = order.cancelamento.statusAnterior || 'Em produção';
+    order.pill = pillMap[order.status] || 'p-prod';
+
+    renderOrders();
+    if(typeof renderCancelamentosPendentes==='function') renderCancelamentosPendentes();
+    toast('Cancelamento negado. Pedido '+orderId+' voltou para "'+order.status+'".');
+  }
+  window.pedSolicitarCancelamento = pedSolicitarCancelamento;
+  window.pedAprovarCancelamento = pedAprovarCancelamento;
+  window.pedNegarCancelamento = pedNegarCancelamento;
+
+  function renderCancelamentosPendentes(){
+    var wrap = document.getElementById('ped-cancelamentos-list');
+    if(!wrap) return;
+    var pendentes = ORDERS.filter(function(o){ return o.cancelamento && o.cancelamento.status==='pendente'; });
+    var badge = document.getElementById('ped-cancelamentos-badge');
+    if(badge){
+      badge.textContent = pendentes.length;
+      badge.style.display = pendentes.length ? '' : 'none';
+    }
+    if(!pendentes.length){ wrap.innerHTML = 'Nenhuma solicitação de cancelamento pendente.'; return; }
+    wrap.innerHTML = pendentes.map(function(o){
+      return '<div class="panel" style="margin-bottom:8px;">'+
+        '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">'+
+        '<div><b>'+o.id+'</b> — '+esc(o.client)+' · '+esc(o.prodDesc||o.prod)+' · R$'+o.valor.toLocaleString('pt-BR')+
+        '<div style="color:var(--text2);font-size:11px;margin-top:2px;">Solicitado por <b>'+esc(o.cancelamento.solicitadoPor)+'</b></div>'+
+        '<div style="color:var(--text2);font-size:11px;margin-top:2px;font-style:italic;">"'+esc(o.cancelamento.motivo)+'"</div></div>'+
+        '<div style="display:flex;gap:6px;align-items:flex-start;">'+
+        '<button class="btn btn-sm btn-rosa" onclick="pedAbrirDecisaoCancelamento(\''+o.id+'\',\'aprovar\')"><i class="ti ti-check" style="font-size:11px;"></i> Aprovar</button>'+
+        '<button class="btn btn-sm btn-danger" onclick="pedAbrirDecisaoCancelamento(\''+o.id+'\',\'negar\')"><i class="ti ti-x" style="font-size:11px;"></i> Negar</button>'+
+        '</div></div></div>';
+    }).join('');
+  }
+
+  var pedDecisaoCtx = null; // {orderId, acao:'aprovar'|'negar'}
+  var scOrderIdAtual = null; // pedido sendo solicitado para cancelamento
+  function pedAbrirSolicitarCancelamento(orderId){
+    var order = ORDERS.find(function(o){ return o.id===orderId; });
+    if(!order) return;
+    if(order.status==='Cancelamento solicitado'){ toast('Este pedido já tem uma solicitação de cancelamento pendente.'); return; }
+    if(order.status==='Cancelado'){ toast('Este pedido já está cancelado.'); return; }
+    scOrderIdAtual = orderId;
+    document.getElementById('sc-resumo').textContent = order.client+' · '+(order.prodDesc||order.prod)+' · R$'+order.valor.toLocaleString('pt-BR');
+    document.getElementById('sc-motivo').value = '';
+    openModal('modal-solicitar-cancelamento');
+  }
+  window.pedAbrirSolicitarCancelamento = pedAbrirSolicitarCancelamento;
+
+  function pedAbrirDecisaoCancelamento(orderId, acao){
+    pedDecisaoCtx = {orderId:orderId, acao:acao};
+    var order = ORDERS.find(function(o){ return o.id===orderId; });
+    document.getElementById('pcd-modal-title').textContent = (acao==='aprovar'?'Aprovar':'Negar')+' cancelamento — '+orderId;
+    document.getElementById('pcd-resumo').textContent = order ? (order.client+' · '+(order.prodDesc||order.prod)+' · R$'+order.valor.toLocaleString('pt-BR')) : '';
+    document.getElementById('pcd-motivo-original').textContent = order && order.cancelamento ? order.cancelamento.motivo : '';
+    document.getElementById('pcd-observacao').value = '';
+    document.getElementById('btn-pcd-confirmar').textContent = acao==='aprovar' ? 'Confirmar aprovação' : 'Confirmar negativa';
+    document.getElementById('btn-pcd-confirmar').className = 'btn btn-sm '+(acao==='aprovar'?'btn-rosa':'btn-danger');
+    openModal('modal-pcd');
+  }
+  window.pedAbrirDecisaoCancelamento = pedAbrirDecisaoCancelamento;
 
   // ── FILA DE PRODUÇÃO ──
   function renderProdQueue() {
@@ -2678,11 +2953,17 @@ document.addEventListener('DOMContentLoaded',function(){
       card.className = 'prod-card' + (item.priority ? ' priority' : '');
       card.setAttribute('draggable', 'true');
       card.setAttribute('data-idx', idx);
+      // O tamanho do copo vem no início da descrição (ex: "500ml · 2cx · 2.000un")
+      var tamMatch = (item.prod||'').match(/^(\d+ml)/);
+      var tamItem = tamMatch ? tamMatch[1] : null;
+      var alertaEstoqueProd = (tamItem && typeof stockTemAlerta==='function' && stockTemAlerta(tamItem))
+        ? '<span class="pill" style="background:#FCEBEB;color:#791F1F;font-size:9px;margin-left:6px;" title="Estoque de '+tamItem+' insuficiente"><i class="ti ti-alert-triangle" style="font-size:9px;"></i> Estoque</span>'
+        : '';
       card.innerHTML =
         '<i class="ti ti-grip-vertical prod-drag-handle"></i>' +
         '<div class="prod-pos">' + (idx+1) + '</div>' +
         '<div class="prod-info">' +
-          '<div class="prod-name">' + item.client + '</div>' +
+          '<div class="prod-name">' + item.client + alertaEstoqueProd + '</div>' +
           '<div class="prod-detail">' + item.prod + ' · Tinta ' + item.tinta + ' · ' + item.vendedor + '</div>' +
           '<div class="prod-date"><i class="ti ti-calendar" style="font-size:10px;"></i> Entrou: ' + item.data + ' &nbsp;|&nbsp; Prazo: ' + item.prazo + '</div>' +
         '</div>' +
@@ -2787,12 +3068,14 @@ document.addEventListener('DOMContentLoaded',function(){
     grid.innerHTML = sizes.map(function(tam) {
       var s = STOCK[tam];
       var totalUnid = s.caixas * UNID_PER_CX[tam] + s.unid;
-      var low = s.caixas < s.minCaixas;
-      return '<div class="stock-item' + (low ? ' low' : '') + '">' +
-        '<div class="stock-item-label">' + tam + '</div>' +
+      var negativo = s.caixas < 0;
+      var low = !negativo && s.caixas < s.minCaixas;
+      return '<div class="stock-item' + (negativo ? ' negativo' : (low ? ' low' : '')) + '">' +
+        '<div class="stock-item-label">' + tam + (negativo ? ' <i class="ti ti-alert-triangle" style="font-size:12px;color:#791F1F;" title="Estoque negativo"></i>' : '') + '</div>' +
         '<div class="stock-item-val">' + s.caixas + '<span style="font-size:13px;font-weight:400;"> cx</span></div>' +
         (s.unid > 0 ? '<div style="font-size:11px;color:var(--text2);margin-top:2px;">+ ' + s.unid.toLocaleString('pt-BR') + ' un avulsas</div>' : '') +
         '<div class="stock-item-sub">' + totalUnid.toLocaleString('pt-BR') + ' unidades total</div>' +
+        (negativo ? '<div style="font-size:10px;color:#791F1F;font-weight:600;margin-top:4px;">Estoque negativo — reponha o quanto antes</div>' : '') +
       '</div>';
     }).join('');
   }
@@ -2801,40 +3084,92 @@ document.addEventListener('DOMContentLoaded',function(){
     var log = document.getElementById('stock-log');
     if(!log) return;
     if(!STOCK_LOG.length) { log.innerHTML = '<div style="color:var(--text3);font-style:italic;font-size:12px;">Nenhuma movimentação.</div>'; return; }
+    var tipoLabel = {entrada:'▲ Entrada', abertura:'📦 Abertura', ajuste:'🔧 Ajuste', saida:'▼ Saída'};
     log.innerHTML = STOCK_LOG.slice(0,15).map(function(l) {
       var desc = l.caixas > 0 ? l.caixas + ' cx' : '';
       if(l.unid > 0) desc += (desc ? ' + ' : '') + l.unid + ' un';
       return '<div class="stock-log-item">' +
         '<div>' +
-          '<span class="stock-log-type ' + l.tipo + '">' + (l.tipo==='entrada'?'▲ Entrada': l.tipo==='abertura'?'📦 Abertura':'▼ Saída') + '</span>' +
+          '<span class="stock-log-type ' + l.tipo + '">' + (tipoLabel[l.tipo]||l.tipo) + '</span>' +
           ' <b>' + l.tam + '</b> · ' + desc +
           (l.nf ? ' <span style="color:var(--text3);">· ' + l.nf + '</span>' : '') +
-          '<div style="font-size:10px;color:var(--text3);margin-top:2px;">' + l.data + ' · ' + l.motivo + '</div>' +
+          '<div style="font-size:10px;color:var(--text3);margin-top:2px;">' + l.data + ' · ' + l.motivo + (l.lancadoPor ? ' · <span style="color:var(--text2);">lançado por '+esc(l.lancadoPor)+'</span>' : '') + '</div>' +
         '</div>' +
       '</div>';
     }).join('');
   }
 
+  // Tamanhos de copo com saldo negativo agora (o caso mais urgente).
+  function stockTamanhosNegativos(){
+    return Object.keys(STOCK).filter(function(tam){ return STOCK[tam].caixas < 0; });
+  }
+  // Tamanhos abaixo do mínimo, mas ainda não negativos (atenção, não urgência).
+  function stockTamanhosBaixos(){
+    return Object.keys(STOCK).filter(function(tam){ return STOCK[tam].caixas >= 0 && STOCK[tam].caixas < STOCK[tam].minCaixas; });
+  }
+  // Usado pela etiqueta dinâmica nos pedidos (Kanban/Fila/Pedidos): true se
+  // este tamanho está negativo ou abaixo do mínimo agora — recalculado toda
+  // vez que a tela renderiza, nunca fica "preso" no pedido.
+  function stockTemAlerta(tam){
+    if(!STOCK[tam]) return false;
+    return STOCK[tam].caixas < STOCK[tam].minCaixas;
+  }
+  window.stockTemAlerta = stockTemAlerta;
+
   function checkStockAlerts() {
-    var alerts = [];
-    Object.keys(STOCK).forEach(function(tam) {
-      if(STOCK[tam].caixas < STOCK[tam].minCaixas) alerts.push(tam + ' (' + STOCK[tam].caixas + ' cx restantes)');
-    });
+    var negativos = stockTamanhosNegativos();
+    var baixos = stockTamanhosBaixos();
     var alertEl = document.getElementById('stock-alert');
     var alertMsg = document.getElementById('stock-alert-msg');
-    if(alerts.length && alertEl && alertMsg) {
+    if((negativos.length || baixos.length) && alertEl && alertMsg) {
       alertEl.style.display = 'flex';
-      alertMsg.textContent = '⚠️ Estoque baixo: ' + alerts.join(', ');
+      var partes = [];
+      if(negativos.length){
+        partes.push('<b style="color:#791F1F;">🔴 Negativo:</b> ' + negativos.map(function(t){ return t+' ('+STOCK[t].caixas+' cx)'; }).join(', '));
+      }
+      if(baixos.length){
+        partes.push('<b style="color:#633806;">🟡 Abaixo do mínimo:</b> ' + baixos.map(function(t){ return t+' ('+STOCK[t].caixas+' cx)'; }).join(', '));
+      }
+      alertMsg.innerHTML = partes.join(' &nbsp;·&nbsp; ');
+      alertEl.classList.toggle('urgente', negativos.length>0);
     } else if(alertEl) {
       alertEl.style.display = 'none';
+      alertEl.classList.remove('urgente');
+    }
+
+    // Badge no menu lateral — só visível para quem tem a permissão de gerenciar
+    // estoque (ou Admin Geral); soma negativos + baixos, some sozinho quando
+    // tudo estiver reposto.
+    var badge = document.getElementById('sb-estoque-badge');
+    if(badge){
+      var total = negativos.length + baixos.length;
+      var podeVer = estoquePodeGerenciar();
+      badge.textContent = total;
+      badge.style.display = (podeVer && total>0) ? '' : 'none';
     }
   }
 
   // Bind estoque
+  // Quem pode registrar entrada/baixa/abertura/ajuste de estoque: Admin Geral
+  // ou quem tiver a permissão específica "podeGerenciarEstoque" (concedida
+  // individualmente pelo Admin Geral, ex: Karla e Gisella hoje). Qualquer
+  // outra pessoa com acesso à aba só enxerga a consulta e o histórico —
+  // não vê nem consegue acionar os formulários de lançamento.
+  function estoquePodeGerenciar(){
+    return currentUser && (currentUser.isAdminGeral || currentUser.podeGerenciarEstoque);
+  }
+
   function initEstoque() {
     renderStockGrid();
     renderStockLog();
     checkStockAlerts();
+
+    var podeGerenciar = estoquePodeGerenciar();
+    var btnEntToggle = document.getElementById('btn-entrada-estoque');
+    var gestorWrap = document.getElementById('estoque-gestor-wrap');
+    if(btnEntToggle) btnEntToggle.style.display = podeGerenciar ? '' : 'none';
+    if(gestorWrap) gestorWrap.style.display = podeGerenciar ? '' : 'none';
+    if(!podeGerenciar) return; // sem a permissão, só visualização — não faz sentido religar os listeners abaixo
 
     var btnEnt = document.getElementById('btn-entrada-estoque');
     var formEnt = document.getElementById('form-entrada');
@@ -2851,7 +3186,7 @@ document.addEventListener('DOMContentLoaded',function(){
       if(!caixas && !unid) { toast('Informe caixas ou unidades!'); return; }
       STOCK[tam].caixas += caixas;
       STOCK[tam].unid += unid;
-      STOCK_LOG.unshift({tipo:'entrada',tam:tam,caixas:caixas,unid:unid,nf:nf,data:new Date().toLocaleDateString('pt-BR'),motivo:'Entrada manual'+(nf?' · '+nf:'')});
+      STOCK_LOG.unshift({tipo:'entrada',tam:tam,caixas:caixas,unid:unid,nf:nf,data:new Date().toLocaleDateString('pt-BR'),motivo:'Entrada manual'+(nf?' · '+nf:''),lancadoPor:currentUser.name});
       renderStockGrid(); renderStockLog(); checkStockAlerts();
       document.getElementById('ent-caixas').value=''; document.getElementById('ent-unid').value=''; document.getElementById('ent-nf').value='';
       formEnt.style.display='none';
@@ -2865,9 +3200,16 @@ document.addEventListener('DOMContentLoaded',function(){
       var unid = parseInt(document.getElementById('baixa-unid').value)||0;
       var motivo = document.getElementById('baixa-motivo').value||'Baixa manual';
       if(!caixas && !unid) { toast('Informe caixas ou unidades!'); return; }
-      STOCK[tam].caixas = Math.max(0, STOCK[tam].caixas - caixas);
-      STOCK[tam].unid = Math.max(0, STOCK[tam].unid - unid);
-      STOCK_LOG.unshift({tipo:'saida',tam:tam,caixas:caixas,unid:unid,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:motivo});
+      // Proteção contra conflito de quantidade: nunca deixa dar baixa maior
+      // do que existe disponível — avisa e não aplica, em vez de zerar
+      // silenciosamente ou deixar o número ficar incoerente.
+      if(caixas > STOCK[tam].caixas || unid > STOCK[tam].unid){
+        toast('⚠️ Quantidade maior que o disponível em estoque ('+STOCK[tam].caixas+'cx / '+STOCK[tam].unid+' un). Baixa não aplicada.');
+        return;
+      }
+      STOCK[tam].caixas -= caixas;
+      STOCK[tam].unid -= unid;
+      STOCK_LOG.unshift({tipo:'saida',tam:tam,caixas:caixas,unid:unid,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:motivo,lancadoPor:currentUser.name});
       renderStockGrid(); renderStockLog(); checkStockAlerts();
       document.getElementById('baixa-caixas').value=''; document.getElementById('baixa-unid').value=''; document.getElementById('baixa-motivo').value='';
       toast('📉 Baixa registrada: ' + caixas + 'cx de ' + tam);
@@ -2902,11 +3244,40 @@ document.addEventListener('DOMContentLoaded',function(){
       var sobra = Math.max(0, total - usados);
       STOCK[tam].caixas = Math.max(0, STOCK[tam].caixas - 1);
       STOCK[tam].unid = (STOCK[tam].unid || 0) + sobra;
-      STOCK_LOG.unshift({tipo:'abertura',tam:tam,caixas:1,unid:sobra,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:motivo + ' (abriu 1cx → ' + total + 'pct, usou ' + usados + ', sobra ' + sobra + ')'});
+      STOCK_LOG.unshift({tipo:'abertura',tam:tam,caixas:1,unid:sobra,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:motivo + ' (abriu 1cx → ' + total + 'pct, usou ' + usados + ', sobra ' + sobra + ')',lancadoPor:currentUser.name});
       renderStockGrid(); renderStockLog(); checkStockAlerts();
       document.getElementById('abrir-total').value=''; document.getElementById('abrir-usados').value=''; document.getElementById('abrir-motivo').value='';
       document.getElementById('abrir-preview').style.display='none';
       toast('📦 Caixa aberta! -1cx / +' + sobra + ' pct avulsos de ' + tam);
+    });
+
+    // Ajuste / correção de inventário — separado de entrada/baixa comuns,
+    // para não misturar "movimentação comercial real" com "correção de
+    // contagem". Também protegido contra deixar o estoque negativo.
+    var btnAjuste = document.getElementById('btn-confirm-ajuste');
+    if(btnAjuste) btnAjuste.addEventListener('click', function(){
+      var tam = document.getElementById('ajuste-tam').value;
+      var tipo = document.getElementById('ajuste-tipo').value; // 'somar' | 'subtrair'
+      var caixas = parseInt(document.getElementById('ajuste-caixas').value)||0;
+      var unid = parseInt(document.getElementById('ajuste-unid').value)||0;
+      var motivo = document.getElementById('ajuste-motivo').value||'';
+      if(!caixas && !unid) { toast('Informe caixas ou unidades para o ajuste!'); return; }
+      if(!motivo.trim()) { toast('Informe o motivo do ajuste.'); return; }
+      if(tipo==='subtrair' && (caixas > STOCK[tam].caixas || unid > STOCK[tam].unid)){
+        toast('⚠️ Quantidade a subtrair maior que o disponível ('+STOCK[tam].caixas+'cx / '+STOCK[tam].unid+' un). Ajuste não aplicado.');
+        return;
+      }
+      if(tipo==='somar'){
+        STOCK[tam].caixas += caixas;
+        STOCK[tam].unid += unid;
+      } else {
+        STOCK[tam].caixas -= caixas;
+        STOCK[tam].unid -= unid;
+      }
+      STOCK_LOG.unshift({tipo:'ajuste',tam:tam,caixas:caixas,unid:unid,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:'Ajuste/correção ('+(tipo==='somar'?'+':'-')+') — '+motivo,lancadoPor:currentUser.name});
+      renderStockGrid(); renderStockLog(); checkStockAlerts();
+      document.getElementById('ajuste-caixas').value=''; document.getElementById('ajuste-unid').value=''; document.getElementById('ajuste-motivo').value='';
+      toast('🔧 Ajuste aplicado: '+(tipo==='somar'?'+':'-')+caixas+'cx / '+(tipo==='somar'?'+':'-')+unid+'un de '+tam);
     });
   }
 
@@ -3048,7 +3419,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // GESTÃO DE USUÁRIOS (Admin)
   // ══════════════════════════════════════
   var ALL_MODULES_MAP = {
-    dashboard:'Início / Dashboard', chats:'Chats ao vivo', kanban:'Kanban',
+    dashboard:'Início / Dashboard', chats:'Chats ao vivo', chatinterno:'Chat interno', kanban:'Kanban',
     contatos:'Contatos', followup:'Follow-up 30d', clientes:'Clientes',
     acoes:'Ações de vendas', pedidos:'Pedidos', producao:'Fila de produção',
     estoque:'Estoque', relatorio:'Relatórios', broadcast:'Broadcast',
@@ -3136,20 +3507,70 @@ document.addEventListener('DOMContentLoaded',function(){
     var isMe = currentUser && currentUser.key === key;
     excluirBtn.style.display = (key && !isMe) ? '' : 'none';
 
-    // Checkboxes de módulos
+    // Checkboxes de módulos — cada um vira um "card" clicável com fundo destacado
+    // quando marcado, para ficar fácil bater o olho no que está ativo, sem
+    // depender só do checkbox pequeno.
     var mods = u ? (u.modulos||[]) : Object.keys(ALL_MODULES_MAP);
     grid.innerHTML = Object.keys(ALL_MODULES_MAP).map(function(m){
       var checked = (u && u.isAdmin) ? true : mods.indexOf(m)>=0;
-      return '<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;padding:4px 0;">' +
-        '<input type="checkbox" class="usr-mod-cb" value="' + m + '"' + (checked?' checked':'') + '> ' +
-        ALL_MODULES_MAP[m] + '</label>';
+      return '<label class="usr-mod-item'+(checked?' checked':'')+'" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 8px;border-radius:6px;border:1px solid '+(checked?'#E31787':'var(--border)')+';background:'+(checked?'#FBEAF0':'transparent')+';transition:background .15s,border-color .15s;">' +
+        '<input type="checkbox" class="usr-mod-cb" value="' + m + '" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#E31787;"' + (checked?' checked':'') + '> ' +
+        '<span style="flex:1;'+(checked?'font-weight:500;':'')+'">'+ALL_MODULES_MAP[m]+'</span>' +
+        '<i class="ti ti-check" style="font-size:14px;color:#E31787;'+(checked?'':'display:none;')+'"></i>' +
+      '</label>';
     }).join('');
+    // Atualiza o destaque do card ao marcar/desmarcar, sem precisar re-renderizar tudo
+    grid.querySelectorAll('.usr-mod-cb').forEach(function(cb){
+      cb.addEventListener('change', function(){
+        var item = this.closest('.usr-mod-item');
+        var icon = item.querySelector('.ti-check');
+        var span = item.querySelector('span');
+        item.classList.toggle('checked', this.checked);
+        item.style.borderColor = this.checked ? '#E31787' : 'var(--border)';
+        item.style.background = this.checked ? '#FBEAF0' : 'transparent';
+        span.style.fontWeight = this.checked ? '500' : 'normal';
+        icon.style.display = this.checked ? '' : 'none';
+      });
+    });
 
     // Mostrar/esconder módulos conforme admin
     adminSel.onchange = function(){
       document.getElementById('usr-modulos-wrap').style.display = this.value==='1' ? 'none' : '';
     };
     document.getElementById('usr-modulos-wrap').style.display = adminSel.value==='1' ? 'none' : '';
+
+    // Permissões de chat comercial (ver todos os clientes / reatribuir vendedor)
+    // e operacionais (gestor de estoque): só o Admin Geral define, e só para
+    // outras pessoas — nunca para si mesmo, já que o Admin Geral já tem tudo
+    // por definição.
+    var permChatWrap = document.getElementById('usr-permissoes-chat-wrap');
+    var permOpWrap = document.getElementById('usr-permissoes-op-wrap');
+    var podeEditarPermChat = currentUser && currentUser.isAdminGeral && !isMe;
+    permChatWrap.style.display = podeEditarPermChat ? '' : 'none';
+    permOpWrap.style.display = podeEditarPermChat ? '' : 'none';
+
+    function aplicarEstadoVisualPerm(cbId, itemId){
+      var cb = document.getElementById(cbId);
+      var item = document.getElementById(itemId);
+      var icon = item.querySelector('.ti-check');
+      var span = item.querySelector('span');
+      item.style.borderColor = cb.checked ? '#E31787' : 'var(--border)';
+      item.style.background = cb.checked ? '#FBEAF0' : 'transparent';
+      span.style.fontWeight = cb.checked ? '500' : 'normal';
+      icon.style.display = cb.checked ? '' : 'none';
+    }
+    var cbVerTodos = document.getElementById('usr-ver-todos-clientes');
+    var cbReatribuir = document.getElementById('usr-reatribuir-vendedor');
+    var cbEstoque = document.getElementById('usr-gerenciar-estoque');
+    cbVerTodos.checked = u ? !!u.podeVerTodosClientes : false;
+    cbReatribuir.checked = u ? !!u.podeReatribuirVendedor : false;
+    cbEstoque.checked = u ? !!u.podeGerenciarEstoque : false;
+    aplicarEstadoVisualPerm('usr-ver-todos-clientes','usr-perm-item-vertodos');
+    aplicarEstadoVisualPerm('usr-reatribuir-vendedor','usr-perm-item-reatribuir');
+    aplicarEstadoVisualPerm('usr-gerenciar-estoque','usr-perm-item-estoque');
+    cbVerTodos.onchange = function(){ aplicarEstadoVisualPerm('usr-ver-todos-clientes','usr-perm-item-vertodos'); };
+    cbReatribuir.onchange = function(){ aplicarEstadoVisualPerm('usr-reatribuir-vendedor','usr-perm-item-reatribuir'); };
+    cbEstoque.onchange = function(){ aplicarEstadoVisualPerm('usr-gerenciar-estoque','usr-perm-item-estoque'); };
 
     openModal('modal-usuario');
   }
@@ -3173,6 +3594,22 @@ document.addEventListener('DOMContentLoaded',function(){
       Array.from(document.querySelectorAll('.usr-mod-cb:checked')).map(function(cb){ return cb.value; });
 
     var existing = editingUserKey ? USERS[editingUserKey] : {};
+
+    // Permissões de chat comercial e operacionais: só o Admin Geral consegue
+    // alterá-las (e nunca para si mesmo — o formulário fica oculto nesses
+    // casos). Se quem está salvando não tem esse poder, preserva o que já
+    // estava gravado, para não apagar por acidente.
+    var podeEditarPermChat = currentUser && currentUser.isAdminGeral && currentUser.key!==editingUserKey;
+    var podeVerTodosClientes = podeEditarPermChat
+      ? document.getElementById('usr-ver-todos-clientes').checked
+      : !!existing.podeVerTodosClientes;
+    var podeReatribuirVendedor = podeEditarPermChat
+      ? document.getElementById('usr-reatribuir-vendedor').checked
+      : !!existing.podeReatribuirVendedor;
+    var podeGerenciarEstoque = podeEditarPermChat
+      ? document.getElementById('usr-gerenciar-estoque').checked
+      : !!existing.podeGerenciarEstoque;
+
     USERS[login] = {
       pass:    senha || (existing.pass||'123456'),
       name:    nome,
@@ -3180,9 +3617,13 @@ document.addEventListener('DOMContentLoaded',function(){
       av:      nome.substring(0,2).toUpperCase(),
       color:   cor,
       isAdmin: isAdm,
+      isAdminGeral: !!existing.isAdminGeral, // nunca editável pelo formulário — só definido no código
       modulos: mods,
       terceirizado: terceirizado,
-      valorHora: valorHora
+      valorHora: valorHora,
+      podeVerTodosClientes: podeVerTodosClientes,
+      podeReatribuirVendedor: podeReatribuirVendedor,
+      podeGerenciarEstoque: podeGerenciarEstoque
     };
 
     // Dados complementares de cadastro (pessoal + contratação), separados do financeiro operacional
@@ -3237,7 +3678,14 @@ document.addEventListener('DOMContentLoaded',function(){
   goPage = function(id, title) {
     _goPage(id, title);
     if(id === 'dashboard' || id === 'inicio') renderDashboard();
-    if(id === 'pedidos') renderOrders();
+    if(id === 'pedidos') {
+      renderOrders();
+      var painelCancel = document.getElementById('ped-cancelamentos-painel');
+      if(painelCancel){
+        painelCancel.style.display = (typeof pedPodeAprovarCancelamento==='function' && pedPodeAprovarCancelamento()) ? '' : 'none';
+      }
+      if(typeof renderCancelamentosPendentes==='function') renderCancelamentosPendentes();
+    }
     if(id === 'producao') renderProdQueue();
     if(id === 'estoque') initEstoque();
   };
@@ -3385,6 +3833,10 @@ document.addEventListener('DOMContentLoaded',function(){
     document.getElementById('np-cidade').value = '';
     document.getElementById('np-rua').value = '';
     document.getElementById('np-obs').value = '';
+    document.getElementById('np-entrada-status').value = 'pago';
+    document.getElementById('np-entrada-data').value = '';
+    document.getElementById('np-entrada-motivo').value = '';
+    document.getElementById('np-entrada-previsto-wrap').style.display = 'none';
     renderItems();
     // Adicionar 1 item inicial
     addItem();
@@ -3403,11 +3855,15 @@ document.addEventListener('DOMContentLoaded',function(){
 
     var total = NP_ITEMS.reduce(function(s,i){ return s+i.subtotal; },0);
     var unidades = NP_ITEMS.reduce(function(s,i){ return s+i.unidades; },0);
-    var statusInicial = document.getElementById('np-status-inicial').value;
     var vendedor = document.getElementById('np-vendedor').value;
     var pid = 'PED-' + String(NP_COUNTER).padStart(3,'0');
     NP_COUNTER++;
 
+    // Regra de negócio: todo pedido confirmado (não-rascunho) já nasce em
+    // produção — não existe mais escolha manual de "status inicial", porque
+    // criar o pedido pressupõe que a entrada de 30% já foi acertada com o
+    // cliente (paga ou com data prevista, ver campos de entrada abaixo).
+    var statusInicial = rascunho ? 'Orçamento enviado' : 'Em produção';
     var pillMap = {'Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod'};
 
     // Produto resumido para exibição
@@ -3415,6 +3871,7 @@ document.addEventListener('DOMContentLoaded',function(){
       return (i.tipo==='caixas' ? i.qtd+'cx' : i.qtd+'un') + ' ' + i.tam;
     }).join(' + ');
 
+    var entradaStatus = document.getElementById('np-entrada-status').value; // 'pago' | 'previsto'
     var newOrder = {
       id: pid,
       client: nome,
@@ -3424,7 +3881,7 @@ document.addEventListener('DOMContentLoaded',function(){
       qtd: NP_ITEMS.reduce(function(s,i){ return s+(i.tipo==='caixas'?i.qtd:0);},0),
       unid: unidades,
       valor: total,
-      status: rascunho ? 'Orçamento enviado' : statusInicial,
+      status: statusInicial,
       vendedor: vendedor,
       data: new Date().toLocaleDateString('pt-BR'),
       pill: pillMap[statusInicial] || 'p-orc',
@@ -3438,26 +3895,51 @@ document.addEventListener('DOMContentLoaded',function(){
       prazo: document.getElementById('np-prazo').value,
       frete: document.getElementById('np-frete').value,
       obs: document.getElementById('np-obs').value||'',
+      // Controle de pagamento em duas etapas (30% entrada / 70% restante).
+      entradaPaga: entradaStatus==='pago',
+      entradaData: entradaStatus==='previsto' ? (document.getElementById('np-entrada-data').value||'') : '',
+      entradaMotivo: entradaStatus==='previsto' ? (document.getElementById('np-entrada-motivo').value||'') : '',
+      restantePago: false,
+      // Fluxo de cancelamento (ver pedCancelamento* mais abaixo no arquivo).
+      cancelamento: null, // {motivo, solicitadoPor, solicitadoEm, status:'pendente'|'aprovado'|'negado', decididoPor, decididoEm, motivoDecisao}
+      estoqueBaixado: false,
     };
 
     ORDERS.unshift(newOrder);
 
-    // Baixa de estoque e fila de produção se Em produção
-    if(!rascunho && statusInicial === 'Em produção') {
+    // Baixa de estoque: acontece sempre que o pedido é confirmado (não-rascunho),
+    // já na criação — nunca mais espera o faturamento, para o vendedor sempre
+    // ver o estoque refletindo o que já está comprometido em produção.
+    // O estoque pode ficar negativo de propósito (sem travar em zero): a venda
+    // NUNCA é bloqueada por falta de estoque — se faltar, o vendedor é avisado
+    // na hora, e o saldo negativo fica visível até a reposição cobrir a
+    // diferença. Isso evita perder venda de produto feito sob encomenda.
+    if(!rascunho){
+      var tamanhosComFalta = [];
       NP_ITEMS.forEach(function(item) {
         if(STOCK[item.tam]) {
+          var disponivel = item.tipo==='caixas' ? STOCK[item.tam].caixas : STOCK[item.tam].unid;
+          if(item.qtd > disponivel) tamanhosComFalta.push(item.tam+' ('+item.qtd+(item.tipo==='caixas'?'cx':'un')+' pedido, '+disponivel+' disponível)');
           if(item.tipo === 'caixas') {
-            STOCK[item.tam].caixas = Math.max(0, STOCK[item.tam].caixas - item.qtd);
+            STOCK[item.tam].caixas -= item.qtd;
           } else {
-            STOCK[item.tam].unid = Math.max(0, STOCK[item.tam].unid - item.qtd);
+            STOCK[item.tam].unid -= item.qtd;
           }
-          STOCK_LOG.unshift({tipo:'saida',tam:item.tam,caixas:item.tipo==='caixas'?item.qtd:0,unid:item.tipo==='unidades'?item.qtd:0,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:'Pedido '+pid+' — '+nome});
+          STOCK_LOG.unshift({tipo:'saida',tam:item.tam,caixas:item.tipo==='caixas'?item.qtd:0,unid:item.tipo==='unidades'?item.qtd:0,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:'Pedido '+pid+' — '+nome,lancadoPor:vendedor+' (criação do pedido)'});
         }
       });
+      newOrder.estoqueBaixado = true;
+      // Fila de produção: sempre no final, respeitando a ordem — o gestor de
+      // produção continua podendo reordenar manualmente (drag/priority), como já
+      // existia antes; isso aqui só garante a entrada automática no fim da fila.
       PROD_QUEUE.push({id:pid,pos:PROD_QUEUE.length+1,priority:false,client:nome,prod:prodDesc,tinta:NP_TINTA,vendedor:vendedor,data:new Date().toLocaleDateString('pt-BR'),prazo:'—'});
-      toast('✅ Pedido '+pid+' criado e adicionado à fila de produção!');
+      if(tamanhosComFalta.length){
+        toast('⚠️ Pedido '+pid+' criado, mas com estoque insuficiente: '+tamanhosComFalta.join(', ')+'. Sinalizado para o Gestor de Estoque.');
+      } else {
+        toast('✅ Pedido '+pid+' criado, estoque atualizado e adicionado à fila de produção!');
+      }
     } else {
-      toast('✅ Pedido ' + pid + ' criado' + (rascunho ? ' como rascunho' : '') + '!');
+      toast('✅ Pedido ' + pid + ' criado como rascunho!');
     }
 
     renderOrders();
@@ -3467,6 +3949,27 @@ document.addEventListener('DOMContentLoaded',function(){
   // Bind botão novo pedido
   var btnNovoPed = document.getElementById('btn-novo-pedido');
   if(btnNovoPed) btnNovoPed.addEventListener('click', openNovoPedido);
+
+  var npEntradaStatus = document.getElementById('np-entrada-status');
+  if(npEntradaStatus) npEntradaStatus.addEventListener('change', function(){
+    document.getElementById('np-entrada-previsto-wrap').style.display = this.value==='previsto' ? '' : 'none';
+  });
+
+  var btnPcdConfirmar = document.getElementById('btn-pcd-confirmar');
+  if(btnPcdConfirmar) btnPcdConfirmar.addEventListener('click', function(){
+    if(!pedDecisaoCtx) return;
+    var obs = document.getElementById('pcd-observacao').value||'';
+    if(pedDecisaoCtx.acao==='aprovar') pedAprovarCancelamento(pedDecisaoCtx.orderId, obs);
+    else pedNegarCancelamento(pedDecisaoCtx.orderId, obs);
+    closeModal('modal-pcd');
+    pedDecisaoCtx = null;
+  });
+
+  var btnSolicitarCancelamento = document.getElementById('btn-solicitar-cancelamento');
+  if(btnSolicitarCancelamento) btnSolicitarCancelamento.addEventListener('click', function(){
+    var motivo = document.getElementById('sc-motivo').value||'';
+    if(pedSolicitarCancelamento(scOrderIdAtual, motivo)) closeModal('modal-solicitar-cancelamento');
+  });
 
   var btnAddItem = document.getElementById('btn-add-item');
   if(btnAddItem) btnAddItem.addEventListener('click', addItem);
@@ -3940,15 +4443,15 @@ document.addEventListener('DOMContentLoaded',function(){
       var stPill = st==='pago'?'cs-pago':st==='vencida'?'cs-vencida':'cs-pendente';
       var stTxt = st==='pago'?'Pago':st==='vencida'?'Vencida':'Pendente';
       return '<div class="conta-row">' +
-        '<div style="flex:1;min-width:0;">' +
-          '<div style="font-weight:500;font-size:12px;">'+esc(c.desc)+'</div>' +
-          '<div style="font-size:11px;color:var(--text2);">'+esc(c.forn||'—')+(c.obs?' · '+esc(c.obs):'')+(c.recorr!=='unica'?' · <span style="color:var(--rosa);">'+esc(c.recorr)+'</span>':'')+'</div>' +
+        '<div style="min-width:0;overflow:hidden;">' +
+          '<div style="font-weight:500;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(c.desc)+'</div>' +
+          '<div style="font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(c.forn||'—')+(c.obs?' · '+esc(c.obs):'')+(c.recorr!=='unica'?' · <span style="color:var(--rosa);">'+esc(c.recorr)+'</span>':'')+'</div>' +
         '</div>' +
-        '<span style="font-size:11px;background:var(--bg);padding:2px 8px;border-radius:12px;flex-shrink:0;">'+esc(c.cat)+'</span>' +
-        '<span class="conta-venc '+vencClass+'" style="padding:0 8px;">'+esc(c.venc.split('-').reverse().join('/'))+'<br><span style="font-size:10px;">'+vencTxt+'</span></span>' +
+        '<span class="conta-cat-pill">'+esc(c.cat)+'</span>' +
+        '<span class="conta-venc '+vencClass+'">'+esc(c.venc.split('-').reverse().join('/'))+'<br><span style="font-size:10px;">'+vencTxt+'</span></span>' +
         '<span class="conta-valor">'+fmt(c.valor)+'</span>' +
         '<span class="conta-status-pill '+stPill+'">'+stTxt+'</span>' +
-        (st!=='pago'?'<button class="btn btn-sm" style="padding:2px 8px;font-size:11px;" data-pagar-idx="'+CONTAS.indexOf(c)+'">Marcar pago</button>':'<button class="btn btn-sm" style="padding:2px 8px;font-size:11px;opacity:.5;" data-unpagar-idx="'+CONTAS.indexOf(c)+'">Desfazer</button>') +
+        '<span class="conta-acao-cel">'+(st!=='pago'?'<button class="btn btn-sm" style="padding:2px 8px;font-size:11px;" data-pagar-idx="'+CONTAS.indexOf(c)+'">Marcar pago</button>':'<button class="btn btn-sm" style="padding:2px 8px;font-size:11px;opacity:.5;" data-unpagar-idx="'+CONTAS.indexOf(c)+'">Desfazer</button>')+'</span>' +
       '</div>';
     }).join('');
 
@@ -4483,6 +4986,133 @@ function horAccInicializarTodos(){
     var id = painel.getAttribute('data-acc');
     horAccAplicar(id, horAccEstadoInicial(id), false);
   });
+}
+
+/* ============================================================
+   MÓDULO CHAT INTERNO — comunicação entre colaboradores
+   ============================================================
+   Diferente do "Chats ao vivo" (que é com clientes/leads e tem toda
+   a hierarquia de permissão por vendedor), aqui a regra é mais aberta:
+   qualquer colaborador pode conversar com qualquer outro colaborador
+   cadastrado no CRM — sem etiqueta de vendedor, sem filtro de acesso.
+
+   Persistência: por enquanto só em memória (perdida ao recarregar a
+   página), pois depende do Supabase para guardar de forma permanente.
+   Upload de imagem/arquivo/áudio fica desabilitado até o Storage do
+   Supabase estar ligado — os botões já existem na interface, prontos
+   para receber a função real assim que o backend estiver disponível.
+   ============================================================ */
+var CI_CONVERSAS = {}; // chave: login do colega, valor: {msgs:[...]}
+var ciConversaAtual = null;
+
+function ciGetConversa(loginColega){
+  if(!CI_CONVERSAS[loginColega]) CI_CONVERSAS[loginColega] = {msgs:[]};
+  return CI_CONVERSAS[loginColega];
+}
+
+function renderChatInternoPage(){
+  if(!currentUser) return;
+  renderCiConvList();
+  var buscaEl = document.getElementById('ci-conv-search');
+  if(buscaEl && !buscaEl._bound){
+    buscaEl.addEventListener('input', function(){ renderCiConvList(this.value); });
+    buscaEl._bound = true;
+  }
+  var attachBtn = document.getElementById('ci-btn-attach');
+  var micBtn = document.getElementById('ci-btn-mic');
+  [attachBtn, micBtn].forEach(function(btn){
+    if(btn && !btn._bound){
+      btn.addEventListener('click', function(){
+        toast('Envio de imagem/arquivo/áudio chega em breve, junto com o Supabase.');
+      });
+      btn._bound = true;
+    }
+  });
+  var sendBtn = document.getElementById('ci-btn-send');
+  if(sendBtn && !sendBtn._bound){
+    sendBtn.addEventListener('click', ciEnviarMensagem);
+    sendBtn._bound = true;
+  }
+  var inputEl = document.getElementById('ci-msg-input');
+  if(inputEl && !inputEl._bound){
+    inputEl.addEventListener('keydown', function(e){ if(e.key==='Enter'){ ciEnviarMensagem(); } });
+    inputEl._bound = true;
+  }
+}
+
+// Lista todos os colaboradores cadastrados, exceto o próprio usuário logado —
+// qualquer um pode iniciar conversa com qualquer um, sem restrição de vendedor.
+function renderCiConvList(busca){
+  var list = document.getElementById('ci-conv-list');
+  if(!list || !currentUser) return;
+  var termo = (busca||'').trim().toLowerCase();
+  var colegas = Object.keys(USERS).filter(function(k){
+    if(k===currentUser.key) return false;
+    if(termo && USERS[k].name.toLowerCase().indexOf(termo)<0) return false;
+    return true;
+  });
+  document.getElementById('ci-conv-count').textContent = colegas.length+' colega'+(colegas.length!==1?'s':'');
+  list.innerHTML = colegas.map(function(k){
+    var u = USERS[k];
+    var conv = ciGetConversa(k);
+    var ultima = conv.msgs.length ? conv.msgs[conv.msgs.length-1] : null;
+    var preview = ultima ? (ultima.autor===currentUser.key?'Você: ':'')+ultima.texto : 'Nenhuma mensagem ainda';
+    return '<button class="conv-btn'+(ciConversaAtual===k?' sel':'')+'" data-ci-key="'+k+'">'+
+      '<div class="conv-av" style="background:'+u.color+';color:#fff;">'+u.av+'</div>'+
+      '<div class="conv-body"><div class="conv-top"><span class="conv-name">'+esc(u.name)+'</span></div>'+
+      '<div class="conv-preview">'+esc(preview)+'</div></div>'+
+    '</button>';
+  }).join('');
+  list.querySelectorAll('[data-ci-key]').forEach(function(btn){
+    btn.addEventListener('click', function(){ ciAbrirConversa(this.getAttribute('data-ci-key')); });
+  });
+}
+
+function ciAbrirConversa(loginColega){
+  ciConversaAtual = loginColega;
+  var u = USERS[loginColega];
+  if(!u) return;
+  document.querySelectorAll('#ci-conv-list .conv-btn').forEach(function(b){ b.classList.remove('sel'); });
+  var sel = document.querySelector('#ci-conv-list [data-ci-key="'+loginColega+'"]');
+  if(sel) sel.classList.add('sel');
+  var av = document.getElementById('ci-ch-av');
+  av.textContent = u.av; av.style.background = u.color; av.style.color='#fff';
+  document.getElementById('ci-ch-name').textContent = u.name;
+  document.getElementById('ci-ch-sub').textContent = u.role||'';
+  document.getElementById('ci-msg-input').disabled = false;
+  document.getElementById('ci-btn-send').disabled = false;
+  renderCiMensagens();
+}
+
+function renderCiMensagens(){
+  var body = document.getElementById('ci-chat-body');
+  if(!body || !ciConversaAtual) return;
+  var conv = ciGetConversa(ciConversaAtual);
+  if(!conv.msgs.length){
+    body.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:12px;font-style:italic;padding:30px 20px;">Nenhuma mensagem ainda. Diga oi 👋</div>';
+    return;
+  }
+  body.innerHTML = conv.msgs.map(function(m){
+    var out = m.autor===currentUser.key;
+    return '<div class="msg '+(out?'msg-out':'msg-in')+'">'+
+      (out?'':'<div class="msg-author">'+esc(USERS[m.autor]?USERS[m.autor].name:m.autor)+'</div>')+
+      '<div class="msg-bubble">'+esc(m.texto).replace(/\n/g,'<br>')+'</div>'+
+      '<div class="msg-meta">'+m.hora+'</div>'+
+    '</div>';
+  }).join('');
+  body.scrollTop = body.scrollHeight;
+}
+
+function ciEnviarMensagem(){
+  if(!ciConversaAtual) return;
+  var input = document.getElementById('ci-msg-input');
+  var texto = (input.value||'').trim();
+  if(!texto) return;
+  var conv = ciGetConversa(ciConversaAtual);
+  conv.msgs.push({autor: currentUser.key, texto: texto, hora: (typeof horAgoraHM==='function') ? horAgoraHM() : now()});
+  input.value = '';
+  renderCiMensagens();
+  renderCiConvList(document.getElementById('ci-conv-search').value);
 }
 
 function initHorario(){
@@ -5493,12 +6123,21 @@ function renderHorAuditoria(){
             </select>
           </div>
           <div class="fg">
-            <label>Status inicial</label>
-            <select id="np-status-inicial">
-              <option value="Orçamento enviado">Orçamento enviado</option>
-              <option value="Arte pendente">Arte pendente</option>
-              <option value="Em produção">Em produção</option>
+            <label>Entrada (30%) — status</label>
+            <select id="np-entrada-status">
+              <option value="pago">Já recebida</option>
+              <option value="previsto">Prevista para uma data (cliente pediu prazo)</option>
             </select>
+          </div>
+        </div>
+        <div class="form-grid form-grid-2" id="np-entrada-previsto-wrap" style="margin-top:12px;display:none;">
+          <div class="fg">
+            <label>Data prevista do pagamento</label>
+            <input type="date" id="np-entrada-data"/>
+          </div>
+          <div class="fg">
+            <label>Motivo do adiamento</label>
+            <input type="text" id="np-entrada-motivo" placeholder="Ex: cliente recebe pagamento em 2 dias"/>
           </div>
         </div>
       </div>
@@ -5511,6 +6150,20 @@ function renderHorAuditoria(){
     </div>
   </div>
 </div>
+
+<div class="modal-overlay" id="modal-solicitar-cancelamento"><div class="modal"><div class="modal-head"><span class="modal-title">Solicitar cancelamento de pedido</span><button class="modal-close" data-close="modal-solicitar-cancelamento">×</button></div><div class="modal-body">
+  <div style="font-size:11px;color:var(--text2);margin-bottom:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
+    <i class="ti ti-info-circle" style="font-size:12px;"></i> O pedido não é cancelado agora — sua solicitação vai para o Admin Geral e o gerente comercial decidirem.
+  </div>
+  <div class="form-group"><label class="form-label">Pedido</label><div style="font-size:13px;font-weight:500;" id="sc-resumo">—</div></div>
+  <div class="form-group"><label class="form-label">Motivo do cancelamento *</label><textarea class="form-textarea" id="sc-motivo" rows="3" placeholder="Explique por que o cliente está desistindo..."></textarea></div>
+</div><div class="modal-footer"><button class="btn" data-close="modal-solicitar-cancelamento">Voltar</button><button class="btn btn-danger" id="btn-solicitar-cancelamento"><i class="ti ti-x" style="font-size:12px;"></i> Enviar solicitação</button></div></div></div>
+
+<div class="modal-overlay" id="modal-pcd"><div class="modal"><div class="modal-head"><span class="modal-title" id="pcd-modal-title">Decidir cancelamento</span><button class="modal-close" data-close="modal-pcd">×</button></div><div class="modal-body">
+  <div class="form-group"><label class="form-label">Pedido</label><div style="font-size:13px;font-weight:500;" id="pcd-resumo">—</div></div>
+  <div class="form-group"><label class="form-label">Motivo informado pelo vendedor</label><div style="font-size:12px;color:var(--text2);font-style:italic;" id="pcd-motivo-original">—</div></div>
+  <div class="form-group"><label class="form-label">Observação (opcional)</label><textarea class="form-textarea" id="pcd-observacao" rows="2" placeholder="Alguma observação sobre esta decisão..."></textarea></div>
+</div><div class="modal-footer"><button class="btn" data-close="modal-pcd">Cancelar</button><button class="btn btn-sm btn-rosa" id="btn-pcd-confirmar">Confirmar</button></div></div></div>
 
 <!-- iOS touch handled via ontouchstart inline -->
 
@@ -5764,6 +6417,35 @@ function renderHorAuditoria(){
       <div id="usr-modulos-wrap" style="margin-top:16px;">
         <div style="font-weight:600;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Módulos com acesso</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;" id="usr-modulos-grid"></div>
+      </div>
+
+      <div id="usr-permissoes-chat-wrap" style="margin-top:16px;display:none;">
+        <div style="font-weight:600;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Permissões de chat comercial</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
+          <i class="ti ti-lock" style="font-size:12px;"></i> Definidas apenas pelo Admin Geral. Controlam o quanto essa pessoa acompanha as conversas dos vendedores — independentes uma da outra.
+        </div>
+        <label class="usr-perm-item" id="usr-perm-item-vertodos" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 8px;border-radius:6px;border:1px solid var(--border);margin-bottom:6px;transition:background .15s,border-color .15s;">
+          <input type="checkbox" id="usr-ver-todos-clientes" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#E31787;"/>
+          <span style="flex:1;">Ver as conversas de todos os vendedores (não só as próprias)</span>
+          <i class="ti ti-check" style="font-size:14px;color:#E31787;display:none;"></i>
+        </label>
+        <label class="usr-perm-item" id="usr-perm-item-reatribuir" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 8px;border-radius:6px;border:1px solid var(--border);transition:background .15s,border-color .15s;">
+          <input type="checkbox" id="usr-reatribuir-vendedor" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#E31787;"/>
+          <span style="flex:1;">Pode atribuir/trocar o vendedor responsável por um lead</span>
+          <i class="ti ti-check" style="font-size:14px;color:#E31787;display:none;"></i>
+        </label>
+      </div>
+
+      <div id="usr-permissoes-op-wrap" style="margin-top:16px;display:none;">
+        <div style="font-weight:600;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Permissões operacionais</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
+          <i class="ti ti-lock" style="font-size:12px;"></i> Também definidas apenas pelo Admin Geral.
+        </div>
+        <label class="usr-perm-item" id="usr-perm-item-estoque" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 8px;border-radius:6px;border:1px solid var(--border);transition:background .15s,border-color .15s;">
+          <input type="checkbox" id="usr-gerenciar-estoque" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#E31787;"/>
+          <span style="flex:1;">Gestor de estoque — pode registrar entradas, baixas, abertura de caixa e ajustes/correções manuais</span>
+          <i class="ti ti-check" style="font-size:14px;color:#E31787;display:none;"></i>
+        </label>
       </div>
     </div>
     <div class="modal-footer">
