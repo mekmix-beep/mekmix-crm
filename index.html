@@ -634,6 +634,7 @@ input, textarea { cursor: text; }
       <button class="sb-btn" data-page="acoes"><i class="ti ti-trophy"></i><span class="sb-btn-lbl">Ações de vendas</span></button>
       <button class="sb-btn" data-page="pedidos"><i class="ti ti-clipboard-list"></i><span class="sb-btn-lbl">Pedidos</span></button>
       <button class="sb-btn admin-only desktop-only" data-page="producao"><i class="ti ti-tools"></i><span class="sb-btn-lbl">Fila de produção</span></button>
+      <button class="sb-btn" data-page="etiquetas"><i class="ti ti-tag"></i><span class="sb-btn-lbl">Etiquetas</span></button>
       <button class="sb-btn" data-page="estoque"><i class="ti ti-package"></i><span class="sb-btn-lbl">Estoque</span><span class="sb-badge" id="sb-estoque-badge" style="display:none;">0</span></button>
       <button class="sb-btn admin-only desktop-only" data-page="relatorio"><i class="ti ti-chart-bar"></i><span class="sb-btn-lbl">Relatórios</span></button>
       <button class="sb-btn admin-only desktop-only" data-page="broadcast"><i class="ti ti-send"></i><span class="sb-btn-lbl">Broadcast</span></button>
@@ -1217,6 +1218,22 @@ input, textarea { cursor: text; }
         <div class="stock-card">
           <div class="panel-head"><span class="panel-title">Histórico de movimentações</span></div>
           <div class="stock-log" id="stock-log"></div>
+        </div>
+      </div>
+
+      <!-- ETIQUETAS DE ENTREGA -->
+      <div id="page-etiquetas" class="page">
+        <div class="page-title">Etiquetas de entrega</div>
+        <div class="panel">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
+            <i class="ti ti-info-circle" style="font-size:12px;"></i> Aparecem aqui os pedidos <b>Prontos para despacho</b> — a etiqueta é gerada automaticamente assim que o pedido chega nesse status, com uma folha por volume (4 por página A4).
+          </div>
+          <div class="search-wrap" style="margin-bottom:12px;max-width:360px;">
+            <i class="ti ti-search" style="font-size:13px;color:var(--text3);"></i>
+            <input type="text" id="etq-busca" placeholder="Buscar por cliente, razão social, nº do pedido..."/>
+          </div>
+          <div id="etq-lista"></div>
+          <div id="etq-vazio" style="display:none;text-align:center;color:var(--text3);font-style:italic;padding:30px;">Nenhum pedido pronto para despacho no momento.</div>
         </div>
       </div>
 
@@ -1875,13 +1892,13 @@ input, textarea { cursor: text; }
 
 <script>
 var USERS={
-  bruno:   {pass:'123456',name:'Bruno',  role:'Admin',    av:'BR',color:'#E31787',isAdmin:true, isAdminGeral:true, podeGerenciarEstoque:true, modulos:['dashboard','chats','chatinterno','kanban','contatos','followup','horario','clientes','acoes','pedidos','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script']},
-  maykon:  {pass:'123456',name:'Maykon', role:'Admin',    av:'MK',color:'#772D83',isAdmin:true, isAdminGeral:false, podeGerenciarEstoque:false, modulos:['dashboard','chats','chatinterno','kanban','contatos','followup','horario','clientes','acoes','pedidos','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script'],terceirizado:false,valorHora:0},
-  karla:   {pass:'123456',name:'Karla',  role:'Admin',    av:'KA',color:'#085041',isAdmin:true, isAdminGeral:false, podeGerenciarEstoque:true, modulos:['dashboard','chats','chatinterno','kanban','contatos','followup','horario','clientes','acoes','pedidos','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script'],terceirizado:false,valorHora:0},
-  gisella: {pass:'123456',name:'Gisella',role:'Admin',    av:'GI',color:'#3C3489',isAdmin:true, isAdminGeral:false, podeGerenciarEstoque:true, modulos:['dashboard','chats','chatinterno','kanban','contatos','followup','horario','clientes','acoes','pedidos','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script'],terceirizado:false,valorHora:0},
-  joao:    {pass:'joao123',name:'João',  role:'Vendedor', av:'JO',color:'#3C3489',isAdmin:false,podeVerTodosClientes:false,podeReatribuirVendedor:false,podeGerenciarEstoque:false,modulos:['chats','chatinterno','kanban','contatos','followup','horario','clientes','pedidos','estoque','templates','script'],terceirizado:true,valorHora:15},
-  maria:   {pass:'maria123',name:'Maria',role:'Vendedor', av:'MA',color:'#633806',isAdmin:false,podeVerTodosClientes:false,podeReatribuirVendedor:false,podeGerenciarEstoque:false,modulos:['chats','chatinterno','kanban','contatos','followup','horario','clientes','pedidos','estoque','templates','script'],terceirizado:true,valorHora:15},
-  pedro:   {pass:'pedro123',name:'Pedro',role:'Vendedor', av:'PE',color:'#085041',isAdmin:false,podeVerTodosClientes:false,podeReatribuirVendedor:false,podeGerenciarEstoque:false,modulos:['chats','chatinterno','kanban','contatos','followup','horario','clientes','pedidos','estoque','templates','script'],terceirizado:true,valorHora:15},
+  bruno:   {pass:'123456',name:'Bruno',  role:'Admin',    av:'BR',color:'#E31787',isAdmin:true, isAdminGeral:true, podeGerenciarEstoque:true, modulos:['dashboard','chats','chatinterno','kanban','contatos','followup','horario','clientes','acoes','pedidos','etiquetas','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script']},
+  maykon:  {pass:'123456',name:'Maykon', role:'Admin',    av:'MK',color:'#772D83',isAdmin:true, isAdminGeral:false, podeGerenciarEstoque:false, modulos:['dashboard','chats','chatinterno','kanban','contatos','followup','horario','clientes','acoes','pedidos','etiquetas','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script'],terceirizado:false,valorHora:0},
+  karla:   {pass:'123456',name:'Karla',  role:'Admin',    av:'KA',color:'#085041',isAdmin:true, isAdminGeral:false, podeGerenciarEstoque:true, modulos:['dashboard','chats','chatinterno','kanban','contatos','followup','horario','clientes','acoes','pedidos','etiquetas','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script'],terceirizado:false,valorHora:0},
+  gisella: {pass:'123456',name:'Gisella',role:'Admin',    av:'GI',color:'#3C3489',isAdmin:true, isAdminGeral:false, podeGerenciarEstoque:true, modulos:['dashboard','chats','chatinterno','kanban','contatos','followup','horario','clientes','acoes','pedidos','etiquetas','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script'],terceirizado:false,valorHora:0},
+  joao:    {pass:'joao123',name:'João',  role:'Vendedor', av:'JO',color:'#3C3489',isAdmin:false,podeVerTodosClientes:false,podeReatribuirVendedor:false,podeGerenciarEstoque:false,modulos:['chats','chatinterno','kanban','contatos','followup','horario','clientes','pedidos','etiquetas','estoque','templates','script'],terceirizado:true,valorHora:15},
+  maria:   {pass:'maria123',name:'Maria',role:'Vendedor', av:'MA',color:'#633806',isAdmin:false,podeVerTodosClientes:false,podeReatribuirVendedor:false,podeGerenciarEstoque:false,modulos:['chats','chatinterno','kanban','contatos','followup','horario','clientes','pedidos','etiquetas','estoque','templates','script'],terceirizado:true,valorHora:15},
+  pedro:   {pass:'pedro123',name:'Pedro',role:'Vendedor', av:'PE',color:'#085041',isAdmin:false,podeVerTodosClientes:false,podeReatribuirVendedor:false,podeGerenciarEstoque:false,modulos:['chats','chatinterno','kanban','contatos','followup','horario','clientes','pedidos','etiquetas','estoque','templates','script'],terceirizado:true,valorHora:15},
 };
 var currentUser=null,currentPage='chats',mobState='list',resolveOn=false,recOn=false,currentKey='AC',editTplIdx=-1;
 
@@ -2230,7 +2247,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // Fix: mover páginas novas para dentro do content-area
   (function(){
     var ca = document.querySelector('.content-area');
-    ['page-pedidos','page-producao','page-estoque','page-clientes','page-acoes','page-financeiro','page-notasfiscais','page-script','page-followup','page-horario','page-chatinterno','page-relatorio','page-broadcast','page-templates','page-whatsapp','page-equipe','page-config'].forEach(function(id){
+    ['page-pedidos','page-producao','page-etiquetas','page-estoque','page-clientes','page-acoes','page-financeiro','page-notasfiscais','page-script','page-followup','page-horario','page-chatinterno','page-relatorio','page-broadcast','page-templates','page-whatsapp','page-equipe','page-config'].forEach(function(id){
       var el = document.getElementById(id);
       if(el && el.parentElement && !el.parentElement.classList.contains('content-area')){
         ca.appendChild(el);
@@ -2909,6 +2926,11 @@ document.addEventListener('DOMContentLoaded',function(){
     var idxFila = PROD_QUEUE.findIndex(function(p){ return p.id===orderId; });
     if(idxFila>=0) PROD_QUEUE.splice(idxFila,1);
 
+    // Etiqueta de entrega: se já tinha sido gerada (pedido chegou a ficar
+    // "Pronto para despacho" antes de ser cancelado), remove automaticamente
+    // — evita ficar com etiqueta órfã de um pedido que não vai mais existir.
+    if(typeof etqRemoverDoPedido==='function') etqRemoverDoPedido(orderId);
+
     order.cancelamento.status = 'aprovado';
     order.cancelamento.decididoPor = currentUser.name;
     order.cancelamento.decididoEm = Date.now();
@@ -2920,6 +2942,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if(typeof renderProdQueue==='function') renderProdQueue();
     if(typeof renderCancelamentosPendentes==='function') renderCancelamentosPendentes();
     if(typeof renderNotificacoes==='function') renderNotificacoes();
+    if(typeof renderEtiquetas==='function') renderEtiquetas();
     toast('❌ Pedido '+orderId+' cancelado. Estoque estornado.');
   }
 
@@ -2996,6 +3019,197 @@ document.addEventListener('DOMContentLoaded',function(){
   }
   window.pedAbrirDecisaoCancelamento = pedAbrirDecisaoCancelamento;
 
+  /* ============================================================
+     ETIQUETAS DE ENTREGA
+     ============================================================
+     Gerada automaticamente quando o pedido vira "Pronto para despacho"
+     (nunca antes — evita gerar algo que pode ser cancelado em produção).
+     Uma etiqueta por volume/caixa do pedido, numeração sequencial única
+     através de todas as folhas (1/6, 2/6...6/6). Cada pedido sempre
+     começa uma folha nova — nunca mistura com outro pedido na mesma
+     folha; se sobrar espaço na última folha, fica em branco.
+
+     ETIQUETAS[pedidoId] = {
+       volumes: [{numero, total}],           // dados de numeração
+       dados: {cliente, endereco, bairro, cidade, referencia, contato, obs, itens},
+       arquivada: false
+     }
+
+     Separar "dados" de "layout de impressão" (a função etqHtmlFolhaA4)
+     é proposital: quando a impressora térmica entrar, basta trocar só a
+     função de renderização, sem tocar em como os dados são calculados.
+     ============================================================ */
+  var ETIQUETAS = {};
+
+  function etqTotalVolumes(order){
+    // Cada "item" do pedido pode ser em caixas ou unidades; para fins de
+    // etiqueta física, cada CAIXA é 1 volume. Itens vendidos em unidades
+    // avulsas (não caixa fechada) contam como 1 volume no total (ainda que
+    // sejam poucas peças, viajam juntas fisicamente).
+    var total = 0;
+    (order.itens||[]).forEach(function(item){
+      total += item.tipo==='caixas' ? item.qtd : 1;
+    });
+    return total || 1;
+  }
+
+  function etqGerarParaPedido(order){
+    var total = etqTotalVolumes(order);
+    ETIQUETAS[order.id] = {
+      volumes: Array.from({length: total}, function(_, i){ return {numero: i+1, total: total}; }),
+      dados: {
+        cliente: order.client,
+        endereco: order.rua || '',
+        bairro: order.bairro || '',
+        cidade: order.cidade || '',
+        referencia: '',
+        contato: order.wapp || '',
+        obs: order.obs || '',
+        itens: (order.itens||[]).slice()
+      },
+      arquivada: false
+    };
+  }
+
+  function etqRemoverDoPedido(orderId){
+    delete ETIQUETAS[orderId];
+  }
+  window.etqRemoverDoPedido = etqRemoverDoPedido;
+
+  function etqAbrirEdicao(orderId){
+    var et = ETIQUETAS[orderId];
+    if(!et) return;
+    document.getElementById('etq-ed-cliente').value = et.dados.cliente;
+    document.getElementById('etq-ed-endereco').value = et.dados.endereco;
+    document.getElementById('etq-ed-bairro').value = et.dados.bairro;
+    document.getElementById('etq-ed-cidade').value = et.dados.cidade;
+    document.getElementById('etq-ed-referencia').value = et.dados.referencia;
+    document.getElementById('etq-ed-contato').value = et.dados.contato;
+    document.getElementById('etq-ed-obs').value = et.dados.obs;
+    document.getElementById('modal-editar-etiqueta').setAttribute('data-editing-order', orderId);
+    openModal('modal-editar-etiqueta');
+  }
+  window.etqAbrirEdicao = etqAbrirEdicao;
+
+  function etqSalvarEdicao(){
+    var orderId = document.getElementById('modal-editar-etiqueta').getAttribute('data-editing-order');
+    var et = ETIQUETAS[orderId];
+    if(!et) return;
+    et.dados.cliente = document.getElementById('etq-ed-cliente').value;
+    et.dados.endereco = document.getElementById('etq-ed-endereco').value;
+    et.dados.bairro = document.getElementById('etq-ed-bairro').value;
+    et.dados.cidade = document.getElementById('etq-ed-cidade').value;
+    et.dados.referencia = document.getElementById('etq-ed-referencia').value;
+    et.dados.contato = document.getElementById('etq-ed-contato').value;
+    et.dados.obs = document.getElementById('etq-ed-obs').value;
+    closeModal('modal-editar-etiqueta');
+    toast('Etiqueta atualizada.');
+  }
+
+  function etqArquivar(orderId){
+    var et = ETIQUETAS[orderId];
+    if(!et) return;
+    et.arquivada = true;
+    renderEtiquetas();
+    toast('Etiqueta arquivada.');
+  }
+  window.etqArquivar = etqArquivar;
+
+  // ── LAYOUT DE IMPRESSÃO (A4, grade 2x2) ──
+  // Isolado numa função própria de propósito: no dia da impressora
+  // térmica, troca-se só esta função (uma etiqueta por vez, formato
+  // estreito em sequência) sem mexer em nada do resto do módulo.
+  function etqHtmlUmaEtiqueta(order, et, volume){
+    var itensTxt = et.dados.itens.map(function(i){
+      return '<li>'+ (i.tipo==='caixas' ? i.qtd+' cx de '+i.tam : i.qtd+' un de '+i.tam) +'</li>';
+    }).join('');
+    return '<div class="etq-quad">'+
+      '<div class="etq-header">MEKMIX SERIGRAFIA</div>'+
+      '<div class="etq-subheader">ETIQUETA DE ENTREGA</div>'+
+      '<div class="etq-linha"><b>CLIENTE:</b> '+esc(et.dados.cliente)+'</div>'+
+      '<div class="etq-linha"><b>ENDEREÇO:</b> '+esc(et.dados.endereco)+'</div>'+
+      '<div class="etq-linha"><b>BAIRRO:</b> '+esc(et.dados.bairro)+'</div>'+
+      '<div class="etq-linha"><b>CIDADE/UF:</b> '+esc(et.dados.cidade)+'</div>'+
+      '<div class="etq-linha"><b>REFERÊNCIA:</b> '+esc(et.dados.referencia)+'</div>'+
+      '<div class="etq-linha"><b>CONTATO:</b> '+esc(et.dados.contato)+'</div>'+
+      '<div class="etq-linha" style="margin-top:10px;"><b>PRODUTOS:</b></div>'+
+      '<ul class="etq-itens">'+itensTxt+'</ul>'+
+      '<div class="etq-linha"><b>VOLUME:</b> '+volume.numero+' / '+volume.total+'</div>'+
+      '<div class="etq-linha"><b>OBSERVAÇÕES:</b> '+esc(et.dados.obs)+'</div>'+
+    '</div>';
+  }
+
+  function etqHtmlFolhasA4(order, et){
+    var folhas = [];
+    for(var i=0; i<et.volumes.length; i+=4){
+      var grupo = et.volumes.slice(i, i+4);
+      var quads = grupo.map(function(v){ return etqHtmlUmaEtiqueta(order, et, v); });
+      while(quads.length < 4) quads.push('<div class="etq-quad etq-quad-vazio"></div>'); // slot em branco, nunca outro pedido
+      folhas.push('<div class="etq-folha">'+quads.join('')+'</div>');
+    }
+    return folhas.join('');
+  }
+
+  function etqGerarPaginaImpressao(orderId){
+    var order = ORDERS.find(function(o){ return o.id===orderId; });
+    var et = ETIQUETAS[orderId];
+    if(!order || !et) return;
+    var win = window.open('', '_blank');
+    win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Etiquetas — '+esc(order.id)+'</title>'+
+      '<style>'+
+      '@page{size:A4;margin:0;}'+
+      'body{font-family:Arial,sans-serif;margin:0;}'+
+      '.etq-folha{width:210mm;height:297mm;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;page-break-after:always;}'+
+      '.etq-folha:last-child{page-break-after:auto;}'+
+      '.etq-quad{border:1px solid #000;padding:14px;box-sizing:border-box;font-size:12px;}'+
+      '.etq-quad-vazio{border:1px solid #000;}'+
+      '.etq-header{color:#E31787;font-weight:700;font-size:16px;text-align:center;}'+
+      '.etq-subheader{font-weight:700;font-size:11px;text-align:center;margin-bottom:10px;}'+
+      '.etq-linha{margin:4px 0;}'+
+      '.etq-itens{margin:2px 0 6px;padding-left:18px;}'+
+      '</style>'+
+      '</head><body>'+etqHtmlFolhasA4(order, et)+'</body></html>');
+    win.document.close();
+    win.focus();
+    setTimeout(function(){ win.print(); }, 300);
+  }
+  window.etqGerarPaginaImpressao = etqGerarPaginaImpressao;
+
+  function etqBaixarPDF(orderId){
+    // Reaproveita a mesma janela de impressão: "Salvar como PDF" no diálogo
+    // de impressão do navegador já cobre o "baixar" sem precisar de uma
+    // biblioteca de geração de PDF à parte.
+    etqGerarPaginaImpressao(orderId);
+  }
+  window.etqBaixarPDF = etqBaixarPDF;
+
+  function renderEtiquetas(busca){
+    var lista = document.getElementById('etq-lista');
+    var vazio = document.getElementById('etq-vazio');
+    if(!lista) return;
+    var termo = (busca||'').trim().toLowerCase();
+    var pedidosProntos = ORDERS.filter(function(o){
+      if(o.status!=='Pronto para despacho') return false;
+      if(!termo) return true;
+      return o.client.toLowerCase().indexOf(termo)>=0 || o.id.toLowerCase().indexOf(termo)>=0 || (o.doc||'').toLowerCase().indexOf(termo)>=0;
+    });
+    vazio.style.display = pedidosProntos.length ? 'none' : '';
+    lista.innerHTML = pedidosProntos.map(function(o){
+      var et = ETIQUETAS[o.id];
+      if(!et) etqGerarParaPedido(o); // segurança: garante que sempre existe etiqueta para quem está pronto
+      et = ETIQUETAS[o.id];
+      return '<div class="panel" style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;'+(et.arquivada?'opacity:.55;':'')+'">'+
+        '<div><b>'+o.id+'</b> — '+esc(o.client)+'<div style="font-size:11px;color:var(--text2);margin-top:2px;">'+o.prodDesc+' · '+et.volumes.length+' volume'+(et.volumes.length!==1?'s':'')+(et.arquivada?' · <span style="color:var(--text3);">arquivada</span>':'')+'</div></div>'+
+        '<div style="display:flex;gap:6px;flex-wrap:wrap;">'+
+        '<button class="btn btn-sm" onclick="etqAbrirEdicao(\''+o.id+'\')"><i class="ti ti-edit" style="font-size:11px;"></i> Editar</button>'+
+        '<button class="btn btn-sm" onclick="etqBaixarPDF(\''+o.id+'\')"><i class="ti ti-download" style="font-size:11px;"></i> Baixar</button>'+
+        '<button class="btn btn-sm btn-rosa" onclick="etqGerarPaginaImpressao(\''+o.id+'\')"><i class="ti ti-printer" style="font-size:11px;"></i> Imprimir</button>'+
+        (et.arquivada ? '' : '<button class="btn btn-sm" onclick="etqArquivar(\''+o.id+'\')" title="Marcar como já impressa/arquivada"><i class="ti ti-archive" style="font-size:11px;"></i></button>')+
+        '</div></div>';
+    }).join('');
+  }
+  window.renderEtiquetas = renderEtiquetas;
+
   // ── FILA DE PRODUÇÃO ──
   function renderProdQueue() {
     var queue = document.getElementById('prod-queue');
@@ -3045,13 +3259,18 @@ document.addEventListener('DOMContentLoaded',function(){
         if(order){
           order.status = 'Pronto para despacho';
           order.pill = 'p-despacho';
+          // Gera a etiqueta de entrega só agora — não antes, para não criar
+          // algo que poderia ter sido descartado por um cancelamento em
+          // produção. Uma etiqueta por volume/caixa do pedido.
+          if(typeof etqGerarParaPedido==='function') etqGerarParaPedido(order);
           if(typeof notifPedidoProntoDespacho==='function') notifPedidoProntoDespacho(order);
         }
         var idx = PROD_QUEUE.findIndex(function(p){ return p.id===id; });
         if(idx>=0) PROD_QUEUE.splice(idx,1);
         renderProdQueue();
         if(typeof renderOrders==='function') renderOrders();
-        toast('✅ '+id+' marcado como pronto para despacho!');
+        if(typeof renderEtiquetas==='function') renderEtiquetas();
+        toast('✅ '+id+' marcado como pronto para despacho! Etiqueta gerada.');
       });
     });
 
@@ -3617,7 +3836,7 @@ document.addEventListener('DOMContentLoaded',function(){
   var ALL_MODULES_MAP = {
     dashboard:'Início / Dashboard', chats:'Chats ao vivo', chatinterno:'Chat interno', kanban:'Kanban',
     contatos:'Contatos', followup:'Follow-up 30d', clientes:'Clientes',
-    acoes:'Ações de vendas', pedidos:'Pedidos', producao:'Fila de produção',
+    acoes:'Ações de vendas', pedidos:'Pedidos', producao:'Fila de produção', etiquetas:'Etiquetas',
     estoque:'Estoque', relatorio:'Relatórios', broadcast:'Broadcast',
     templates:'Templates', financeiro:'Financeiro', notasfiscais:'Notas Fiscais',
     equipe:'Equipe', config:'Configurações', script:'Script de vendas'
@@ -3884,12 +4103,22 @@ document.addEventListener('DOMContentLoaded',function(){
     }
     if(id === 'producao') renderProdQueue();
     if(id === 'estoque') initEstoque();
+    if(id === 'etiquetas') renderEtiquetas(document.getElementById('etq-busca') ? document.getElementById('etq-busca').value : '');
   };
 
   // Filtros de pedidos
   ['filter-ped-status','filter-ped-vend','filter-ped-sort'].forEach(function(fid) {
     var el = document.getElementById(fid);
     if(el) el.addEventListener('change', renderOrders);
+  });
+
+  // Busca de etiquetas
+  var etqBusca = document.getElementById('etq-busca');
+  if(etqBusca) etqBusca.addEventListener('input', function(){ renderEtiquetas(this.value); });
+  var btnSalvarEtiqueta = document.getElementById('btn-salvar-etiqueta');
+  if(btnSalvarEtiqueta) btnSalvarEtiqueta.addEventListener('click', function(){
+    etqSalvarEdicao();
+    renderEtiquetas(etqBusca ? etqBusca.value : '');
   });
 
   // Botão adicionar à fila de produção
@@ -4072,6 +4301,8 @@ document.addEventListener('DOMContentLoaded',function(){
       id: pid,
       client: nome,
       cidade: (document.getElementById('np-cidade').value||'—'),
+      rua: (document.getElementById('np-rua').value||''),
+      bairro: (document.getElementById('np-bairro').value||''),
       prod: NP_ITEMS[0].tam,
       prodDesc: prodDesc,
       qtd: NP_ITEMS.reduce(function(s,i){ return s+(i.tipo==='caixas'?i.qtd:0);},0),
@@ -6360,6 +6591,16 @@ function renderHorAuditoria(){
   <div class="form-group"><label class="form-label">Motivo informado pelo vendedor</label><div style="font-size:12px;color:var(--text2);font-style:italic;" id="pcd-motivo-original">—</div></div>
   <div class="form-group"><label class="form-label">Observação (opcional)</label><textarea class="form-textarea" id="pcd-observacao" rows="2" placeholder="Alguma observação sobre esta decisão..."></textarea></div>
 </div><div class="modal-footer"><button class="btn" data-close="modal-pcd">Cancelar</button><button class="btn btn-sm btn-rosa" id="btn-pcd-confirmar">Confirmar</button></div></div></div>
+
+<div class="modal-overlay" id="modal-editar-etiqueta"><div class="modal"><div class="modal-head"><span class="modal-title">Editar dados da etiqueta</span><button class="modal-close" data-close="modal-editar-etiqueta">×</button></div><div class="modal-body">
+  <div class="form-group"><label class="form-label">Cliente</label><input class="form-input" id="etq-ed-cliente"/></div>
+  <div class="form-group"><label class="form-label">Endereço (rua, número)</label><input class="form-input" id="etq-ed-endereco"/></div>
+  <div class="form-group"><label class="form-label">Bairro</label><input class="form-input" id="etq-ed-bairro"/></div>
+  <div class="form-group"><label class="form-label">Cidade/UF</label><input class="form-input" id="etq-ed-cidade"/></div>
+  <div class="form-group"><label class="form-label">Referência</label><input class="form-input" id="etq-ed-referencia" placeholder="Ponto de referência (opcional)"/></div>
+  <div class="form-group"><label class="form-label">Contato</label><input class="form-input" id="etq-ed-contato" placeholder="Telefone/WhatsApp"/></div>
+  <div class="form-group"><label class="form-label">Observações</label><textarea class="form-textarea" id="etq-ed-obs" rows="2"></textarea></div>
+</div><div class="modal-footer"><button class="btn" data-close="modal-editar-etiqueta">Cancelar</button><button class="btn btn-rosa" id="btn-salvar-etiqueta">Salvar alterações</button></div></div></div>
 
 <!-- iOS touch handled via ontouchstart inline -->
 
