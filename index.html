@@ -587,22 +587,17 @@ input, textarea { cursor: text; }
 }
 
 </style>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 <div class="notif-toast" id="notif-toast"><i class="ti ti-brand-whatsapp" style="font-size:16px;flex-shrink:0;"></i><span id="notif-text">Nova mensagem!</span></div>
 <div class="login-screen" id="login-screen">
   <div class="login-card">
     <div class="login-logo"><div class="login-ico">MM</div><div class="login-title">MekMix CRM</div><div class="login-sub">Faça login para continuar</div></div>
-    <div class="login-field"><label>Usuário</label><input type="text" class="login-inp" id="login-user" placeholder="seu.nome" autocapitalize="none"/></div>
+    <div class="login-field"><label>Telefone (com DDD)</label><input type="tel" class="login-inp" id="login-user" placeholder="Ex: 35999998888" autocapitalize="none" inputmode="numeric"/></div>
     <div class="login-field"><label>Senha</label><input type="password" class="login-inp" id="login-pass" placeholder="••••••"/></div>
-    <div class="login-error" id="login-error">Usuário ou senha incorretos</div>
-    <button class="login-btn" id="login-btn" ontouchstart="" onclick="doLogin()">Entrar</button>
-    <div class="login-divider">Acesso rápido (demo)</div>
-    <button class="quick-user" ontouchstart="" onclick="qlLogin('bruno','123456')"><div class="qu-av" style="background:#E31787;">BR</div><div><div class="qu-name">Bruno</div><div class="qu-role">Admin</div></div><i class="ti ti-arrow-right" style="color:#aaa;font-size:14px;margin-left:auto;"></i></button>
-    <button class="quick-user" ontouchstart="" onclick="qlLogin('maykon','123456')"><div class="qu-av" style="background:#772D83;">MK</div><div><div class="qu-name">Maykon</div><div class="qu-role">Admin</div></div><i class="ti ti-arrow-right" style="color:#aaa;font-size:14px;margin-left:auto;"></i></button>
-    <button class="quick-user" ontouchstart="" onclick="qlLogin('karla','123456')"><div class="qu-av" style="background:#085041;">KA</div><div><div class="qu-name">Karla</div><div class="qu-role">Admin</div></div><i class="ti ti-arrow-right" style="color:#aaa;font-size:14px;margin-left:auto;"></i></button>
-    <button class="quick-user" ontouchstart="" onclick="qlLogin('gisella','123456')"><div class="qu-av" style="background:#3C3489;">GI</div><div><div class="qu-name">Gisella</div><div class="qu-role">Admin</div></div><i class="ti ti-arrow-right" style="color:#aaa;font-size:14px;margin-left:auto;"></i></button>
+    <div class="login-error" id="login-error">Telefone ou senha incorretos</div>
+    <button class="login-btn" id="btn-login-entrar" ontouchstart="" onclick="doLogin()">Entrar</button>
   </div>
 </div>
 <div class="app" id="app">
@@ -1891,15 +1886,82 @@ input, textarea { cursor: text; }
 </div>
 
 <script>
-var USERS={
-  bruno:   {pass:'123456',name:'Bruno',  role:'Admin',    av:'BR',color:'#E31787',isAdmin:true, isAdminGeral:true, podeGerenciarEstoque:true, modulos:['dashboard','chats','chatinterno','kanban','contatos','followup','horario','clientes','acoes','pedidos','etiquetas','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script']},
-  maykon:  {pass:'123456',name:'Maykon', role:'Admin',    av:'MK',color:'#772D83',isAdmin:true, isAdminGeral:false, podeGerenciarEstoque:false, modulos:['dashboard','chats','chatinterno','kanban','contatos','followup','horario','clientes','acoes','pedidos','etiquetas','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script'],terceirizado:false,valorHora:0},
-  karla:   {pass:'123456',name:'Karla',  role:'Admin',    av:'KA',color:'#085041',isAdmin:true, isAdminGeral:false, podeGerenciarEstoque:true, modulos:['dashboard','chats','chatinterno','kanban','contatos','followup','horario','clientes','acoes','pedidos','etiquetas','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script'],terceirizado:false,valorHora:0},
-  gisella: {pass:'123456',name:'Gisella',role:'Admin',    av:'GI',color:'#3C3489',isAdmin:true, isAdminGeral:false, podeGerenciarEstoque:true, modulos:['dashboard','chats','chatinterno','kanban','contatos','followup','horario','clientes','acoes','pedidos','etiquetas','producao','estoque','relatorio','broadcast','templates','financeiro','notasfiscais','equipe','config','script'],terceirizado:false,valorHora:0},
-  joao:    {pass:'joao123',name:'João',  role:'Vendedor', av:'JO',color:'#3C3489',isAdmin:false,podeVerTodosClientes:false,podeReatribuirVendedor:false,podeGerenciarEstoque:false,modulos:['chats','chatinterno','kanban','contatos','followup','horario','clientes','pedidos','etiquetas','estoque','templates','script'],terceirizado:true,valorHora:15},
-  maria:   {pass:'maria123',name:'Maria',role:'Vendedor', av:'MA',color:'#633806',isAdmin:false,podeVerTodosClientes:false,podeReatribuirVendedor:false,podeGerenciarEstoque:false,modulos:['chats','chatinterno','kanban','contatos','followup','horario','clientes','pedidos','etiquetas','estoque','templates','script'],terceirizado:true,valorHora:15},
-  pedro:   {pass:'pedro123',name:'Pedro',role:'Vendedor', av:'PE',color:'#085041',isAdmin:false,podeVerTodosClientes:false,podeReatribuirVendedor:false,podeGerenciarEstoque:false,modulos:['chats','chatinterno','kanban','contatos','followup','horario','clientes','pedidos','etiquetas','estoque','templates','script'],terceirizado:true,valorHora:15},
+/* ============================================================
+   CONEXÃO COM SUPABASE (mekmix-portal)
+   ============================================================
+   A partir daqui o CRM passa a autenticar de verdade contra o banco,
+   em vez do objeto USERS fixo do protótipo. USERS continua existindo
+   como CACHE local (o resto do código já depende muito dele), mas
+   agora é populado a partir dos dados reais do banco após o login —
+   nunca mais contém senha nem dado inventado.
+
+   Login: cada colaborador usa TELEFONE (com DDD) + senha. Por trás,
+   isso vira "telefone@mekmix.internal" no Supabase Auth — o telefone
+   nunca precisa ser um e-mail de verdade, é só o identificador único
+   que o Supabase exige.
+   ============================================================ */
+var SUPABASE_URL = 'https://rbrytgtdytpqcgfthgty.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJicnl0Z3RkeXRwcWNnZnRoZ3R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMDg3NzQsImV4cCI6MjA5NjY4NDc3NH0.-Zw93ga-vtBrI2KSBUnmV39yqeZCAoilNZT9mX2tJp8';
+var sbClient = (typeof supabase !== 'undefined')
+  ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+
+// Tradução entre o texto que o CRM mostra (herdado do protótipo) e as
+// siglas que o enum "status_pedido" usa no banco (definidas antes de
+// começarmos a mexer no schema, então preservamos como estão).
+var STATUS_CRM_PARA_BANCO = {
+  'Novo lead': 'neg',
+  'Orçamento enviado': 'apr',
+  'Arte pendente': 'prep',
+  'Em produção': 'prod',
+  'Pronto para despacho': 'Pronto para despacho', // valor novo, já cadastrado por extenso
+  'Entregue': 'ent',
+  'Follow-up 30d': 'col',
+  'Cancelamento solicitado': 'Cancelamento solicitado', // valor novo, já por extenso
+  'Cancelado': 'Cancelado' // valor novo, já por extenso
 };
+var STATUS_BANCO_PARA_CRM = {};
+Object.keys(STATUS_CRM_PARA_BANCO).forEach(function(k){ STATUS_BANCO_PARA_CRM[STATUS_CRM_PARA_BANCO[k]] = k; });
+function statusParaBanco(textoCrm){ return STATUS_CRM_PARA_BANCO[textoCrm] || textoCrm; }
+function statusParaCrm(valorBanco){ return STATUS_BANCO_PARA_CRM[valorBanco] || valorBanco; }
+
+// Monta o "e-mail" interno a partir do telefone, só dígitos (remove
+// espaço, traço, parênteses caso a pessoa digite formatado).
+function telefoneParaEmailInterno(telefone){
+  var soDigitos = (telefone||'').replace(/\D/g,'');
+  return soDigitos + '@mekmix.internal';
+}
+
+// Converte uma linha da tabela "perfis" (formato do banco) no formato
+// que USERS já usa em todo o resto do código (isAdmin, av, color, etc.)
+// — assim não precisamos reescrever cada tela que já lê de USERS.
+function perfilParaUser(perfil){
+  return {
+    pass: null, // nunca guardamos senha aqui — autenticação já foi feita pelo Supabase
+    name: perfil.nome,
+    role: perfil.cargo || (perfil.is_admin ? 'Admin' : 'Usuário'),
+    av: (perfil.avatar_iniciais || perfil.nome.substring(0,2)).toUpperCase(),
+    color: perfil.cor || '#772D83',
+    isAdmin: !!perfil.is_admin,
+    isAdminGeral: !!perfil.is_admin_geral,
+    podeVerTodosClientes: !!perfil.pode_ver_todos_clientes,
+    podeReatribuirVendedor: !!perfil.pode_reatribuir_vendedor,
+    podeGerenciarEstoque: !!perfil.pode_gerenciar_estoque,
+    modulos: perfil.modulos || [],
+    terceirizado: !!perfil.terceirizado,
+    valorHora: perfil.valor_hora || 0,
+    telefone: perfil.telefone || perfil.login || '',
+    cpf: perfil.cpf || '', rg: perfil.rg || '',
+    dataNascimento: perfil.data_nascimento || '',
+    endereco: perfil.endereco || '', email: perfil.email || '',
+    tipoContratacao: perfil.tipo_contratacao || 'clt',
+    cnpj: perfil.cnpj || '', razaoSocial: perfil.razao_social || '',
+    ativo: perfil.ativo !== false,
+    _supabaseId: perfil.id // guarda o UUID real do banco, necessário pra todas as próximas queries
+  };
+}
+
+var USERS={};
 var currentUser=null,currentPage='chats',mobState='list',resolveOn=false,recOn=false,currentKey='AC',editTplIdx=-1;
 
 var TEMPLATES=[
@@ -1951,25 +2013,46 @@ function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 
 // ── LOGIN ──
-function tryLogin(u,p){
-  var usr=USERS[u.toLowerCase()];
-  if(usr&&usr.pass===p){
-    currentUser=Object.assign({},usr,{key:u.toLowerCase()});
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app').classList.add('visible');
-    applyRole();renderConvList();renderTemplates();renderQR();openConv('AC');
-    if(typeof checkStockAlerts==='function') checkStockAlerts();
-    if(typeof renderNotificacoes==='function') renderNotificacoes();
-    // Sempre começa na aba Início — além de ser o comportamento desejado,
-    // isso também garante que só uma página fica visível de cada vez (sem
-    // essa chamada explícita, Chats ao vivo e Chat interno podiam aparecer
-    // juntos até o primeiro clique manual em alguma aba).
-    goPage('dashboard','Início');
-    setTimeout(renderDashboard, 300);
-    if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
-    return true;
+// Autenticação real: telefone + senha, via Supabase Auth. Assíncrona —
+// diferente do protótipo antigo, que comparava senha em texto puro na
+// hora. Retorna via callback(sucesso, mensagemErro) em vez de valor
+// direto, já que agora depende de uma resposta de rede.
+function tryLogin(telefone, senha, callback){
+  if(!sbClient){
+    callback(false, 'Conexão com o banco não configurada.');
+    return;
   }
-  return false;
+  var emailInterno = telefoneParaEmailInterno(telefone);
+  sbClient.auth.signInWithPassword({ email: emailInterno, password: senha }).then(function(res){
+    if(res.error){
+      callback(false, 'Telefone ou senha incorretos.');
+      return;
+    }
+    var userId = res.data.user.id;
+    // Login confirmado pelo Auth — agora busca os dados completos do
+    // colaborador na tabela "perfis" para montar o currentUser do CRM.
+    sbClient.from('perfis').select('*').eq('id', userId).single().then(function(res2){
+      if(res2.error || !res2.data){
+        callback(false, 'Login válido, mas não encontramos seu cadastro. Fale com o Admin Geral.');
+        return;
+      }
+      var perfil = res2.data;
+      var userObj = perfilParaUser(perfil);
+      var loginKey = (perfil.login || telefone).replace(/\D/g,'');
+      USERS[loginKey] = userObj;
+      currentUser = Object.assign({}, userObj, {key: loginKey});
+
+      document.getElementById('login-screen').style.display='none';
+      document.getElementById('app').classList.add('visible');
+      applyRole();renderConvList();renderTemplates();renderQR();openConv('AC');
+      if(typeof checkStockAlerts==='function') checkStockAlerts();
+      if(typeof renderNotificacoes==='function') renderNotificacoes();
+      goPage('dashboard','Início');
+      setTimeout(renderDashboard, 300);
+      if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
+      callback(true, null);
+    });
+  });
 }
 
 function applyRole(){
@@ -2013,6 +2096,7 @@ function applyRole(){
 }
 
 function logout(){
+  if(sbClient) sbClient.auth.signOut();
   currentUser=null;
   document.getElementById('app').classList.remove('visible');
   document.getElementById('login-screen').style.display='flex';
@@ -2231,16 +2315,20 @@ function updateBC(){
 
 // ── INIT ──
 
-// iOS Safari file:// compat — funções chamadas por onclick inline
-function qlLogin(u,p){
-  document.getElementById('login-user').value=u;
-  document.getElementById('login-pass').value=p;
-  doLogin();
-}
 function doLogin(){
   var u=document.getElementById('login-user').value.trim();
   var p=document.getElementById('login-pass').value;
-  if(!tryLogin(u,p)){document.getElementById('login-error').style.display='block';}
+  var btnEntrar = document.getElementById('btn-login-entrar');
+  var errEl = document.getElementById('login-error');
+  errEl.style.display='none';
+  if(btnEntrar){ btnEntrar.disabled = true; btnEntrar.textContent = 'Entrando...'; }
+  tryLogin(u, p, function(sucesso, msgErro){
+    if(btnEntrar){ btnEntrar.disabled = false; btnEntrar.textContent = 'Entrar'; }
+    if(!sucesso){
+      errEl.textContent = msgErro || 'Telefone ou senha incorretos.';
+      errEl.style.display='block';
+    }
+  });
 }
 
 document.addEventListener('DOMContentLoaded',function(){
