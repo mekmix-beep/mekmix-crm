@@ -6095,16 +6095,32 @@ function ciEncontrarOuCriarConversa(loginColega, callback){
 }
 
 function ciCriarConversaNova(meuId, colegaId, loginColega, callback){
-  sbClient.from('conversas').insert({tipo:'direta'}).select().single().then(function(res){
+  // Gera o UUID aqui mesmo, em vez de pedir de volta com .select() logo após
+  // o insert — nesse instante a conversa ainda não tem nenhum participante
+  // cadastrado, então a política de leitura (que exige ser participante)
+  // bloquearia essa leitura imediata, mesmo para quem acabou de criar.
+  var conversaId = ciGerarUUID();
+  sbClient.from('conversas').insert({id: conversaId, tipo:'direta'}).then(function(res){
     if(res.error){ toast('Erro ao iniciar conversa: '+res.error.message); callback(null); return; }
-    var conversaId = res.data.id;
     sbClient.from('conversas_participantes').insert([
       {conversa_id: conversaId, colaborador_id: meuId},
       {conversa_id: conversaId, colaborador_id: colegaId}
-    ]).then(function(){
+    ]).then(function(res2){
+      if(res2.error){ toast('Erro ao adicionar participantes: '+res2.error.message); callback(null); return; }
       ciGetConversa(loginColega).conversaId = conversaId;
       callback(conversaId);
     });
+  });
+}
+
+// UUID v4 de verdade — a coluna "id" de conversas é do tipo uuid, então o
+// fallback também precisa gerar um formato válido (horUid() não serve aqui,
+// gera algo tipo "ev1a2b3c", que o Postgres rejeitaria).
+function ciGerarUUID(){
+  if(typeof crypto!=='undefined' && crypto.randomUUID) return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){
+    var r = Math.random()*16|0, v = c==='x' ? r : (r&0x3|0x8);
+    return v.toString(16);
   });
 }
 
