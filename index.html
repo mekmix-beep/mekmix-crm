@@ -1881,8 +1881,16 @@ input, textarea { cursor: text; }
    ============================================================ */
 var SUPABASE_URL = 'https://rbrytgtdytpqcgfthgty.supabase.co';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJicnl0Z3RkeXRwcWNnZnRoZ3R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMDg3NzQsImV4cCI6MjA5NjY4NDc3NH0.-Zw93ga-vtBrI2KSBUnmV39yqeZCAoilNZT9mX2tJp8';
+// A sessão fica em sessionStorage (não localStorage) de propósito: assim
+// o F5 (atualizar a página) mantém o usuário logado, mas fechar a aba ou
+// o navegador encerra a sessão — na próxima abertura, login e senha
+// precisam ser digitados de novo. Isso é importante em computadores
+// compartilhados da produção/loja, onde "ficar sempre logado" seria um
+// risco de segurança.
 var sbClient = (typeof supabase !== 'undefined')
-  ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { storage: window.sessionStorage, persistSession: true, autoRefreshToken: true }
+    })
   : null;
 
 // Tradução entre o texto que o CRM mostra (herdado do protótipo) e as
