@@ -4324,6 +4324,7 @@ document.addEventListener('DOMContentLoaded',function(){
       callback();
     });
   }
+  window.equipeCarregarTodos = equipeCarregarTodos;
 
   function renderEquipeAdmin() {
     var list = document.getElementById('equipe-list');
@@ -6081,22 +6082,38 @@ function ciGetConversa(loginColega){
 function ciEncontrarOuCriarConversa(loginColega, callback){
   var conv = ciGetConversa(loginColega);
   if(conv.conversaId){ callback(conv.conversaId); return; }
-  if(!sbClient || !currentUser._supabaseId || !USERS[loginColega] || !USERS[loginColega]._supabaseId){ callback(null); return; }
-  var meuId = currentUser._supabaseId;
-  var colegaId = USERS[loginColega]._supabaseId;
+  if(!sbClient || !currentUser._supabaseId){ callback(null); return; }
 
-  sbClient.from('conversas_participantes').select('conversa_id').eq('colaborador_id', meuId).then(function(resMinhas){
-    if(resMinhas.error || !resMinhas.data.length){ ciCriarConversaNova(meuId, colegaId, loginColega, callback); return; }
-    var idsMinhasConversas = resMinhas.data.map(function(r){ return r.conversa_id; });
-    sbClient.from('conversas_participantes').select('conversa_id').eq('colaborador_id', colegaId).in('conversa_id', idsMinhasConversas).then(function(resComuns){
-      if(resComuns.error || !resComuns.data.length){ ciCriarConversaNova(meuId, colegaId, loginColega, callback); return; }
-      // Entre as conversas em comum, pega a que é do tipo "direta" (evita
-      // confundir com uma conversa de grupo/pedido que ambos participem).
-      var idsComuns = resComuns.data.map(function(r){ return r.conversa_id; });
-      sbClient.from('conversas').select('id').in('id', idsComuns).eq('tipo','direta').limit(1).then(function(resDireta){
-        if(resDireta.error || !resDireta.data.length){ ciCriarConversaNova(meuId, colegaId, loginColega, callback); return; }
-        conv.conversaId = resDireta.data[0].id;
-        callback(conv.conversaId);
+  // Se o colega não estiver no cache local (USERS), busca ele diretamente
+  // no banco antes de desistir — evita o cenário em que alguém aparece na
+  // lista (via equipeCarregarTodos) mas, por alguma falha de sincronismo,
+  // ainda não tem o _supabaseId populado corretamente no momento do clique.
+  function comColegaGarantido(prosseguir){
+    if(USERS[loginColega] && USERS[loginColega]._supabaseId){ prosseguir(); return; }
+    sbClient.from('perfis').select('*').eq('login', loginColega).single().then(function(res){
+      if(res.error || !res.data){ toast('Não foi possível localizar este colaborador no banco.'); callback(null); return; }
+      USERS[loginColega] = perfilParaUser(res.data);
+      prosseguir();
+    });
+  }
+
+  comColegaGarantido(function(){
+    var meuId = currentUser._supabaseId;
+    var colegaId = USERS[loginColega]._supabaseId;
+
+    sbClient.from('conversas_participantes').select('conversa_id').eq('colaborador_id', meuId).then(function(resMinhas){
+      if(resMinhas.error || !resMinhas.data.length){ ciCriarConversaNova(meuId, colegaId, loginColega, callback); return; }
+      var idsMinhasConversas = resMinhas.data.map(function(r){ return r.conversa_id; });
+      sbClient.from('conversas_participantes').select('conversa_id').eq('colaborador_id', colegaId).in('conversa_id', idsMinhasConversas).then(function(resComuns){
+        if(resComuns.error || !resComuns.data.length){ ciCriarConversaNova(meuId, colegaId, loginColega, callback); return; }
+        // Entre as conversas em comum, pega a que é do tipo "direta" (evita
+        // confundir com uma conversa de grupo/pedido que ambos participem).
+        var idsComuns = resComuns.data.map(function(r){ return r.conversa_id; });
+        sbClient.from('conversas').select('id').in('id', idsComuns).eq('tipo','direta').limit(1).then(function(resDireta){
+          if(resDireta.error || !resDireta.data.length){ ciCriarConversaNova(meuId, colegaId, loginColega, callback); return; }
+          conv.conversaId = resDireta.data[0].id;
+          callback(conv.conversaId);
+        });
       });
     });
   });
@@ -6134,7 +6151,15 @@ function ciGerarUUID(){
 
 function renderChatInternoPage(){
   if(!currentUser) return;
-  renderCiConvList();
+  // Busca TODOS os colaboradores cadastrados no banco antes de montar a
+  // lista — sem isso, cada pessoa só via como "colega" quem por acaso já
+  // tinha passado pelo cache local dela (ex: quem logou antes, na mesma
+  // sessão), fazendo Karla ver Bruno mas Gisella não ver Karla nem Maykon.
+  if(typeof equipeCarregarTodos==='function'){
+    equipeCarregarTodos(function(){ renderCiConvList(); });
+  } else {
+    renderCiConvList();
+  }
   var buscaEl = document.getElementById('ci-conv-search');
   if(buscaEl && !buscaEl._bound){
     buscaEl.addEventListener('input', function(){ renderCiConvList(this.value); });
