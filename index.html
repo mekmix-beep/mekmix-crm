@@ -832,10 +832,8 @@ input, textarea { cursor: text; }
       <div id="page-followup" class="page">
         <div class="page-title">Follow-up 30 dias</div>
         <div class="panel"><div class="panel-head"><span class="panel-title">Clientes para reativar</span><button class="btn btn-rosa btn-sm" id="btn-go-broadcast"><i class="ti ti-send" style="font-size:12px;"></i> Broadcast</button></div>
-        <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Cliente</th><th>Pedido</th><th>Valor</th><th>Entregue</th><th>Vendedor</th><th>Prazo</th><th>Ação</th></tr></thead><tbody>
-          <tr><td><b>Thiago Costa</b></td><td>500ml·5cx</td><td style="color:#E31787;">R$2.245</td><td>25/05</td><td>João</td><td><span class="pill p-follow">Venceu há 1d</span></td><td><button class="btn btn-rosa btn-sm"><i class="ti ti-brand-whatsapp" style="font-size:11px;"></i> Avisar</button></td></tr>
-          <tr><td><b>Luana Reis</b></td><td>330ml·2cx</td><td style="color:#E31787;">R$818</td><td>27/05</td><td>Maria</td><td><span class="pill p-follow">Venceu hoje</span></td><td><button class="btn btn-rosa btn-sm"><i class="ti ti-brand-whatsapp" style="font-size:11px;"></i> Avisar</button></td></tr>
-          <tr><td><b>Carlos Mota</b></td><td>400ml·1cx</td><td style="color:#E31787;">R$489</td><td>01/06</td><td>Pedro</td><td><span class="pill p-prod">7 dias</span></td><td><button class="btn btn-sm">Lembrar</button></td></tr>
+        <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Cliente</th><th>Pedido</th><th>Valor</th><th>Entregue</th><th>Vendedor</th><th>Prazo</th><th>Ação</th></tr></thead><tbody id="followup-tbody">
+          <tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px;">Carregando...</td></tr>
         </tbody></table></div></div>
       </div>
       <div id="page-chatinterno" class="chat-layout">
@@ -1233,28 +1231,6 @@ input, textarea { cursor: text; }
       </div>
 
     </div><!-- /content-area -->
-
-      <!-- CLIENTES -->
-      <div id="page-clientes" class="page">
-        <div class="page-title">Clientes
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-            <button class="btn btn-sm" id="btn-export-clientes" style="background:#217346;color:#fff;border-color:#217346;"><i class="ti ti-file-spreadsheet" style="font-size:12px;"></i> Exportar Excel</button>
-            <button class="btn btn-rosa btn-sm" id="btn-novo-cliente"><i class="ti ti-user-plus" style="font-size:12px;"></i> Novo cliente</button>
-          </div>
-        </div>
-        <div class="panel" style="margin-bottom:10px;">
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-            <div class="search-wrap" style="flex:1;max-width:300px;"><i class="ti ti-search" style="font-size:14px;color:#aaa;"></i><input type="search" id="cliente-search" placeholder="Nome, CNPJ/CPF ou cidade..."/></div>
-            <select class="sel" style="width:120px;" id="filter-cli-status"><option value="">Todos</option><option value="ativo">Ativos</option><option value="inativo">Inativos</option><option value="vip">VIP</option></select>
-            <select class="sel" style="width:130px;" id="filter-cli-vend"><option value="">Todos vendedores</option><option>João</option><option>Maria</option><option>Pedro</option></select>
-          </div>
-        </div>
-        <div id="clientes-list"></div>
-        <div id="clientes-empty" style="display:none;text-align:center;padding:40px;color:var(--text3);">
-          <i class="ti ti-users" style="font-size:40px;display:block;margin-bottom:10px;"></i>
-          Nenhum cliente encontrado
-        </div>
-      </div>
 
       <!-- CLIENTES -->
       <div id="page-clientes" class="page">
@@ -2045,10 +2021,20 @@ function tryLogin(telefone, senha, callback){
       document.getElementById('login-screen').style.display='none';
       document.getElementById('app').classList.add('visible');
       applyRole();renderConvList();renderTemplates();renderQR();openConv('AC');
-      if(typeof checkStockAlerts==='function') checkStockAlerts();
-      if(typeof renderNotificacoes==='function') renderNotificacoes();
+      // Carrega os dados reais do banco (pedidos, estoque, histórico de
+      // movimentações) antes de montar o dashboard — sem isso, o painel
+      // ficaria vazio ou mostrando dados desatualizados do cache.
+      carregarEstoqueDoBanco(function(){
+        carregarEstoqueLogDoBanco(function(){
+          carregarPedidosDoBanco(function(){
+            if(typeof checkStockAlerts==='function') checkStockAlerts();
+            if(typeof renderNotificacoes==='function') renderNotificacoes();
+            if(typeof renderFollowup==='function') renderFollowup(); // atualiza o badge da sidebar
+            renderDashboard();
+          });
+        });
+      });
       goPage('dashboard','Início');
-      setTimeout(renderDashboard, 300);
       if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
       callback(true, null);
     });
@@ -2364,33 +2350,43 @@ document.addEventListener('DOMContentLoaded',function(){
   var btnSalvarCli = document.getElementById('btn-salvar-cliente');
   if(btnSalvarCli) btnSalvarCli.addEventListener('click', function(){
     var nome = (document.getElementById('cli-nome').value||'').trim();
-    if(!nome){toast('Informe o nome do cliente!');return;}
-    var cli = {
-      id: (window._editIdx&&window._editIdx()) >= 0 ? CLIENTES[window._editIdx()].id : 'CLI-' + String(CLIENTES.length+1).padStart(3,'0'),
+    var doc = (document.getElementById('cli-doc').value||'').trim();
+    if(!nome){ toast('Informe o nome do cliente!'); return; }
+    if(!doc){ toast('CPF/CNPJ é obrigatório para o cadastro.'); return; }
+    if(!sbClient){ toast('Sem conexão com o banco.'); return; }
+
+    var idxEdit = (window._editIdx && window._editIdx()>=0) ? window._editIdx() : -1;
+    var vendedorNome = document.getElementById('cli-vendedor').value;
+    var vendedorObj = Object.keys(USERS).map(function(k){return USERS[k];}).find(function(u){ return u.name===vendedorNome; });
+
+    var registro = {
       nome: nome,
-      tipo: document.getElementById('cli-tipo').value,
-      doc: document.getElementById('cli-doc').value||'',
-      wapp: document.getElementById('cli-wapp').value||'',
-      email: document.getElementById('cli-email').value||'',
-      segmento: document.getElementById('cli-segmento').value||'',
-      endereco: document.getElementById('cli-endereco').value||'',
-      cidade: document.getElementById('cli-cidade').value||'',
-      estado: document.getElementById('cli-estado').value||'MG',
-      vendedor: document.getElementById('cli-vendedor').value,
-      indicado: document.getElementById('cli-indicado').value||'',
-      preco_esp: document.querySelector('input[name="preco-esp"]:checked').value === 'sim',
-      obs: document.getElementById('cli-obs').value||'',
-      cadastro: (window._editIdx&&window._editIdx()>=0) ? CLIENTES[window._editIdx()].cadastro : new Date().toISOString().split('T')[0],
-      ultimo_pedido: (window._editIdx&&window._editIdx()>=0) ? CLIENTES[window._editIdx()].ultimo_pedido : '',
-      total_pedidos: (window._editIdx&&window._editIdx()>=0) ? CLIENTES[window._editIdx()].total_pedidos : 0,
-      total_caixas: (window._editIdx&&window._editIdx()>=0) ? CLIENTES[window._editIdx()].total_caixas : 0,
-      status: 'ativo'
+      cpf_cnpj: doc,
+      whatsapp: document.getElementById('cli-wapp').value||null,
+      cidade: document.getElementById('cli-cidade').value||null,
+      estado: document.getElementById('cli-estado').value||null,
+      vendedor_id: vendedorObj ? vendedorObj._supabaseId : null
     };
-    if(window._editIdx&&window._editIdx()>=0) CLIENTES[window._editIdx()]=cli;
-    else CLIENTES.unshift(cli);
-    closeModal('modal-novo-cliente');
-    renderClientes('','','');
-    toast('✅ Cliente '+((window._editIdx&&window._editIdx()>=0)?'atualizado':'cadastrado')+': '+nome);
+
+    if(idxEdit>=0 && CLIENTES[idxEdit]._uuid){
+      sbClient.from('clientes').update(registro).eq('id', CLIENTES[idxEdit]._uuid).then(function(res){
+        if(res.error){ toast('Erro ao atualizar cliente: '+res.error.message); return; }
+        carregarClientesDoBanco(function(){
+          closeModal('modal-novo-cliente');
+          renderClientes('','','');
+          toast('✅ Cliente atualizado: '+nome);
+        });
+      });
+    } else {
+      sbClient.from('clientes').insert(registro).then(function(res){
+        if(res.error){ toast('Erro ao cadastrar cliente: '+res.error.message); return; }
+        carregarClientesDoBanco(function(){
+          closeModal('modal-novo-cliente');
+          renderClientes('','','');
+          toast('✅ Cliente cadastrado: '+nome);
+        });
+      });
+    }
   });
 
   var btnExport = document.getElementById('btn-export-clientes');
@@ -2443,19 +2439,24 @@ document.addEventListener('DOMContentLoaded',function(){
     var val=parseFloat(document.getElementById('conta-valor').value||'0');
     var venc=document.getElementById('conta-venc').value;
     if(!desc||!val||!venc){toast('Preencha descricao, valor e vencimento!');return;}
-    var c={
-      id:'CNT-'+String(CONTAS.length+1).padStart(3,'0'),
-      desc:desc,forn:document.getElementById('conta-forn').value||'',
-      valor:val,venc:venc,
-      cat:document.getElementById('conta-cat').value,
-      recorr:document.getElementById('conta-recorr').value,
-      obs:document.getElementById('conta-obs').value||'',
-      status:'pendente'
+    if(!sbClient){ toast('Sem conexão com o banco.'); return; }
+    var registro = {
+      descricao: desc,
+      fornecedor: document.getElementById('conta-forn').value||null,
+      valor: val, vencimento: venc,
+      categoria: document.getElementById('conta-cat').value||null,
+      recorrencia: document.getElementById('conta-recorr').value||'unica',
+      observacao: document.getElementById('conta-obs').value||null,
+      status: 'pendente'
     };
-    CONTAS.push(c);
-    closeModal('modal-nova-conta');
-    renderFinanceiro('','','');
-    toast('Conta adicionada!');
+    sbClient.from('contas_a_pagar').insert(registro).then(function(res){
+      if(res.error){ toast('Erro ao salvar conta: '+res.error.message); return; }
+      carregarContasDoBanco(function(){
+        closeModal('modal-nova-conta');
+        renderFinanceiro('','','');
+        toast('Conta adicionada!');
+      });
+    });
   });
 
   var btnSalvarCNPJ = document.getElementById('btn-salvar-cnpj');
@@ -2817,24 +2818,10 @@ document.addEventListener('DOMContentLoaded',function(){
 
 
   // ── DADOS: PEDIDOS ──
-  var ORDERS = [
-    {id:'PED-001',client:'Ana Clara',cidade:'Campinas/SP',prod:'500ml',qtd:2,unid:2000,valor:1078,status:'Novo lead',vendedor:'João',data:'24/06/2025',pill:'p-novo'},
-    {id:'PED-002',client:'Rafael Silva',cidade:'BH/MG',prod:'770ml',qtd:3,unid:1500,valor:1347,status:'Em produção',vendedor:'Maria',data:'20/06/2025',pill:'p-prod'},
-    {id:'PED-003',client:'Pedro Lima',cidade:'SP/SP',prod:'330ml',qtd:1,unid:1000,valor:409,status:'Orçamento enviado',vendedor:'João',data:'18/06/2025',pill:'p-orc'},
-    {id:'PED-004',client:'Thiago Costa',cidade:'Pouso Alegre/MG',prod:'500ml',qtd:5,unid:5000,valor:2245,status:'Em produção',vendedor:'João',data:'15/06/2025',pill:'p-prod'},
-    {id:'PED-005',client:'Marina Fonseca',cidade:'RJ/RJ',prod:'400ml',qtd:2,unid:2000,valor:978,status:'Arte pendente',vendedor:'Pedro',data:'22/06/2025',pill:'p-arte'},
-    {id:'PED-006',client:'Luana Reis',cidade:'BH/MG',prod:'330ml',qtd:2,unid:2000,valor:818,status:'Entregue',vendedor:'Maria',data:'10/06/2025',pill:'p-entregue'},
-    {id:'PED-007',client:'Fernanda Cruz',cidade:'Curitiba/PR',prod:'500ml',qtd:2,unid:2000,valor:1078,status:'Em produção',vendedor:'Pedro',data:'19/06/2025',pill:'p-prod'},
-    {id:'PED-008',client:'Carlos Mota',cidade:'SP/SP',prod:'400ml',qtd:1,unid:1000,valor:489,status:'Entregue',vendedor:'Pedro',data:'05/06/2025',pill:'p-entregue'},
-  ];
+  var ORDERS = [];
 
   // ── FILA DE PRODUÇÃO ──
-  var PROD_QUEUE = [
-    {id:'PED-002',pos:1,priority:true,client:'Rafael Silva',prod:'770ml · 3cx · 1.500un',tinta:'Preta',vendedor:'Maria',data:'20/06',prazo:'30/06'},
-    {id:'PED-004',pos:2,priority:true,client:'Thiago Costa',prod:'500ml · 5cx · 5.000un',tinta:'Branca',vendedor:'João',data:'15/06',prazo:'29/06'},
-    {id:'PED-007',pos:3,priority:false,client:'Fernanda Cruz',prod:'500ml · 2cx · 2.000un',tinta:'Azul',vendedor:'Pedro',data:'19/06',prazo:'03/07'},
-    {id:'PED-005',pos:4,priority:false,client:'Marina Fonseca',prod:'400ml · 2cx · 2.000un',tinta:'Verde',vendedor:'Pedro',data:'22/06',prazo:'07/07'},
-  ];
+  var PROD_QUEUE = [];
 
   // Expor para o dashboard
   window._ORDERS    = function(){ return ORDERS; };
@@ -2842,22 +2829,103 @@ document.addEventListener('DOMContentLoaded',function(){
 
   // ── ESTOQUE ──
   var STOCK = {
-    '330ml': {caixas: 8, unid: 350, minCaixas: 3},
-    '400ml': {caixas: 5, unid: 0,   minCaixas: 3},
-    '500ml': {caixas: 2, unid: 500, minCaixas: 3},
-    '770ml': {caixas: 6, unid: 0,   minCaixas: 2},
+    '330ml': {caixas: 0, unid: 0, minCaixas: 3},
+    '400ml': {caixas: 0, unid: 0, minCaixas: 3},
+    '500ml': {caixas: 0, unid: 0, minCaixas: 3},
+    '770ml': {caixas: 0, unid: 0, minCaixas: 2},
   };
   var UNID_PER_CX = {'330ml':1000,'400ml':1000,'500ml':1000,'770ml':500};
-  var STOCK_LOG = [
-    {tipo:'entrada',tam:'330ml',caixas:10,unid:0,nf:'NF 4521',data:'10/06/2025',motivo:'Compra fornecedor'},
-    {tipo:'saida',tam:'330ml',caixas:2,unid:650,nf:'',data:'15/06/2025',motivo:'Produção PED-006 + PED-003'},
-    {tipo:'entrada',tam:'500ml',caixas:5,unid:0,nf:'NF 4522',data:'12/06/2025',motivo:'Compra fornecedor'},
-    {tipo:'saida',tam:'500ml',caixas:3,unid:500,nf:'',data:'19/06/2025',motivo:'Produção PED-002 + PED-004'},
-    {tipo:'entrada',tam:'770ml',caixas:8,unid:0,nf:'NF 4523',data:'14/06/2025',motivo:'Compra fornecedor'},
-    {tipo:'saida',tam:'770ml',caixas:2,unid:0,nf:'',data:'20/06/2025',motivo:'Produção PED-007'},
-    {tipo:'entrada',tam:'400ml',caixas:6,unid:0,nf:'NF 4524',data:'16/06/2025',motivo:'Compra fornecedor'},
-    {tipo:'saida',tam:'400ml',caixas:1,unid:0,nf:'',data:'22/06/2025',motivo:'Produção PED-008'},
-  ];
+  var STOCK_LOG = [];
+
+  /* ============================================================
+     CARREGAMENTO DE DADOS REAIS DO SUPABASE
+     ============================================================
+     Preenche ORDERS, PROD_QUEUE, STOCK e STOCK_LOG a partir do banco,
+     em vez dos dados fixos de demonstração que existiam antes. Todo o
+     resto do código continua lendo essas mesmas variáveis — só a forma
+     de preenchê-las mudou.
+     ============================================================ */
+  var STATUS_PILL_MAP = {'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Pronto para despacho':'p-despacho','Entregue':'p-entregue','Follow-up 30d':'p-follow','Cancelamento solicitado':'p-follow','Cancelado':'p-cancelado'};
+
+  function carregarPedidosDoBanco(callback){
+    if(!sbClient){ if(callback) callback(); return; }
+    sbClient.from('pedidos').select('*, itens_pedido(*)').order('created_at', {ascending:false}).then(function(res){
+      if(!res.error && res.data){
+        ORDERS.length = 0;
+        res.data.forEach(function(p){
+          var statusCrm = statusParaCrm(p.status);
+          var itens = (p.itens_pedido||[]).map(function(i){
+            return {tam: i.produto_ml+'ml', tipo:'caixas', qtd: i.quantidade_caixas, subtotal: (i.preco_unitario_cx||0)*(i.quantidade_caixas||0)};
+          });
+          var qtdCaixasTotal = itens.reduce(function(s,i){ return s+i.qtd; },0);
+          var unidTotal = itens.reduce(function(s,i){ return s + i.qtd*(UNID_PER_CX[i.tam]||1000); },0);
+          ORDERS.push({
+            id: p.numero,
+            _uuid: p.id, // guarda o UUID real, necessário para updates
+            client: p.nome,
+            cidade: (p.cidade||'')+(p.estado?'/'+p.estado:''),
+            rua: '', bairro: '', // colunas não existem em pedidos ainda no schema atual
+            prod: itens[0] ? itens[0].tam : '',
+            prodDesc: itens.map(function(i){ return i.qtd+'cx '+i.tam; }).join(' + '),
+            qtd: qtdCaixasTotal,
+            unid: unidTotal,
+            valor: p.valor_estimado || 0,
+            status: statusCrm,
+            vendedor: '', // vendedor_id ainda não resolvido para nome aqui — ver observação abaixo
+            vendedorId: p.vendedor_id,
+            data: p.created_at ? new Date(p.created_at).toLocaleDateString('pt-BR') : '',
+            pill: STATUS_PILL_MAP[statusCrm] || 'p-novo',
+            itens: itens,
+            doc: '', wapp: p.whatsapp||'',
+            pagamento: '', prazo: '', frete: '', obs: '',
+            entradaPaga: !!p.pagamento_70_pago,
+            entradaData: '', entradaMotivo: '',
+            restantePago: !!p.pagamento_70_pago,
+            cancelamento: p.cancelamento_status ? {
+              motivo: p.cancelamento_motivo, status: p.cancelamento_status,
+              solicitadoPor: '', decididoPor: '', motivoDecisao: p.cancelamento_motivo_decisao||'',
+              statusAnterior: p.status_anterior_cancelamento
+            } : null,
+            estoqueBaixado: !!p.estoque_baixado
+          });
+        });
+        // Resolve nome do vendedor a partir do cache USERS, quando já carregado
+        ORDERS.forEach(function(o){
+          if(o.vendedorId){
+            var v = Object.keys(USERS).map(function(k){return USERS[k];}).find(function(u){ return u._supabaseId===o.vendedorId; });
+            if(v) o.vendedor = v.name;
+          }
+        });
+      }
+      if(callback) callback();
+    });
+  }
+
+  function carregarEstoqueDoBanco(callback){
+    if(!sbClient){ if(callback) callback(); return; }
+    sbClient.from('estoque').select('*').then(function(res){
+      if(!res.error && res.data){
+        res.data.forEach(function(e){
+          STOCK[e.tamanho] = {caixas: e.caixas, unid: e.unidades_avulsas, minCaixas: e.minimo_caixas};
+          UNID_PER_CX[e.tamanho] = e.unidades_por_caixa;
+        });
+      }
+      if(callback) callback();
+    });
+  }
+
+  function carregarEstoqueLogDoBanco(callback){
+    if(!sbClient){ if(callback) callback(); return; }
+    sbClient.from('estoque_log').select('*').order('criado_em', {ascending:false}).limit(50).then(function(res){
+      if(!res.error && res.data){
+        STOCK_LOG.length = 0;
+        res.data.forEach(function(l){
+          STOCK_LOG.push({tipo:l.tipo, tam:l.tamanho, caixas:l.caixas, unid:l.unidades, nf:l.nota_fiscal||'', data: l.criado_em ? new Date(l.criado_em).toLocaleDateString('pt-BR') : '', motivo:l.motivo||'', lancadoPor: l.lancado_por||''});
+        });
+      }
+      if(callback) callback();
+    });
+  }
 
   // ── RENDER PEDIDOS ──
   function renderOrders() {
@@ -2920,40 +2988,59 @@ document.addEventListener('DOMContentLoaded',function(){
     var id = sel.getAttribute('data-id');
     var newStatus = sel.value;
     var order = ORDERS.find(function(o){ return o.id === id; });
-    if(!order) return;
+    if(!order || !order._uuid || !sbClient){ toast('Não foi possível localizar este pedido no banco.'); return; }
     var oldStatus = order.status;
-    order.status = newStatus;
-    var pillMap = {'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Pronto para despacho':'p-despacho','Entregue':'p-entregue','Follow-up 30d':'p-follow','Cancelamento solicitado':'p-follow','Cancelado':'p-cancelado'};
-    order.pill = pillMap[newStatus] || 'p-novo';
 
-    // Baixa automática de estoque ao entrar em produção — só roda se este
-    // pedido ainda não teve baixa alguma vez (evita duplicar a baixa quando
-    // o pedido já nasceu "Em produção" na criação, que já desconta sozinho).
-    // O estoque pode ficar negativo aqui de propósito: refletir a dívida real
-    // é mais útil do que travar em zero e perder a informação de quanto falta
-    // repor — a venda nunca é bloqueada por falta de estoque.
-    if(newStatus === 'Em produção' && oldStatus !== 'Em produção' && !order.estoqueBaixado) {
-      var tam = order.prod;
-      if(STOCK[tam]) {
-        var totalUnid = order.unid;
-        var upCx = UNID_PER_CX[tam];
-        var caixasBaixar = Math.floor(totalUnid / upCx);
-        var unidBaixar = totalUnid % upCx;
-        STOCK[tam].caixas -= caixasBaixar;
-        STOCK[tam].unid -= unidBaixar;
-        STOCK_LOG.unshift({tipo:'saida',tam:tam,caixas:caixasBaixar,unid:unidBaixar,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:'Produção '+id+' (auto)',lancadoPor:'Sistema (automático)'});
-        order.estoqueBaixado = true;
-        // Adicionar à fila de produção
-        if(!PROD_QUEUE.find(function(p){ return p.id===id; })) {
-          PROD_QUEUE.push({id:id,pos:PROD_QUEUE.length+1,priority:false,client:order.client,prod:order.prod+' · '+order.qtd+'cx · '+order.unid.toLocaleString('pt-BR')+'un',tinta:'—',vendedor:order.vendedor,data:order.data,prazo:'—'});
+    sbClient.from('pedidos').update({status: statusParaBanco(newStatus)}).eq('id', order._uuid).then(function(res){
+      if(res.error){ toast('Erro ao atualizar status: '+res.error.message); sel.value = oldStatus; return; }
+
+      // Registra no histórico — sem isso não teríamos como saber quando um
+      // pedido virou "Entregue", por exemplo, o que o Follow-up 30 dias
+      // depende diretamente para calcular o prazo de reativação.
+      sbClient.from('status_historico').insert({
+        pedido_id: order._uuid, status: statusParaBanco(newStatus)
+      });
+
+      order.status = newStatus;
+      order.pill = STATUS_PILL_MAP[newStatus] || 'p-novo';
+
+      // Baixa automática de estoque ao entrar em produção — só roda se este
+      // pedido ainda não teve baixa alguma vez (evita duplicar a baixa quando
+      // o pedido já nasceu "Em produção" na criação, que já desconta sozinho).
+      // O estoque pode ficar negativo aqui de propósito: refletir a dívida real
+      // é mais útil do que travar em zero e perder a informação de quanto falta
+      // repor — a venda nunca é bloqueada por falta de estoque.
+      if(newStatus === 'Em produção' && oldStatus !== 'Em produção' && !order.estoqueBaixado) {
+        var tam = order.prod;
+        if(STOCK[tam]) {
+          var totalUnid = order.unid;
+          var upCx = UNID_PER_CX[tam];
+          var caixasBaixar = Math.floor(totalUnid / upCx);
+          var novoValor = STOCK[tam].caixas - caixasBaixar;
+
+          sbClient.from('estoque').update({caixas: novoValor}).eq('tamanho', tam).then(function(){
+            sbClient.from('pedidos').update({estoque_baixado: true}).eq('id', order._uuid).then(function(){
+              sbClient.from('estoque_log').insert({
+                tipo:'saida', tamanho:tam, caixas:caixasBaixar, unidades:0,
+                motivo:'Produção '+id+' (auto)', lancado_por: currentUser._supabaseId
+              }).then(function(){
+                STOCK[tam].caixas = novoValor;
+                order.estoqueBaixado = true;
+                STOCK_LOG.unshift({tipo:'saida',tam:tam,caixas:caixasBaixar,unid:0,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:'Produção '+id+' (auto)',lancadoPor:'Sistema (automático)'});
+                if(!PROD_QUEUE.find(function(p){ return p.id===id; })) {
+                  PROD_QUEUE.push({id:id,pos:PROD_QUEUE.length+1,priority:false,client:order.client,prod:order.prod+' · '+order.qtd+'cx · '+order.unid.toLocaleString('pt-BR')+'un',tinta:'—',vendedor:order.vendedor,data:order.data,prazo:'—'});
+                }
+                renderStockGrid();
+                renderStockLog();
+                renderProdQueue();
+                toast('📦 Baixa automática: ' + caixasBaixar + 'cx de ' + tam + ' — ' + order.client);
+                checkStockAlerts();
+              });
+            });
+          });
         }
-        renderStockGrid();
-        renderStockLog();
-        renderProdQueue();
-        toast('📦 Baixa automática: ' + caixasBaixar + 'cx de ' + tam + ' — ' + order.client);
-        checkStockAlerts();
       }
-    }
+    });
   }
 
   // ── CANCELAMENTO DE PEDIDO (solicitação + aprovação) ──
@@ -2970,23 +3057,33 @@ document.addEventListener('DOMContentLoaded',function(){
     var order = ORDERS.find(function(o){ return o.id === orderId; });
     if(!order) return false;
     if(!motivo || !motivo.trim()){ toast('Informe o motivo do cancelamento.'); return false; }
-    order.cancelamento = {
-      motivo: motivo.trim(),
-      solicitadoPor: currentUser.name,
-      solicitadoEm: Date.now(),
-      status: 'pendente',
-      statusAnterior: order.status, // para poder voltar exatamente a este status, se negado
-      decididoPor: null,
-      decididoEm: null,
-      motivoDecisao: ''
-    };
-    order.status = 'Cancelamento solicitado';
-    order.pill = 'p-follow';
-    renderOrders();
-    if(typeof renderProdQueue==='function') renderProdQueue();
-    if(typeof renderCancelamentosPendentes==='function') renderCancelamentosPendentes();
-    if(typeof renderNotificacoes==='function') renderNotificacoes();
-    toast('Cancelamento solicitado. Aguardando aprovação do Admin Geral/gerente comercial.');
+    if(!order._uuid || !sbClient){ toast('Não foi possível localizar este pedido no banco.'); return false; }
+
+    sbClient.from('pedidos').update({
+      cancelamento_motivo: motivo.trim(),
+      cancelamento_solicitado_por: currentUser._supabaseId,
+      cancelamento_solicitado_em: new Date().toISOString(),
+      cancelamento_status: 'pendente',
+      status_anterior_cancelamento: statusParaBanco(order.status),
+      status: statusParaBanco('Cancelamento solicitado')
+    }).eq('id', order._uuid).then(function(res){
+      if(res.error){ toast('Erro ao solicitar cancelamento: '+res.error.message); return; }
+      order.cancelamento = {
+        motivo: motivo.trim(),
+        solicitadoPor: currentUser.name,
+        solicitadoEm: Date.now(),
+        status: 'pendente',
+        statusAnterior: order.status,
+        decididoPor: null, decididoEm: null, motivoDecisao: ''
+      };
+      order.status = 'Cancelamento solicitado';
+      order.pill = 'p-follow';
+      renderOrders();
+      if(typeof renderProdQueue==='function') renderProdQueue();
+      if(typeof renderCancelamentosPendentes==='function') renderCancelamentosPendentes();
+      if(typeof renderNotificacoes==='function') renderNotificacoes();
+      toast('Cancelamento solicitado. Aguardando aprovação do Admin Geral/gerente comercial.');
+    });
     return true;
   }
 
@@ -2994,68 +3091,189 @@ document.addEventListener('DOMContentLoaded',function(){
     if(!pedPodeAprovarCancelamento()){ toast('Você não tem permissão para aprovar cancelamentos.'); return; }
     var order = ORDERS.find(function(o){ return o.id === orderId; });
     if(!order || !order.cancelamento || order.cancelamento.status!=='pendente') return;
+    if(!order._uuid || !sbClient){ toast('Não foi possível localizar este pedido no banco.'); return; }
 
-    // Estorno de estoque: só devolve se este pedido realmente tinha baixa feita.
-    if(order.estoqueBaixado){
-      (order.itens||[]).forEach(function(item){
-        if(STOCK[item.tam]){
-          if(item.tipo==='caixas'){ STOCK[item.tam].caixas += item.qtd; }
-          else { STOCK[item.tam].unid += item.qtd; }
-          STOCK_LOG.unshift({tipo:'entrada',tam:item.tam,caixas:item.tipo==='caixas'?item.qtd:0,unid:item.tipo==='unidades'?item.qtd:0,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:'Estorno — cancelamento '+orderId+' aprovado',lancadoPor:currentUser.name+' (aprovação de cancelamento)'});
-        }
+    function persistirAprovacao(){
+      sbClient.from('pedidos').update({
+        cancelamento_status: 'aprovado',
+        cancelamento_decidido_por: currentUser._supabaseId,
+        cancelamento_decidido_em: new Date().toISOString(),
+        cancelamento_motivo_decisao: motivoDecisao||'',
+        status: statusParaBanco('Cancelado'),
+        estoque_baixado: false
+      }).eq('id', order._uuid).then(function(res){
+        if(res.error){ toast('Erro ao aprovar cancelamento: '+res.error.message); return; }
+
+        var idxFila = PROD_QUEUE.findIndex(function(p){ return p.id===orderId; });
+        if(idxFila>=0) PROD_QUEUE.splice(idxFila,1);
+        if(typeof etqRemoverDoPedido==='function') etqRemoverDoPedido(orderId);
+
+        order.cancelamento.status = 'aprovado';
+        order.cancelamento.decididoPor = currentUser.name;
+        order.cancelamento.decididoEm = Date.now();
+        order.cancelamento.motivoDecisao = motivoDecisao||'';
+        order.status = 'Cancelado';
+        order.pill = 'p-cancelado';
+        order.estoqueBaixado = false;
+
+        renderOrders();
+        if(typeof renderProdQueue==='function') renderProdQueue();
+        if(typeof renderCancelamentosPendentes==='function') renderCancelamentosPendentes();
+        if(typeof renderNotificacoes==='function') renderNotificacoes();
+        if(typeof renderEtiquetas==='function') renderEtiquetas();
+        toast('❌ Pedido '+orderId+' cancelado. Estoque estornado.');
       });
-      order.estoqueBaixado = false;
-      if(typeof renderStockGrid==='function') renderStockGrid();
-      if(typeof renderStockLog==='function') renderStockLog();
-      if(typeof checkStockAlerts==='function') checkStockAlerts();
     }
 
-    // Sai da fila de produção, se estava nela
-    var idxFila = PROD_QUEUE.findIndex(function(p){ return p.id===orderId; });
-    if(idxFila>=0) PROD_QUEUE.splice(idxFila,1);
-
-    // Etiqueta de entrega: se já tinha sido gerada (pedido chegou a ficar
-    // "Pronto para despacho" antes de ser cancelado), remove automaticamente
-    // — evita ficar com etiqueta órfã de um pedido que não vai mais existir.
-    if(typeof etqRemoverDoPedido==='function') etqRemoverDoPedido(orderId);
-
-    order.cancelamento.status = 'aprovado';
-    order.cancelamento.decididoPor = currentUser.name;
-    order.cancelamento.decididoEm = Date.now();
-    order.cancelamento.motivoDecisao = motivoDecisao||'';
-    order.status = 'Cancelado';
-    order.pill = 'p-cancelado';
-
-    renderOrders();
-    if(typeof renderProdQueue==='function') renderProdQueue();
-    if(typeof renderCancelamentosPendentes==='function') renderCancelamentosPendentes();
-    if(typeof renderNotificacoes==='function') renderNotificacoes();
-    if(typeof renderEtiquetas==='function') renderEtiquetas();
-    toast('❌ Pedido '+orderId+' cancelado. Estoque estornado.');
+    // Estorno de estoque real no banco: só devolve se este pedido realmente
+    // tinha baixa feita.
+    if(order.estoqueBaixado && (order.itens||[]).length){
+      var itensParaEstornar = order.itens;
+      var pendentes = itensParaEstornar.length;
+      itensParaEstornar.forEach(function(item){
+        var novoValor = (STOCK[item.tam] ? STOCK[item.tam].caixas : 0) + item.qtd;
+        sbClient.from('estoque').update({caixas: novoValor}).eq('tamanho', item.tam).then(function(){
+          sbClient.from('estoque_log').insert({
+            tipo:'entrada', tamanho:item.tam, caixas:item.qtd, unidades:0,
+            motivo:'Estorno — cancelamento '+orderId+' aprovado', lancado_por: currentUser._supabaseId
+          }).then(function(){
+            if(STOCK[item.tam]) STOCK[item.tam].caixas = novoValor;
+            STOCK_LOG.unshift({tipo:'entrada',tam:item.tam,caixas:item.qtd,unid:0,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:'Estorno — cancelamento '+orderId+' aprovado',lancadoPor:currentUser.name+' (aprovação de cancelamento)'});
+            if(typeof renderStockGrid==='function') renderStockGrid();
+            if(typeof renderStockLog==='function') renderStockLog();
+            if(typeof checkStockAlerts==='function') checkStockAlerts();
+            pendentes--;
+            if(pendentes===0) persistirAprovacao();
+          });
+        });
+      });
+    } else {
+      persistirAprovacao();
+    }
   }
 
   function pedNegarCancelamento(orderId, motivoDecisao){
     if(!pedPodeAprovarCancelamento()){ toast('Você não tem permissão para decidir sobre cancelamentos.'); return; }
     var order = ORDERS.find(function(o){ return o.id === orderId; });
     if(!order || !order.cancelamento || order.cancelamento.status!=='pendente') return;
+    if(!order._uuid || !sbClient){ toast('Não foi possível localizar este pedido no banco.'); return; }
 
-    order.cancelamento.status = 'negado';
-    order.cancelamento.decididoPor = currentUser.name;
-    order.cancelamento.decididoEm = Date.now();
-    order.cancelamento.motivoDecisao = motivoDecisao||'';
-    // Volta exatamente ao status que tinha antes da solicitação
-    var pillMap = {'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Pronto para despacho':'p-despacho','Entregue':'p-entregue'};
-    order.status = order.cancelamento.statusAnterior || 'Em produção';
-    order.pill = pillMap[order.status] || 'p-prod';
+    var statusVolta = order.cancelamento.statusAnterior || 'Em produção';
+    sbClient.from('pedidos').update({
+      cancelamento_status: 'negado',
+      cancelamento_decidido_por: currentUser._supabaseId,
+      cancelamento_decidido_em: new Date().toISOString(),
+      cancelamento_motivo_decisao: motivoDecisao||'',
+      status: statusParaBanco(statusVolta)
+    }).eq('id', order._uuid).then(function(res){
+      if(res.error){ toast('Erro ao negar cancelamento: '+res.error.message); return; }
 
-    renderOrders();
-    if(typeof renderCancelamentosPendentes==='function') renderCancelamentosPendentes();
-    if(typeof renderNotificacoes==='function') renderNotificacoes();
-    toast('Cancelamento negado. Pedido '+orderId+' voltou para "'+order.status+'".');
+      order.cancelamento.status = 'negado';
+      order.cancelamento.decididoPor = currentUser.name;
+      order.cancelamento.decididoEm = Date.now();
+      order.cancelamento.motivoDecisao = motivoDecisao||'';
+      order.status = statusVolta;
+      order.pill = STATUS_PILL_MAP[statusVolta] || 'p-prod';
+
+      renderOrders();
+      if(typeof renderCancelamentosPendentes==='function') renderCancelamentosPendentes();
+      if(typeof renderNotificacoes==='function') renderNotificacoes();
+      toast('Cancelamento negado. Pedido '+orderId+' voltou para "'+order.status+'".');
+    });
   }
   window.pedSolicitarCancelamento = pedSolicitarCancelamento;
   window.pedAprovarCancelamento = pedAprovarCancelamento;
   window.pedNegarCancelamento = pedNegarCancelamento;
+
+  /* ============================================================
+     FOLLOW-UP 30 DIAS
+     ============================================================
+     Lista clientes cujo último pedido foi entregue há um tempo, para
+     o vendedor reativar o contato. A data de entrega vem da tabela
+     status_historico (quando o pedido passou a ter status "Entregue"),
+     não existe uma coluna própria para isso em "pedidos".
+     ============================================================ */
+  var FOLLOWUP_PRAZO_DIAS = 30;
+
+  function renderFollowup(){
+    var tbody = document.getElementById('followup-tbody');
+    var badge = document.querySelector('.sb-btn[data-page="followup"] .sb-badge');
+    if(!tbody || !sbClient) return;
+
+    var entregues = ORDERS.filter(function(o){ return o.status==='Entregue' && o._uuid; });
+    if(!entregues.length){
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px;">Nenhum pedido entregue ainda.</td></tr>';
+      if(badge) badge.style.display='none';
+      return;
+    }
+
+    var idsUuid = entregues.map(function(o){ return o._uuid; });
+    sbClient.from('status_historico').select('pedido_id, created_at').eq('status', statusParaBanco('Entregue')).in('pedido_id', idsUuid).order('created_at', {ascending:false}).then(function(res){
+      var dataEntregaPorPedido = {};
+      if(!res.error && res.data){
+        res.data.forEach(function(h){
+          // Pega a entrega mais recente registrada para aquele pedido
+          // (caso tenha ido e voltado do status por algum motivo).
+          if(!dataEntregaPorPedido[h.pedido_id]) dataEntregaPorPedido[h.pedido_id] = h.created_at;
+        });
+      }
+
+      var hoje = new Date();
+      var linhas = entregues.map(function(o){
+        var dataEntregaISO = dataEntregaPorPedido[o._uuid];
+        if(!dataEntregaISO) return null; // sem histórico registrado, não dá pra calcular prazo
+        var dataEntrega = new Date(dataEntregaISO);
+        var diasDesde = Math.floor((hoje - dataEntrega) / 86400000);
+        var diasRestantes = FOLLOWUP_PRAZO_DIAS - diasDesde;
+        return {order:o, dataEntrega:dataEntrega, diasRestantes:diasRestantes};
+      }).filter(function(x){ return x!==null; })
+        .sort(function(a,b){ return a.diasRestantes - b.diasRestantes; });
+
+      var vencidosLinhas = linhas.filter(function(x){ return x.diasRestantes<=0; });
+      var vencidos = vencidosLinhas.length;
+      if(badge){
+        badge.textContent = vencidos;
+        badge.style.display = vencidos>0 ? '' : 'none';
+      }
+      // Alimenta o cache que a central de notificações usa (ver
+      // coletarNotificacoes) — o cálculo é assíncrono, então isso é o jeito
+      // mais simples de sincronizar as duas telas sem duplicar a consulta.
+      window._FOLLOWUP_CACHE = vencidosLinhas.map(function(x){
+        return x.order.client + ' · ' + (x.diasRestantes===0?'venceu hoje':'venceu há '+Math.abs(x.diasRestantes)+'d');
+      });
+      if(typeof renderNotificacoes==='function') renderNotificacoes();
+
+      if(!linhas.length){
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px;">Nenhum follow-up pendente.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = linhas.map(function(x){
+        var o = x.order;
+        var prazoTxt, prazoClasse;
+        if(x.diasRestantes < 0){ prazoTxt = 'Venceu há '+Math.abs(x.diasRestantes)+'d'; prazoClasse='p-follow'; }
+        else if(x.diasRestantes === 0){ prazoTxt = 'Venceu hoje'; prazoClasse='p-follow'; }
+        else { prazoTxt = x.diasRestantes+' dias'; prazoClasse='p-prod'; }
+        var dataEntregaBR = x.dataEntrega.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+        var acao = x.diasRestantes<=0
+          ? '<button class="btn btn-rosa btn-sm" onclick="followupAvisar(\''+o.id+'\')"><i class="ti ti-brand-whatsapp" style="font-size:11px;"></i> Avisar</button>'
+          : '<button class="btn btn-sm" onclick="followupAvisar(\''+o.id+'\')">Lembrar</button>';
+        return '<tr><td><b>'+esc(o.client)+'</b></td><td>'+esc(o.prodDesc||o.prod)+'</td><td style="color:#E31787;">R$'+o.valor.toLocaleString('pt-BR')+'</td><td>'+dataEntregaBR+'</td><td>'+esc(o.vendedor||'—')+'</td><td><span class="pill '+prazoClasse+'">'+prazoTxt+'</span></td><td>'+acao+'</td></tr>';
+      }).join('');
+    });
+  }
+
+  function followupAvisar(orderId){
+    var order = ORDERS.find(function(o){ return o.id===orderId; });
+    if(!order) return;
+    if(order.wapp){
+      var numero = order.wapp.replace(/\D/g,'');
+      window.open('https://wa.me/55'+numero, '_blank');
+    } else {
+      toast('Este pedido não tem WhatsApp cadastrado.');
+    }
+  }
+  window.followupAvisar = followupAvisar;
 
   function renderCancelamentosPendentes(){
     var wrap = document.getElementById('ped-cancelamentos-list');
@@ -3589,11 +3807,13 @@ document.addEventListener('DOMContentLoaded',function(){
       });
     }
 
-    // 4) Follow-up vencido — visível para todos (cada um já vê só os próprios
-    // clientes, seguindo a mesma regra de visibilidade da aba Follow-up).
-    // Aproveita os dados de exemplo já usados na tela de Follow-up 30d.
-    itens.push({tipo:'followup', icone:'ti-bell', cor:'#E31787', titulo:'Follow-up vencido', detalhe:'Thiago Costa · venceu há 1 dia', pagina:'followup'});
-    itens.push({tipo:'followup', icone:'ti-bell', cor:'#E31787', titulo:'Follow-up vencido', detalhe:'Luana Reis · venceu hoje', pagina:'followup'});
+    // 4) Follow-up vencido — alimentado por um cache calculado em
+    // renderFollowup() (que roda de forma assíncrona, então não dá pra
+    // calcular aqui na hora); cada item já vem filtrado pelo mesmo critério
+    // de visibilidade usado no resto do CRM.
+    (window._FOLLOWUP_CACHE||[]).forEach(function(f){
+      itens.push({tipo:'followup', icone:'ti-bell', cor:'#E31787', titulo:'Follow-up vencido', detalhe:f, pagina:'followup'});
+    });
 
     return itens;
   }
@@ -3662,10 +3882,38 @@ document.addEventListener('DOMContentLoaded',function(){
     return currentUser && (currentUser.isAdminGeral || currentUser.podeGerenciarEstoque);
   }
 
+  // Aplica uma mudança de estoque (soma ou subtrai caixas/unidades) no banco
+  // e registra o log de movimentação — usado pelos 4 formulários abaixo
+  // (entrada, baixa, abertura, ajuste), evitando repetir a mesma sequência
+  // de chamadas ao Supabase em cada um.
+  function estoquePersistirMovimento(tam, deltaCaixas, deltaUnid, tipoLog, motivo, callback){
+    var novoCaixas = STOCK[tam].caixas + deltaCaixas;
+    var novoUnid = STOCK[tam].unid + deltaUnid;
+    sbClient.from('estoque').update({caixas: novoCaixas, unidades_avulsas: novoUnid}).eq('tamanho', tam).then(function(res){
+      if(res.error){ toast('Erro ao atualizar estoque: '+res.error.message); return; }
+      sbClient.from('estoque_log').insert({
+        tipo: tipoLog, tamanho: tam,
+        caixas: Math.abs(deltaCaixas), unidades: Math.abs(deltaUnid),
+        motivo: motivo, lancado_por: currentUser._supabaseId
+      }).then(function(res2){
+        if(res2.error){ toast('Movimento salvo, mas houve erro ao registrar o histórico: '+res2.error.message); }
+        STOCK[tam].caixas = novoCaixas;
+        STOCK[tam].unid = novoUnid;
+        STOCK_LOG.unshift({tipo:tipoLog, tam:tam, caixas:Math.abs(deltaCaixas), unid:Math.abs(deltaUnid), nf:'', data:new Date().toLocaleDateString('pt-BR'), motivo:motivo, lancadoPor:currentUser.name});
+        renderStockGrid(); renderStockLog(); checkStockAlerts();
+        if(callback) callback();
+      });
+    });
+  }
+
   function initEstoque() {
-    renderStockGrid();
-    renderStockLog();
-    checkStockAlerts();
+    carregarEstoqueDoBanco(function(){
+      carregarEstoqueLogDoBanco(function(){
+        renderStockGrid();
+        renderStockLog();
+        checkStockAlerts();
+      });
+    });
 
     var podeGerenciar = estoquePodeGerenciar();
     var btnEntToggle = document.getElementById('btn-entrada-estoque');
@@ -3687,13 +3935,11 @@ document.addEventListener('DOMContentLoaded',function(){
       var unid = parseInt(document.getElementById('ent-unid').value)||0;
       var nf = document.getElementById('ent-nf').value||'';
       if(!caixas && !unid) { toast('Informe caixas ou unidades!'); return; }
-      STOCK[tam].caixas += caixas;
-      STOCK[tam].unid += unid;
-      STOCK_LOG.unshift({tipo:'entrada',tam:tam,caixas:caixas,unid:unid,nf:nf,data:new Date().toLocaleDateString('pt-BR'),motivo:'Entrada manual'+(nf?' · '+nf:''),lancadoPor:currentUser.name});
-      renderStockGrid(); renderStockLog(); checkStockAlerts();
-      document.getElementById('ent-caixas').value=''; document.getElementById('ent-unid').value=''; document.getElementById('ent-nf').value='';
-      formEnt.style.display='none';
-      toast('✅ Estoque atualizado! +' + caixas + 'cx de ' + tam);
+      estoquePersistirMovimento(tam, caixas, unid, 'entrada', 'Entrada manual'+(nf?' · '+nf:''), function(){
+        document.getElementById('ent-caixas').value=''; document.getElementById('ent-unid').value=''; document.getElementById('ent-nf').value='';
+        formEnt.style.display='none';
+        toast('✅ Estoque atualizado! +' + caixas + 'cx de ' + tam);
+      });
     });
 
     var btnBaixa = document.getElementById('btn-confirm-baixa');
@@ -3710,12 +3956,10 @@ document.addEventListener('DOMContentLoaded',function(){
         toast('⚠️ Quantidade maior que o disponível em estoque ('+STOCK[tam].caixas+'cx / '+STOCK[tam].unid+' un). Baixa não aplicada.');
         return;
       }
-      STOCK[tam].caixas -= caixas;
-      STOCK[tam].unid -= unid;
-      STOCK_LOG.unshift({tipo:'saida',tam:tam,caixas:caixas,unid:unid,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:motivo,lancadoPor:currentUser.name});
-      renderStockGrid(); renderStockLog(); checkStockAlerts();
-      document.getElementById('baixa-caixas').value=''; document.getElementById('baixa-unid').value=''; document.getElementById('baixa-motivo').value='';
-      toast('📉 Baixa registrada: ' + caixas + 'cx de ' + tam);
+      estoquePersistirMovimento(tam, -caixas, -unid, 'saida', motivo, function(){
+        document.getElementById('baixa-caixas').value=''; document.getElementById('baixa-unid').value=''; document.getElementById('baixa-motivo').value='';
+        toast('📉 Baixa registrada: ' + caixas + 'cx de ' + tam);
+      });
     });
 
     // Preview ao digitar no Abrir caixa
@@ -3745,13 +3989,11 @@ document.addEventListener('DOMContentLoaded',function(){
       if(!total) { toast('Informe quantos pacotes tem a caixa!'); return; }
       if(STOCK[tam].caixas < 1) { toast('⚠️ Sem caixas fechadas de ' + tam + ' em estoque!'); return; }
       var sobra = Math.max(0, total - usados);
-      STOCK[tam].caixas = Math.max(0, STOCK[tam].caixas - 1);
-      STOCK[tam].unid = (STOCK[tam].unid || 0) + sobra;
-      STOCK_LOG.unshift({tipo:'abertura',tam:tam,caixas:1,unid:sobra,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:motivo + ' (abriu 1cx → ' + total + 'pct, usou ' + usados + ', sobra ' + sobra + ')',lancadoPor:currentUser.name});
-      renderStockGrid(); renderStockLog(); checkStockAlerts();
-      document.getElementById('abrir-total').value=''; document.getElementById('abrir-usados').value=''; document.getElementById('abrir-motivo').value='';
-      document.getElementById('abrir-preview').style.display='none';
-      toast('📦 Caixa aberta! -1cx / +' + sobra + ' pct avulsos de ' + tam);
+      estoquePersistirMovimento(tam, -1, sobra, 'abertura', motivo + ' (abriu 1cx → ' + total + 'pct, usou ' + usados + ', sobra ' + sobra + ')', function(){
+        document.getElementById('abrir-total').value=''; document.getElementById('abrir-usados').value=''; document.getElementById('abrir-motivo').value='';
+        document.getElementById('abrir-preview').style.display='none';
+        toast('📦 Caixa aberta! -1cx / +' + sobra + ' pct avulsos de ' + tam);
+      });
     });
 
     // Ajuste / correção de inventário — separado de entrada/baixa comuns,
@@ -3770,17 +4012,11 @@ document.addEventListener('DOMContentLoaded',function(){
         toast('⚠️ Quantidade a subtrair maior que o disponível ('+STOCK[tam].caixas+'cx / '+STOCK[tam].unid+' un). Ajuste não aplicado.');
         return;
       }
-      if(tipo==='somar'){
-        STOCK[tam].caixas += caixas;
-        STOCK[tam].unid += unid;
-      } else {
-        STOCK[tam].caixas -= caixas;
-        STOCK[tam].unid -= unid;
-      }
-      STOCK_LOG.unshift({tipo:'ajuste',tam:tam,caixas:caixas,unid:unid,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:'Ajuste/correção ('+(tipo==='somar'?'+':'-')+') — '+motivo,lancadoPor:currentUser.name});
-      renderStockGrid(); renderStockLog(); checkStockAlerts();
-      document.getElementById('ajuste-caixas').value=''; document.getElementById('ajuste-unid').value=''; document.getElementById('ajuste-motivo').value='';
-      toast('🔧 Ajuste aplicado: '+(tipo==='somar'?'+':'-')+caixas+'cx / '+(tipo==='somar'?'+':'-')+unid+'un de '+tam);
+      var sinal = tipo==='somar' ? 1 : -1;
+      estoquePersistirMovimento(tam, sinal*caixas, sinal*unid, 'ajuste', 'Ajuste/correção ('+(tipo==='somar'?'+':'-')+') — '+motivo, function(){
+        document.getElementById('ajuste-caixas').value=''; document.getElementById('ajuste-unid').value=''; document.getElementById('ajuste-motivo').value='';
+        toast('🔧 Ajuste aplicado: '+(tipo==='somar'?'+':'-')+caixas+'cx / '+(tipo==='somar'?'+':'-')+unid+'un de '+tam);
+      });
     });
   }
 
@@ -3931,7 +4167,31 @@ document.addEventListener('DOMContentLoaded',function(){
   };
   var editingUserKey = null;
 
+  // Busca TODOS os colaboradores cadastrados no banco (não só quem já
+  // logou nesta sessão, que é tudo que USERS teria sem isso) e atualiza
+  // o cache local USERS antes de desenhar a lista.
+  function equipeCarregarTodos(callback){
+    if(!sbClient){ callback(); return; }
+    sbClient.from('perfis').select('*').then(function(res){
+      if(!res.error && res.data){
+        res.data.forEach(function(perfil){
+          var loginKey = (perfil.login || '').replace(/\D/g,'');
+          if(loginKey) USERS[loginKey] = perfilParaUser(perfil);
+        });
+      }
+      callback();
+    });
+  }
+
   function renderEquipeAdmin() {
+    var list = document.getElementById('equipe-list');
+    if(!list) return;
+    equipeCarregarTodos(function(){
+      renderEquipeAdminLista();
+    });
+  }
+
+  function renderEquipeAdminLista() {
     var list = document.getElementById('equipe-list');
     if(!list) return;
     list.innerHTML = Object.keys(USERS).map(function(key) {
@@ -3943,12 +4203,12 @@ document.addEventListener('DOMContentLoaded',function(){
         ? '<span style="background:#FBEAF0;color:#A0184E;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600;">Admin</span>'
         : '<span style="background:#EDE3F5;color:#5A1E7A;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600;">' + (u.role||'Usuário') + '</span>';
       var modCount = u.isAdmin ? 'Acesso total' : (u.modulos||[]).length + ' módulos';
-      var contratacaoLabel = {clt:'CLT', mei:'MEI', pj:'Terceirizado/PJ'}[col.contratacao] || (u.terceirizado?'Terceirizado/PJ':'CLT');
+      var contratacaoLabel = {clt:'CLT', mei:'MEI', pj:'Terceirizado/PJ'}[u.tipoContratacao] || (u.terceirizado?'Terceirizado/PJ':'CLT');
       return '<div class="usuario-card">' +
         '<div class="usuario-av" style="background:' + u.color + ';">' + ini + '</div>' +
         '<div class="usuario-info">' +
           '<div class="usuario-nome">' + u.name + (isMe ? ' <span style="font-size:10px;color:#aaa;">(você)</span>' : '') + '</div>' +
-          '<div class="usuario-sub">@' + key + (col.cargo?' · '+esc(col.cargo):'') + ' · ' + contratacaoLabel + ' · ' + modCount + '</div>' +
+          '<div class="usuario-sub">' + key + (u.role?' · '+esc(u.role):'') + ' · ' + contratacaoLabel + ' · ' + modCount + '</div>' +
           '<div style="margin-top:4px;">' + adminBadge + '</div>' +
         '</div>' +
         '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">' +
@@ -3965,7 +4225,6 @@ document.addEventListener('DOMContentLoaded',function(){
   function abrirModalUsuario(key) {
     editingUserKey = key;
     var u = key ? USERS[key] : null;
-    var col = (key && typeof COLABORADORES!=='undefined' && COLABORADORES[key]) || {};
     var grid = document.getElementById('usr-modulos-grid');
     var adminSel = document.getElementById('usr-admin');
 
@@ -3973,19 +4232,19 @@ document.addEventListener('DOMContentLoaded',function(){
 
     // Dados pessoais
     document.getElementById('usr-nome').value       = u ? u.name : '';
-    document.getElementById('usr-cpf').value        = col.cpf || '';
-    document.getElementById('usr-rg').value         = col.rg || '';
-    document.getElementById('usr-nascimento').value = col.nascimento || '';
-    document.getElementById('usr-telefone').value   = col.telefone || '';
-    document.getElementById('usr-endereco').value   = col.endereco || '';
-    document.getElementById('usr-email').value      = col.email || '';
+    document.getElementById('usr-cpf').value        = u ? u.cpf||'' : '';
+    document.getElementById('usr-rg').value         = u ? u.rg||'' : '';
+    document.getElementById('usr-nascimento').value = u ? u.dataNascimento||'' : '';
+    document.getElementById('usr-telefone').value   = u ? u.telefone||'' : '';
+    document.getElementById('usr-endereco').value   = u ? u.endereco||'' : '';
+    document.getElementById('usr-email').value      = u ? u.email||'' : '';
 
     // Dados de contratação
     document.getElementById('usr-cargo').value = u ? (u.role||'') : '';
     var contratacaoSel = document.getElementById('usr-contratacao');
-    contratacaoSel.value = col.contratacao || (u && u.terceirizado ? 'pj' : 'clt');
-    document.getElementById('usr-cnpj').value  = col.cnpj || '';
-    document.getElementById('usr-razao').value = col.razaoSocial || '';
+    contratacaoSel.value = (u && u.tipoContratacao) || (u && u.terceirizado ? 'pj' : 'clt');
+    document.getElementById('usr-cnpj').value  = u ? u.cnpj||'' : '';
+    document.getElementById('usr-razao').value = u ? u.razaoSocial||'' : '';
     document.getElementById('usr-valorhora').value = u ? (u.valorHora||'') : '';
     document.getElementById('usr-terceirizado').checked = u ? !!u.terceirizado : false;
 
@@ -4080,7 +4339,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
   document.getElementById('usr-btn-salvar').addEventListener('click', function(){
     var nome  = document.getElementById('usr-nome').value.trim();
-    var login = (editingUserKey || document.getElementById('usr-login').value.trim()).toLowerCase().replace(/\s/g,'');
+    var login = (editingUserKey || document.getElementById('usr-login').value.trim()).replace(/\D/g,'');
     var senha = document.getElementById('usr-senha').value;
     var cargo = document.getElementById('usr-cargo').value.trim();
     var cor   = document.getElementById('usr-cor').value;
@@ -4088,20 +4347,15 @@ document.addEventListener('DOMContentLoaded',function(){
     var valorHora = parseFloat(document.getElementById('usr-valorhora').value)||0;
     var terceirizado = document.getElementById('usr-terceirizado').checked;
 
-    if(!nome || !login){ toast('Preencha nome e login!'); return; }
+    if(!nome || !login){ toast('Preencha nome e telefone!'); return; }
     if(!editingUserKey && !senha){ toast('Informe a senha!'); return; }
     if(senha && senha.length < 6){ toast('Senha precisa ter ao menos 6 caracteres!'); return; }
-    if(!editingUserKey && USERS[login]){ toast('Login já existe. Escolha outro.'); return; }
 
     var mods = isAdm ? Object.keys(ALL_MODULES_MAP) :
       Array.from(document.querySelectorAll('.usr-mod-cb:checked')).map(function(cb){ return cb.value; });
 
     var existing = editingUserKey ? USERS[editingUserKey] : {};
 
-    // Permissões de chat comercial e operacionais: só o Admin Geral consegue
-    // alterá-las (e nunca para si mesmo — o formulário fica oculto nesses
-    // casos). Se quem está salvando não tem esse poder, preserva o que já
-    // estava gravado, para não apagar por acidente.
     var podeEditarPermChat = currentUser && currentUser.isAdminGeral && currentUser.key!==editingUserKey;
     var podeVerTodosClientes = podeEditarPermChat
       ? document.getElementById('usr-ver-todos-clientes').checked
@@ -4113,57 +4367,74 @@ document.addEventListener('DOMContentLoaded',function(){
       ? document.getElementById('usr-gerenciar-estoque').checked
       : !!existing.podeGerenciarEstoque;
 
-    USERS[login] = {
-      pass:    senha || (existing.pass||'123456'),
-      name:    nome,
-      role:    cargo || existing.role || 'Usuário',
-      av:      nome.substring(0,2).toUpperCase(),
-      color:   cor,
-      isAdmin: isAdm,
-      isAdminGeral: !!existing.isAdminGeral, // nunca editável pelo formulário — só definido no código
+    var dadosPerfil = {
+      nome: nome,
+      cargo: cargo || null,
+      cor: cor,
+      is_admin: isAdm,
       modulos: mods,
       terceirizado: terceirizado,
-      valorHora: valorHora,
-      podeVerTodosClientes: podeVerTodosClientes,
-      podeReatribuirVendedor: podeReatribuirVendedor,
-      podeGerenciarEstoque: podeGerenciarEstoque
+      valor_hora: valorHora,
+      pode_ver_todos_clientes: podeVerTodosClientes,
+      pode_reatribuir_vendedor: podeReatribuirVendedor,
+      pode_gerenciar_estoque: podeGerenciarEstoque,
+      cpf: document.getElementById('usr-cpf').value||null,
+      rg: document.getElementById('usr-rg').value||null,
+      data_nascimento: document.getElementById('usr-nascimento').value||null,
+      telefone: document.getElementById('usr-telefone').value||login,
+      endereco: document.getElementById('usr-endereco').value||null,
+      email: document.getElementById('usr-email').value||null,
+      tipo_contratacao: document.getElementById('usr-contratacao').value,
+      cnpj: document.getElementById('usr-cnpj').value||null,
+      razao_social: document.getElementById('usr-razao').value||null
     };
 
-    // Dados complementares de cadastro (pessoal + contratação), separados do financeiro operacional
-    if(typeof COLABORADORES!=='undefined'){
-      COLABORADORES[login] = {
-        cpf: document.getElementById('usr-cpf').value||'',
-        rg: document.getElementById('usr-rg').value||'',
-        nascimento: document.getElementById('usr-nascimento').value||'',
-        telefone: document.getElementById('usr-telefone').value||'',
-        endereco: document.getElementById('usr-endereco').value||'',
-        email: document.getElementById('usr-email').value||'',
-        cargo: cargo,
-        contratacao: document.getElementById('usr-contratacao').value,
-        cnpj: document.getElementById('usr-cnpj').value||'',
-        razaoSocial: document.getElementById('usr-razao').value||''
-      };
-      if(typeof horSaveColab==='function') horSaveColab();
-      if(typeof horAuditar==='function') horAuditar(editingUserKey?'Colaborador editado':'Colaborador cadastrado', nome+' ('+login+')');
+    if(editingUserKey){
+      // Edição de colaborador já existente: isso a chave "anon" já resolve,
+      // protegido pela política de RLS "perfis_update_proprio_ou_admin_geral".
+      var uuid = existing._supabaseId;
+      if(!uuid || !sbClient){ toast('Não foi possível identificar este colaborador no banco.'); return; }
+      sbClient.from('perfis').update(dadosPerfil).eq('id', uuid).then(function(res){
+        if(res.error){ toast('Erro ao salvar: '+res.error.message); return; }
+        USERS[login] = Object.assign({}, existing, perfilParaUser(Object.assign({id:uuid, login:login}, dadosPerfil)));
+        closeModal('modal-usuario');
+        renderEquipeAdmin();
+        if(typeof renderHorAdminColabSelect==='function') renderHorAdminColabSelect();
+        if(typeof renderHorDashboard==='function') renderHorDashboard();
+        toast('✅ Colaborador atualizado: ' + nome);
+      });
+    } else {
+      // Criar um colaborador novo exige gerar um login de autenticação no
+      // Supabase Auth — isso precisa da chave "service_role" (privilegiada),
+      // que nunca deve rodar no navegador do cliente por segurança. Isso só
+      // pode ser feito com segurança através de uma Edge Function (código
+      // rodando no servidor do Supabase), que ainda não construímos.
+      // Por enquanto, cadastro de colaborador novo continua sendo feito
+      // manualmente no painel do Supabase (Authentication > Users), com o
+      // Admin Geral preenchendo os dados aqui depois pela edição.
+      toast('⚠️ Criar colaborador novo ainda depende de configuração manual no painel do Supabase (Authentication). Peça para o Admin Geral criar o acesso, depois edite os dados dele aqui.');
     }
-
-    closeModal('modal-usuario');
-    renderEquipeAdmin();
-    if(typeof renderHorAdminColabSelect==='function') renderHorAdminColabSelect();
-    if(typeof renderHorDashboard==='function') renderHorDashboard();
-    toast('✅ Colaborador ' + (editingUserKey ? 'atualizado' : 'criado') + ': ' + nome);
   });
 
   document.getElementById('usr-btn-excluir').addEventListener('click', function(){
     if(!editingUserKey) return;
-    if(!confirm('Excluir o colaborador ' + USERS[editingUserKey].name + '? Esta ação não pode ser desfeita.')) return;
-    delete USERS[editingUserKey];
-    if(typeof COLABORADORES!=='undefined') delete COLABORADORES[editingUserKey];
-    closeModal('modal-usuario');
-    renderEquipeAdmin();
-    if(typeof renderHorAdminColabSelect==='function') renderHorAdminColabSelect();
-    if(typeof renderHorDashboard==='function') renderHorDashboard();
-    toast('🗑️ Colaborador excluído.');
+    var alvo = USERS[editingUserKey];
+    if(!confirm('Excluir o colaborador ' + alvo.name + '? Esta ação não pode ser desfeita.')) return;
+    var uuid = alvo._supabaseId;
+    if(!uuid || !sbClient){ toast('Não foi possível identificar este colaborador no banco.'); return; }
+    // Remove o cadastro em "perfis". O login de autenticação em si (Auth)
+    // precisa ser removido separadamente pelo Admin Geral no painel do
+    // Supabase — apagar só o perfil já impede o acesso ao CRM, que é o
+    // efeito prático mais importante aqui.
+    sbClient.from('perfis').delete().eq('id', uuid).then(function(res){
+      if(res.error){ toast('Erro ao excluir: '+res.error.message); return; }
+      delete USERS[editingUserKey];
+      closeModal('modal-usuario');
+      renderEquipeAdmin();
+      if(typeof renderHorAdminColabSelect==='function') renderHorAdminColabSelect();
+      if(typeof renderHorDashboard==='function') renderHorDashboard();
+      toast('🗑️ Colaborador excluído do CRM. Para remover o acesso por completo, apague também o usuário no painel Supabase (Authentication).');
+    });
   });
 
   window.abrirModalUsuario = abrirModalUsuario;
@@ -4365,100 +4636,126 @@ document.addEventListener('DOMContentLoaded',function(){
     var nome = (document.getElementById('np-nome').value||'').trim();
     if(!nome) { toast('Informe o nome do cliente!'); return; }
     if(!NP_ITEMS.length) { toast('Adicione pelo menos um produto!'); return; }
+    if(!sbClient){ toast('Sem conexão com o banco.'); return; }
 
     var total = NP_ITEMS.reduce(function(s,i){ return s+i.subtotal; },0);
     var unidades = NP_ITEMS.reduce(function(s,i){ return s+i.unidades; },0);
-    var vendedor = document.getElementById('np-vendedor').value;
-    var pid = 'PED-' + String(NP_COUNTER).padStart(3,'0');
-    NP_COUNTER++;
+    var vendedorNome = document.getElementById('np-vendedor').value;
+    var vendedorObj = Object.keys(USERS).map(function(k){return USERS[k];}).find(function(u){ return u.name===vendedorNome; });
 
-    // Regra de negócio: todo pedido confirmado (não-rascunho) já nasce em
-    // produção — não existe mais escolha manual de "status inicial", porque
-    // criar o pedido pressupõe que a entrada de 30% já foi acertada com o
-    // cliente (paga ou com data prevista, ver campos de entrada abaixo).
     var statusInicial = rascunho ? 'Orçamento enviado' : 'Em produção';
-    var pillMap = {'Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod'};
-
-    // Produto resumido para exibição
     var prodDesc = NP_ITEMS.map(function(i){
       return (i.tipo==='caixas' ? i.qtd+'cx' : i.qtd+'un') + ' ' + i.tam;
     }).join(' + ');
+    var entradaStatus = document.getElementById('np-entrada-status').value;
 
-    var entradaStatus = document.getElementById('np-entrada-status').value; // 'pago' | 'previsto'
-    var newOrder = {
-      id: pid,
-      client: nome,
-      cidade: (document.getElementById('np-cidade').value||'—'),
-      rua: (document.getElementById('np-rua').value||''),
-      bairro: (document.getElementById('np-bairro').value||''),
-      prod: NP_ITEMS[0].tam,
-      prodDesc: prodDesc,
-      qtd: NP_ITEMS.reduce(function(s,i){ return s+(i.tipo==='caixas'?i.qtd:0);},0),
-      unid: unidades,
-      valor: total,
-      status: statusInicial,
-      vendedor: vendedor,
-      data: new Date().toLocaleDateString('pt-BR'),
-      pill: pillMap[statusInicial] || 'p-orc',
-      impressao: NP_IMPRESSAO,
-      tinta: NP_TINTA,
-      arte: NP_ARTE,
-      itens: NP_ITEMS.slice(),
-      doc: document.getElementById('np-doc').value||'',
-      wapp: document.getElementById('np-wapp').value||'',
-      pagamento: document.getElementById('np-pagamento').value,
-      prazo: document.getElementById('np-prazo').value,
-      frete: document.getElementById('np-frete').value,
-      obs: document.getElementById('np-obs').value||'',
-      // Controle de pagamento em duas etapas (30% entrada / 70% restante).
-      entradaPaga: entradaStatus==='pago',
-      entradaData: entradaStatus==='previsto' ? (document.getElementById('np-entrada-data').value||'') : '',
-      entradaMotivo: entradaStatus==='previsto' ? (document.getElementById('np-entrada-motivo').value||'') : '',
-      restantePago: false,
-      // Fluxo de cancelamento (ver pedCancelamento* mais abaixo no arquivo).
-      cancelamento: null, // {motivo, solicitadoPor, solicitadoEm, status:'pendente'|'aprovado'|'negado', decididoPor, decididoEm, motivoDecisao}
-      estoqueBaixado: false,
-    };
+    var btnConfirmar = document.getElementById('btn-confirmar-pedido');
+    if(btnConfirmar){ btnConfirmar.disabled = true; }
 
-    ORDERS.unshift(newOrder);
+    // 1) Gera o número aleatório do pedido chamando a função do banco
+    // (mesma lógica usada na consulta pública — nunca sequencial).
+    sbClient.rpc('gerar_numero_pedido').then(function(resNum){
+      if(resNum.error){ toast('Erro ao gerar número do pedido: '+resNum.error.message); if(btnConfirmar) btnConfirmar.disabled=false; return; }
+      var pid = resNum.data;
 
-    // Baixa de estoque: acontece sempre que o pedido é confirmado (não-rascunho),
-    // já na criação — nunca mais espera o faturamento, para o vendedor sempre
-    // ver o estoque refletindo o que já está comprometido em produção.
-    // O estoque pode ficar negativo de propósito (sem travar em zero): a venda
-    // NUNCA é bloqueada por falta de estoque — se faltar, o vendedor é avisado
-    // na hora, e o saldo negativo fica visível até a reposição cobrir a
-    // diferença. Isso evita perder venda de produto feito sob encomenda.
-    if(!rascunho){
-      var tamanhosComFalta = [];
-      NP_ITEMS.forEach(function(item) {
-        if(STOCK[item.tam]) {
-          var disponivel = item.tipo==='caixas' ? STOCK[item.tam].caixas : STOCK[item.tam].unid;
-          if(item.qtd > disponivel) tamanhosComFalta.push(item.tam+' ('+item.qtd+(item.tipo==='caixas'?'cx':'un')+' pedido, '+disponivel+' disponível)');
-          if(item.tipo === 'caixas') {
-            STOCK[item.tam].caixas -= item.qtd;
-          } else {
-            STOCK[item.tam].unid -= item.qtd;
+      // 2) Insere o pedido em si.
+      var registroPedido = {
+        numero: pid,
+        status: statusParaBanco(statusInicial),
+        nome: nome,
+        empresa: document.getElementById('np-doc').value||null,
+        whatsapp: document.getElementById('np-wapp').value||null,
+        cidade: document.getElementById('np-cidade').value||null,
+        vendedor_id: vendedorObj ? vendedorObj._supabaseId : null,
+        valor_estimado: total,
+        entrada_paga: entradaStatus==='pago',
+        entrada_data_prevista: entradaStatus==='previsto' ? (document.getElementById('np-entrada-data').value||null) : null,
+        entrada_motivo_adiamento: entradaStatus==='previsto' ? (document.getElementById('np-entrada-motivo').value||null) : null,
+        restante_pago: false,
+        estoque_baixado: false
+      };
+
+      sbClient.from('pedidos').insert(registroPedido).select().single().then(function(resPed){
+        if(resPed.error){ toast('Erro ao criar pedido: '+resPed.error.message); if(btnConfirmar) btnConfirmar.disabled=false; return; }
+        var pedidoUuid = resPed.data.id;
+
+        // 3) Insere os itens do pedido (um por tamanho/quantidade).
+        var itensParaInserir = NP_ITEMS.map(function(item){
+          return {
+            pedido_id: pedidoUuid,
+            produto_ml: parseInt(item.tam),
+            quantidade_caixas: item.tipo==='caixas' ? item.qtd : 0,
+            preco_unitario_cx: item.tipo==='caixas' ? (item.subtotal/(item.qtd||1)) : 0
+          };
+        });
+        sbClient.from('itens_pedido').insert(itensParaInserir).then(function(resItens){
+          if(resItens.error){ toast('Pedido criado, mas houve erro ao salvar os itens: '+resItens.error.message); }
+
+          function finalizarNaTela(tamanhosComFalta){
+            var newOrder = {
+              id: pid, _uuid: pedidoUuid, client: nome,
+              cidade: (document.getElementById('np-cidade').value||'—'),
+              rua: (document.getElementById('np-rua').value||''),
+              bairro: (document.getElementById('np-bairro').value||''),
+              prod: NP_ITEMS[0].tam, prodDesc: prodDesc,
+              qtd: NP_ITEMS.reduce(function(s,i){ return s+(i.tipo==='caixas'?i.qtd:0);},0),
+              unid: unidades, valor: total, status: statusInicial,
+              vendedor: vendedorNome, vendedorId: vendedorObj?vendedorObj._supabaseId:null,
+              data: new Date().toLocaleDateString('pt-BR'),
+              pill: STATUS_PILL_MAP[statusInicial] || 'p-orc',
+              impressao: NP_IMPRESSAO, tinta: NP_TINTA, arte: NP_ARTE,
+              itens: NP_ITEMS.slice(),
+              doc: document.getElementById('np-doc').value||'', wapp: document.getElementById('np-wapp').value||'',
+              pagamento: document.getElementById('np-pagamento').value, prazo: document.getElementById('np-prazo').value,
+              frete: document.getElementById('np-frete').value, obs: document.getElementById('np-obs').value||'',
+              entradaPaga: entradaStatus==='pago',
+              entradaData: entradaStatus==='previsto' ? (document.getElementById('np-entrada-data').value||'') : '',
+              entradaMotivo: entradaStatus==='previsto' ? (document.getElementById('np-entrada-motivo').value||'') : '',
+              restantePago: false, cancelamento: null,
+              estoqueBaixado: !rascunho
+            };
+            ORDERS.unshift(newOrder);
+            if(!rascunho){
+              PROD_QUEUE.push({id:pid,pos:PROD_QUEUE.length+1,priority:false,client:nome,prod:prodDesc,tinta:NP_TINTA,vendedor:vendedorNome,data:new Date().toLocaleDateString('pt-BR'),prazo:'—'});
+              if(tamanhosComFalta && tamanhosComFalta.length){
+                toast('⚠️ Pedido '+pid+' criado, mas com estoque insuficiente: '+tamanhosComFalta.join(', ')+'. Sinalizado para o Gestor de Estoque.');
+              } else {
+                toast('✅ Pedido '+pid+' criado, estoque atualizado e adicionado à fila de produção!');
+              }
+            } else {
+              toast('✅ Pedido ' + pid + ' criado como rascunho!');
+            }
+            renderOrders();
+            closeModal('modal-novo-pedido');
+            if(btnConfirmar) btnConfirmar.disabled=false;
           }
-          STOCK_LOG.unshift({tipo:'saida',tam:item.tam,caixas:item.tipo==='caixas'?item.qtd:0,unid:item.tipo==='unidades'?item.qtd:0,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:'Pedido '+pid+' — '+nome,lancadoPor:vendedor+' (criação do pedido)'});
-        }
-      });
-      newOrder.estoqueBaixado = true;
-      // Fila de produção: sempre no final, respeitando a ordem — o gestor de
-      // produção continua podendo reordenar manualmente (drag/priority), como já
-      // existia antes; isso aqui só garante a entrada automática no fim da fila.
-      PROD_QUEUE.push({id:pid,pos:PROD_QUEUE.length+1,priority:false,client:nome,prod:prodDesc,tinta:NP_TINTA,vendedor:vendedor,data:new Date().toLocaleDateString('pt-BR'),prazo:'—'});
-      if(tamanhosComFalta.length){
-        toast('⚠️ Pedido '+pid+' criado, mas com estoque insuficiente: '+tamanhosComFalta.join(', ')+'. Sinalizado para o Gestor de Estoque.');
-      } else {
-        toast('✅ Pedido '+pid+' criado, estoque atualizado e adicionado à fila de produção!');
-      }
-    } else {
-      toast('✅ Pedido ' + pid + ' criado como rascunho!');
-    }
 
-    renderOrders();
-    closeModal('modal-novo-pedido');
+          // 4) Baixa de estoque real no banco — só quando não é rascunho.
+          if(!rascunho){
+            var tamanhosComFalta = [];
+            var pendentes = NP_ITEMS.length;
+            if(pendentes===0){ finalizarNaTela([]); return; }
+            NP_ITEMS.forEach(function(item){
+              var disponivel = STOCK[item.tam] ? STOCK[item.tam].caixas : 0;
+              if(item.qtd > disponivel) tamanhosComFalta.push(item.tam+' ('+item.qtd+'cx pedido, '+disponivel+' disponível)');
+              var novoValor = disponivel - item.qtd; // pode ficar negativo de propósito
+              sbClient.from('estoque').update({caixas: novoValor}).eq('tamanho', item.tam).then(function(){
+                sbClient.from('estoque_log').insert({
+                  tipo:'saida', tamanho:item.tam, caixas:item.qtd, unidades:0,
+                  motivo:'Pedido '+pid+' — '+nome, lancado_por: currentUser._supabaseId
+                }).then(function(){
+                  if(STOCK[item.tam]) STOCK[item.tam].caixas = novoValor;
+                  pendentes--;
+                  if(pendentes===0) finalizarNaTela(tamanhosComFalta);
+                });
+              });
+            });
+          } else {
+            finalizarNaTela([]);
+          }
+        });
+      });
+    });
   }
 
   // Bind botão novo pedido
@@ -4687,16 +4984,43 @@ document.addEventListener('DOMContentLoaded',function(){
 
 
   // ── DADOS DE CLIENTES ──
-  var CLIENTES = [
-    {id:'CLI-001',nome:'Ana Clara',tipo:'PF',doc:'',wapp:'(19) 99123-4567',email:'ana@email.com',segmento:'Eventos / Buffet',cidade:'Campinas',estado:'SP',vendedor:'João',indicado:'',preco_esp:false,obs:'Evento de formatura em agosto.',cadastro:'2024-06-24',ultimo_pedido:'2025-06-24',total_caixas:2,total_pedidos:1,status:'ativo'},
-    {id:'CLI-002',nome:'Rafael Silva',tipo:'PJ',doc:'12.345.678/0001-90',wapp:'(31) 98765-4321',email:'rafael@empresa.com',segmento:'Bar / Boteco',cidade:'Belo Horizonte',estado:'MG',vendedor:'Maria',indicado:'',preco_esp:false,obs:'',cadastro:'2024-01-15',ultimo_pedido:'2025-06-20',total_caixas:8,total_pedidos:3,status:'ativo'},
-    {id:'CLI-003',nome:'Pedro Lima',tipo:'PJ',doc:'98.765.432/0001-10',wapp:'(11) 97654-3210',email:'pedro@empresa.com',segmento:'Distribuidora',cidade:'São Paulo',estado:'SP',vendedor:'João',indicado:'',preco_esp:false,obs:'',cadastro:'2024-06-24',ultimo_pedido:'2025-06-20',total_caixas:3,total_pedidos:1,status:'ativo'},
-    {id:'CLI-004',nome:'Thiago Costa',tipo:'PJ',doc:'11.222.333/0001-44',wapp:'(35) 99888-7766',email:'thiago@empresa.com',segmento:'Adega',cidade:'Pouso Alegre',estado:'MG',vendedor:'João',indicado:'',preco_esp:false,obs:'Cliente VIP — comprador frequente.',cadastro:'2024-05-10',ultimo_pedido:'2025-05-25',total_caixas:12,total_pedidos:4,status:'vip'},
-    {id:'CLI-005',nome:'Luana Reis',tipo:'PF',doc:'',wapp:'(31) 98877-6655',email:'',segmento:'Eventos / Buffet',cidade:'Belo Horizonte',estado:'MG',vendedor:'Maria',indicado:'',preco_esp:false,obs:'',cadastro:'2024-06-01',ultimo_pedido:'2025-05-27',total_caixas:4,total_pedidos:2,status:'ativo'},
-    {id:'CLI-006',nome:'Marina Fonseca',tipo:'PF',doc:'',wapp:'(21) 96543-2100',email:'',segmento:'Eventos / Buffet',cidade:'Rio de Janeiro',estado:'RJ',vendedor:'Pedro',indicado:'Ana Clara',preco_esp:false,obs:'Indicada pela Ana Clara.',cadastro:'2025-06-22',ultimo_pedido:'',total_caixas:0,total_pedidos:0,status:'ativo'},
-    {id:'CLI-007',nome:'Fernanda Cruz',tipo:'PJ',doc:'55.444.333/0001-22',wapp:'(41) 99777-5544',email:'fernanda@empresa.com',segmento:'Bar / Boteco',cidade:'Curitiba',estado:'PR',vendedor:'Pedro',indicado:'',preco_esp:false,obs:'',cadastro:'2024-12-01',ultimo_pedido:'2025-06-19',total_caixas:6,total_pedidos:2,status:'ativo'},
-    {id:'CLI-008',nome:'Carlos Mota',tipo:'PF',doc:'',wapp:'(11) 98888-4433',email:'',segmento:'Outro',cidade:'São Paulo',estado:'SP',vendedor:'Pedro',indicado:'',preco_esp:false,obs:'',cadastro:'2024-03-15',ultimo_pedido:'2025-06-01',total_caixas:3,total_pedidos:2,status:'ativo'},
-  ];
+  var CLIENTES = [];
+
+  // Busca clientes do banco. O RLS já filtra sozinho quem pode ver o quê
+  // (vendedor vê os próprios, quem tem permissão ampla vê todos, admin vê
+  // tudo) — não precisamos duplicar essa lógica aqui, só confiar na política
+  // já criada na migração ("clientes_select").
+  function carregarClientesDoBanco(callback){
+    if(!sbClient){ if(callback) callback(); return; }
+    sbClient.from('clientes').select('*').order('criado_em', {ascending:false}).then(function(res){
+      if(!res.error && res.data){
+        CLIENTES.length = 0;
+        res.data.forEach(function(c){
+          var vendedorObj = Object.keys(USERS).map(function(k){return USERS[k];}).find(function(u){ return u._supabaseId===c.vendedor_id; });
+          CLIENTES.push({
+            _uuid: c.id,
+            id: c.id, // exibição usa o próprio UUID quando não há um código curto — ver observação no cadastro
+            nome: c.nome,
+            tipo: (c.cpf_cnpj||'').replace(/\D/g,'').length > 11 ? 'PJ' : 'PF',
+            doc: c.cpf_cnpj||'',
+            wapp: c.whatsapp||'',
+            email: '', // coluna não existe em "clientes" no schema atual
+            segmento: '',
+            endereco: '',
+            cidade: c.cidade||'',
+            estado: c.estado||'',
+            vendedor: vendedorObj ? vendedorObj.name : '',
+            vendedorId: c.vendedor_id,
+            indicado: '', preco_esp: false, obs: '',
+            cadastro: c.criado_em ? c.criado_em.split('T')[0] : '',
+            ultimo_pedido: '', total_caixas: 0, total_pedidos: 0,
+            status: 'ativo'
+          });
+        });
+      }
+      if(callback) callback();
+    });
+  }
 
   var CLI_CORES = ['#E31787','#772583','#3C3489','#633806','#085041','#0C447C','#791F1F','#633806'];
   var editingClienteIdx = -1;
@@ -4727,8 +5051,10 @@ document.addEventListener('DOMContentLoaded',function(){
     if(!list) return;
 
     var filtered = CLIENTES.filter(function(cli) {
-      // Todos veem todos os clientes (privacidade futura por vendedor)
-      // if(!currentUser.isAdmin && cli.vendedor !== currentUser.name) return false;
+      // A privacidade por vendedor já é garantida pelo RLS do banco (política
+      // "clientes_select") — o array CLIENTES só chega aqui com o que o
+      // colaborador logado tem permissão de ver, então não precisa repetir
+      // o filtro aqui.
       if(search) {
         var s = search.toLowerCase();
         if(cli.nome.toLowerCase().indexOf(s) < 0 && cli.doc.indexOf(s) < 0 && cli.cidade.toLowerCase().indexOf(s) < 0 && cli.wapp.indexOf(s) < 0) return false;
@@ -4883,10 +5209,11 @@ document.addEventListener('DOMContentLoaded',function(){
   var _goPageOrig = goPage;
   goPage = function(id, title) {
     _goPageOrig(id, title);
-    if(id === 'clientes') { renderClientes('','',''); }
-    if(id === 'financeiro') { renderFinanceiro('','',''); }
+    if(id === 'clientes') { carregarClientesDoBanco(function(){ renderClientes('','',''); }); }
+    if(id === 'financeiro') { carregarContasDoBanco(function(){ renderFinanceiro('','',''); }); }
     if(id === 'notasfiscais') { renderNF('','',''); initNF(); }
     if(id === 'equipe') { renderEquipeAdmin ? renderEquipeAdmin() : renderEquipe(); }
+    if(id === 'followup') { renderFollowup(); }
   };
 
 
@@ -4894,15 +5221,28 @@ document.addEventListener('DOMContentLoaded',function(){
   // ══════════════════════════════════════
   // FINANCEIRO — CONTAS A PAGAR
   // ══════════════════════════════════════
-  var CONTAS = [
-    {id:'CNT-001',desc:'Fornecedor de copos 330ml',forn:'Plastipak Industria',valor:4800,venc:'2025-06-28',cat:'Fornecedor',recorr:'unica',obs:'NF 8821',status:'pendente'},
-    {id:'CNT-002',desc:'Aluguel do galpao - Junho',forn:'Imobiliaria Central',valor:2200,venc:'2025-06-10',cat:'Aluguel',recorr:'mensal',obs:'',status:'pago'},
-    {id:'CNT-003',desc:'Energia eletrica - Maio',forn:'CEMIG',valor:680,venc:'2025-06-05',cat:'Servicos',recorr:'mensal',obs:'',status:'pago'},
-    {id:'CNT-004',desc:'Parcelamento DAS MEI - Junho',forn:'Receita Federal',valor:360,venc:'2025-06-20',cat:'Impostos',recorr:'mensal',obs:'',status:'pendente'},
-    {id:'CNT-005',desc:'Tinta para impressao serigrafica',forn:'Colorink Suprimentos',valor:1250,venc:'2025-06-02',cat:'Fornecedor',recorr:'unica',obs:'NF 3344',status:'vencida'},
-    {id:'CNT-006',desc:'Conta de agua - Maio',forn:'COPASA',valor:180,venc:'2025-06-15',cat:'Servicos',recorr:'mensal',obs:'',status:'pendente'},
-    {id:'CNT-007',desc:'Aluguel do galpao - Julho',forn:'Imobiliaria Central',valor:2200,venc:'2025-07-10',cat:'Aluguel',recorr:'mensal',obs:'',status:'pendente'},
-  ];
+  var CONTAS = [];
+
+  function carregarContasDoBanco(callback){
+    if(!sbClient){ if(callback) callback(); return; }
+    sbClient.from('contas_a_pagar').select('*').order('vencimento', {ascending:true}).then(function(res){
+      if(!res.error && res.data){
+        CONTAS.length = 0;
+        res.data.forEach(function(c){
+          CONTAS.push({
+            _uuid: c.id,
+            id: c.id,
+            desc: c.descricao, forn: c.fornecedor||'',
+            valor: c.valor, venc: c.vencimento,
+            cat: c.categoria||'', recorr: c.recorrencia||'unica',
+            obs: c.observacao||'', status: c.status
+          });
+        });
+      }
+      if(callback) callback();
+    });
+  }
+
   var editingContaIdx = -1;
 
   function getContaStatus(conta) {
@@ -4974,17 +5314,27 @@ document.addEventListener('DOMContentLoaded',function(){
     list.querySelectorAll('[data-pagar-idx]').forEach(function(btn){
       btn.addEventListener('click',function(){
         var idx=parseInt(this.getAttribute('data-pagar-idx'));
-        CONTAS[idx].status='pago';
-        renderFinanceiro(document.getElementById('fin-search').value, document.getElementById('fin-filter-status').value, document.getElementById('fin-filter-cat').value);
-        toast('Conta marcada como paga!');
+        var conta = CONTAS[idx];
+        if(!conta._uuid || !sbClient){ toast('Não foi possível localizar esta conta no banco.'); return; }
+        sbClient.from('contas_a_pagar').update({status:'pago'}).eq('id', conta._uuid).then(function(res){
+          if(res.error){ toast('Erro ao atualizar: '+res.error.message); return; }
+          conta.status='pago';
+          renderFinanceiro(document.getElementById('fin-search').value, document.getElementById('fin-filter-status').value, document.getElementById('fin-filter-cat').value);
+          toast('Conta marcada como paga!');
+        });
       });
     });
     list.querySelectorAll('[data-unpagar-idx]').forEach(function(btn){
       btn.addEventListener('click',function(){
         var idx=parseInt(this.getAttribute('data-unpagar-idx'));
-        CONTAS[idx].status='pendente';
-        renderFinanceiro(document.getElementById('fin-search').value, document.getElementById('fin-filter-status').value, document.getElementById('fin-filter-cat').value);
-        toast('Pagamento desfeito.');
+        var conta = CONTAS[idx];
+        if(!conta._uuid || !sbClient){ toast('Não foi possível localizar esta conta no banco.'); return; }
+        sbClient.from('contas_a_pagar').update({status:'pendente'}).eq('id', conta._uuid).then(function(res){
+          if(res.error){ toast('Erro ao atualizar: '+res.error.message); return; }
+          conta.status='pendente';
+          renderFinanceiro(document.getElementById('fin-search').value, document.getElementById('fin-filter-status').value, document.getElementById('fin-filter-cat').value);
+          toast('Pagamento desfeito.');
+        });
       });
     });
   }
@@ -5271,7 +5621,7 @@ function horJaAlmocouHoje(userKey){
   return evsHoje.some(function(e){ return e.tipo==='saida_almoco'; });
 }
 
-function horCriarEvento(userKey, tipo, opts){
+function horCriarEvento(userKey, tipo, opts, callback){
   opts = opts||{};
   var dataISO = opts.dataISO || horHojeISO();
   var hora = opts.hora || horAgoraHM();
@@ -5290,8 +5640,32 @@ function horCriarEvento(userKey, tipo, opts){
     criadoEm: Date.now(),
     substituido: false
   };
-  horEventos(userKey).push(ev);
-  horSave();
+
+  if(!sbClient){
+    horEventos(userKey).push(ev);
+    horSave();
+    if(callback) callback(ev);
+    return ev;
+  }
+
+  var colaboradorObj = USERS[userKey];
+  var criadoPorObj = currentUser;
+  sbClient.from('eventos_ponto').insert({
+    colaborador_id: colaboradorObj ? colaboradorObj._supabaseId : null,
+    tipo: tipo, data: dataISO, hora: hora + ':00',
+    motivo: ev.motivo||null, observacao: ev.obs||null, ip: ev.ip||null,
+    editado_por_admin: ev.editadoPorAdmin, justificativa_admin: ev.justificativaAdmin||null,
+    criado_por: criadoPorObj ? criadoPorObj._supabaseId : null
+  }).select().single().then(function(res){
+    if(res.error){
+      toast('Erro ao registrar ponto: '+res.error.message);
+      return;
+    }
+    ev.id = res.data.id; // usa o UUID real do banco como id do evento
+    horEventos(userKey).push(ev);
+    horSave(); // mantém o cache local também, para telas que ainda leem só daqui
+    if(callback) callback(ev);
+  });
   return ev;
 }
 
@@ -5352,23 +5726,60 @@ function horTotalAjustesNoPeriodo(userKey, datas){
   }, 0);
 }
 
-function horCriarAjuste(userKey, dataISO, tipo, valor, motivo){
-  var ajuste = {
-    id: horUid(), userKey: userKey, dataISO: dataISO, tipo: tipo, valor: Math.abs(valor),
-    motivo: motivo, lancadoPor: currentUser?currentUser.name:'—', lancadoEm: Date.now()
-  };
-  AJUSTES.push(ajuste);
-  horSaveAjustes();
-  return ajuste;
+function horCriarAjuste(userKey, dataISO, tipo, valor, motivo, callback){
+  var colaboradorObj = USERS[userKey];
+  if(!sbClient || !colaboradorObj || !colaboradorObj._supabaseId || !currentUser._supabaseId){
+    if(callback) callback(null);
+    return;
+  }
+  sbClient.from('ajustes_financeiros').insert({
+    colaborador_id: colaboradorObj._supabaseId,
+    data: dataISO, tipo: tipo, valor: Math.abs(valor), motivo: motivo,
+    lancado_por: currentUser._supabaseId
+  }).select().single().then(function(res){
+    if(res.error){ toast('Erro ao lançar ajuste: '+res.error.message); if(callback) callback(null); return; }
+    var ajuste = {
+      id: res.data.id, userKey: userKey, dataISO: dataISO, tipo: tipo, valor: Math.abs(valor),
+      motivo: motivo, lancadoPor: currentUser.name, lancadoEm: Date.now()
+    };
+    AJUSTES.push(ajuste);
+    if(callback) callback(ajuste);
+  });
 }
 
-function horRemoverAjuste(id){
+// Busca do banco os ajustes financeiros de TODOS os colaboradores (a tela
+// do admin precisa ver de todo mundo). Como valor_hora e ajustes são dado
+// sensível, o RLS já limita: colaborador comum só recebe os próprios.
+function horCarregarAjustesDoBanco(callback){
+  if(!sbClient){ if(callback) callback(); return; }
+  sbClient.from('ajustes_financeiros').select('*').then(function(res){
+    if(!res.error && res.data){
+      AJUSTES.length = 0;
+      res.data.forEach(function(a){
+        var colaboradorObj = Object.keys(USERS).map(function(k){return {key:k,u:USERS[k]};}).find(function(x){ return x.u._supabaseId===a.colaborador_id; });
+        var lancadorObj = Object.keys(USERS).map(function(k){return {key:k,u:USERS[k]};}).find(function(x){ return x.u._supabaseId===a.lancado_por; });
+        AJUSTES.push({
+          id: a.id, userKey: colaboradorObj?colaboradorObj.key:a.colaborador_id,
+          dataISO: a.data, tipo: a.tipo, valor: a.valor, motivo: a.motivo,
+          lancadoPor: lancadorObj?lancadorObj.u.name:'—', lancadoEm: a.criado_em ? new Date(a.criado_em).getTime() : Date.now()
+        });
+      });
+    }
+    if(callback) callback();
+  });
+}
+
+function horRemoverAjuste(id, callback){
   var idx = AJUSTES.findIndex(function(a){ return a.id===id; });
   if(idx<0) return;
   var a = AJUSTES[idx];
-  horAuditar('Ajuste financeiro removido', (USERS[a.userKey]?USERS[a.userKey].name:a.userKey)+' — '+(a.tipo==='adicional'?'+':'-')+horFmtValor(a.valor)+' ('+a.motivo+')');
-  AJUSTES.splice(idx,1);
-  horSaveAjustes();
+  if(!sbClient){ if(callback) callback(); return; }
+  sbClient.from('ajustes_financeiros').delete().eq('id', id).then(function(res){
+    if(res.error){ toast('Erro ao remover ajuste: '+res.error.message); return; }
+    horAuditar('Ajuste financeiro removido', (USERS[a.userKey]?USERS[a.userKey].name:a.userKey)+' — '+(a.tipo==='adicional'?'+':'-')+horFmtValor(a.valor)+' ('+a.motivo+')');
+    AJUSTES.splice(idx,1);
+    if(callback) callback();
+  });
 }
 
 function horListarDatasComEventos(userKey){
@@ -5517,12 +5928,56 @@ function horAccInicializarTodos(){
    Supabase estar ligado — os botões já existem na interface, prontos
    para receber a função real assim que o backend estiver disponível.
    ============================================================ */
-var CI_CONVERSAS = {}; // chave: login do colega, valor: {msgs:[...]}
+var CI_CONVERSAS = {}; // chave: login do colega, valor: {msgs:[...], conversaId:uuid}
 var ciConversaAtual = null;
+var ciRealtimeChannel = null;
 
 function ciGetConversa(loginColega){
-  if(!CI_CONVERSAS[loginColega]) CI_CONVERSAS[loginColega] = {msgs:[]};
+  if(!CI_CONVERSAS[loginColega]) CI_CONVERSAS[loginColega] = {msgs:[], conversaId:null};
   return CI_CONVERSAS[loginColega];
+}
+
+// Acha a conversa "direta" já existente entre os dois colaboradores, ou
+// cria uma nova (com os dois como participantes) se ainda não existir.
+// Conversas diretas são identificadas por terem exatamente esses 2
+// participantes — não por nenhuma coluna própria, então a busca é feita
+// olhando quem já compartilha uma conversa "direta" com o colega.
+function ciEncontrarOuCriarConversa(loginColega, callback){
+  var conv = ciGetConversa(loginColega);
+  if(conv.conversaId){ callback(conv.conversaId); return; }
+  if(!sbClient || !currentUser._supabaseId || !USERS[loginColega] || !USERS[loginColega]._supabaseId){ callback(null); return; }
+  var meuId = currentUser._supabaseId;
+  var colegaId = USERS[loginColega]._supabaseId;
+
+  sbClient.from('conversas_participantes').select('conversa_id').eq('colaborador_id', meuId).then(function(resMinhas){
+    if(resMinhas.error || !resMinhas.data.length){ ciCriarConversaNova(meuId, colegaId, loginColega, callback); return; }
+    var idsMinhasConversas = resMinhas.data.map(function(r){ return r.conversa_id; });
+    sbClient.from('conversas_participantes').select('conversa_id').eq('colaborador_id', colegaId).in('conversa_id', idsMinhasConversas).then(function(resComuns){
+      if(resComuns.error || !resComuns.data.length){ ciCriarConversaNova(meuId, colegaId, loginColega, callback); return; }
+      // Entre as conversas em comum, pega a que é do tipo "direta" (evita
+      // confundir com uma conversa de grupo/pedido que ambos participem).
+      var idsComuns = resComuns.data.map(function(r){ return r.conversa_id; });
+      sbClient.from('conversas').select('id').in('id', idsComuns).eq('tipo','direta').limit(1).then(function(resDireta){
+        if(resDireta.error || !resDireta.data.length){ ciCriarConversaNova(meuId, colegaId, loginColega, callback); return; }
+        conv.conversaId = resDireta.data[0].id;
+        callback(conv.conversaId);
+      });
+    });
+  });
+}
+
+function ciCriarConversaNova(meuId, colegaId, loginColega, callback){
+  sbClient.from('conversas').insert({tipo:'direta'}).select().single().then(function(res){
+    if(res.error){ toast('Erro ao iniciar conversa: '+res.error.message); callback(null); return; }
+    var conversaId = res.data.id;
+    sbClient.from('conversas_participantes').insert([
+      {conversa_id: conversaId, colaborador_id: meuId},
+      {conversa_id: conversaId, colaborador_id: colegaId}
+    ]).then(function(){
+      ciGetConversa(loginColega).conversaId = conversaId;
+      callback(conversaId);
+    });
+  });
 }
 
 function renderChatInternoPage(){
@@ -5538,7 +5993,7 @@ function renderChatInternoPage(){
   [attachBtn, micBtn].forEach(function(btn){
     if(btn && !btn._bound){
       btn.addEventListener('click', function(){
-        toast('Envio de imagem/arquivo/áudio chega em breve, junto com o Supabase.');
+        toast('Envio de imagem/arquivo/áudio chega em breve.');
       });
       btn._bound = true;
     }
@@ -5594,9 +6049,59 @@ function ciAbrirConversa(loginColega){
   av.textContent = u.av; av.style.background = u.color; av.style.color='#fff';
   document.getElementById('ci-ch-name').textContent = u.name;
   document.getElementById('ci-ch-sub').textContent = u.role||'';
-  document.getElementById('ci-msg-input').disabled = false;
-  document.getElementById('ci-btn-send').disabled = false;
-  renderCiMensagens();
+  document.getElementById('ci-msg-input').disabled = true; // reabilita depois de carregar
+  document.getElementById('ci-btn-send').disabled = true;
+
+  ciEncontrarOuCriarConversa(loginColega, function(conversaId){
+    document.getElementById('ci-msg-input').disabled = false;
+    document.getElementById('ci-btn-send').disabled = false;
+    if(!conversaId){ renderCiMensagens(); return; }
+    ciCarregarMensagens(conversaId, function(){
+      renderCiMensagens();
+      ciAssinarRealtime(conversaId, loginColega);
+    });
+  });
+}
+
+function ciCarregarMensagens(conversaId, callback){
+  if(!sbClient){ if(callback) callback(); return; }
+  sbClient.from('mensagens').select('*').eq('conversa_id', conversaId).order('criado_em', {ascending:true}).then(function(res){
+    if(!res.error && res.data){
+      var conv = ciGetConversa(ciConversaAtual);
+      conv.msgs = res.data.map(function(m){
+        var autorObj = Object.keys(USERS).map(function(k){return {key:k, u:USERS[k]};}).find(function(x){ return x.u._supabaseId===m.autor_id; });
+        return {
+          autor: autorObj ? autorObj.key : m.autor_id,
+          texto: m.texto||'',
+          hora: m.criado_em ? new Date(m.criado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : ''
+        };
+      });
+    }
+    if(callback) callback();
+  });
+}
+
+// Realtime: assina a tabela "mensagens" filtrando por esta conversa, para
+// que mensagens novas apareçam sem precisar recarregar a página. Cancela
+// a assinatura anterior ao trocar de conversa, para não acumular listeners.
+function ciAssinarRealtime(conversaId, loginColega){
+  if(!sbClient) return;
+  if(ciRealtimeChannel) sbClient.removeChannel(ciRealtimeChannel);
+  ciRealtimeChannel = sbClient.channel('mensagens-'+conversaId)
+    .on('postgres_changes', {event:'INSERT', schema:'public', table:'mensagens', filter:'conversa_id=eq.'+conversaId}, function(payload){
+      if(ciConversaAtual!==loginColega) return; // usuário já trocou de conversa
+      var m = payload.new;
+      if(m.autor_id===currentUser._supabaseId) return; // já foi adicionado localmente ao enviar
+      var autorObj = Object.keys(USERS).map(function(k){return {key:k, u:USERS[k]};}).find(function(x){ return x.u._supabaseId===m.autor_id; });
+      ciGetConversa(loginColega).msgs.push({
+        autor: autorObj ? autorObj.key : m.autor_id,
+        texto: m.texto||'',
+        hora: new Date(m.criado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})
+      });
+      renderCiMensagens();
+      renderCiConvList(document.getElementById('ci-conv-search').value);
+    })
+    .subscribe();
 }
 
 function renderCiMensagens(){
@@ -5624,14 +6129,61 @@ function ciEnviarMensagem(){
   var texto = (input.value||'').trim();
   if(!texto) return;
   var conv = ciGetConversa(ciConversaAtual);
-  conv.msgs.push({autor: currentUser.key, texto: texto, hora: (typeof horAgoraHM==='function') ? horAgoraHM() : now()});
+  if(!conv.conversaId || !sbClient){ toast('Conversa ainda não está pronta, aguarde.'); return; }
+
   input.value = '';
+  var horaAgora = (typeof horAgoraHM==='function') ? horAgoraHM() : '';
+  // Adiciona localmente na hora (resposta imediata na tela), e persiste
+  // no banco em seguida — se der erro, avisa mas não desfaz visualmente,
+  // já que o usuário já viu a mensagem "enviada".
+  conv.msgs.push({autor: currentUser.key, texto: texto, hora: horaAgora});
   renderCiMensagens();
   renderCiConvList(document.getElementById('ci-conv-search').value);
+
+  sbClient.from('mensagens').insert({
+    conversa_id: conv.conversaId,
+    autor_id: currentUser._supabaseId,
+    tipo: 'texto',
+    texto: texto
+  }).then(function(res){
+    if(res.error){ toast('⚠️ Mensagem pode não ter sido salva: '+res.error.message); }
+  });
+}
+
+// Busca do banco os eventos de ponto do colaborador logado (últimos 90
+// dias, o suficiente para os relatórios de Horário) e popula PONTOS —
+// sem isso, o CRM só enxergaria eventos criados na sessão atual.
+function horCarregarDoBanco(callback){
+  if(!sbClient || !currentUser || !currentUser._supabaseId){ if(callback) callback(); return; }
+  var desde = new Date(); desde.setDate(desde.getDate()-90);
+  var desdeISO = desde.toISOString().split('T')[0];
+  sbClient.from('eventos_ponto').select('*')
+    .eq('colaborador_id', currentUser._supabaseId)
+    .eq('substituido', false)
+    .gte('data', desdeISO)
+    .order('timestamp_real', {ascending:true})
+    .then(function(res){
+      if(!res.error && res.data){
+        var lista = horEventos(currentUser.key);
+        lista.length = 0;
+        res.data.forEach(function(e){
+          lista.push({
+            id: e.id, tipo: e.tipo, dataISO: e.data, hora: (e.hora||'').slice(0,5),
+            ts: e.timestamp_real ? new Date(e.timestamp_real).getTime() : Date.now(),
+            motivo: e.motivo||'', obs: e.observacao||'', ip: e.ip||'',
+            editadoPorAdmin: !!e.editado_por_admin, justificativaAdmin: e.justificativa_admin||'',
+            criadoPor: currentUser.key, criadoEm: Date.now(), substituido: false
+          });
+        });
+      }
+      if(callback) callback();
+    });
 }
 
 function initHorario(){
   horLoad();
+  horCarregarDoBanco();
+  if(currentUser && currentUser.isAdmin) horCarregarAjustesDoBanco(function(){ if(typeof renderHorTabelaAjustes==='function') renderHorTabelaAjustes(); });
 
   document.querySelectorAll('#page-horario [data-acc-toggle]').forEach(function(head){
     head.addEventListener('click', function(e){
@@ -5799,10 +6351,11 @@ function horAcaoEntrada(){
   var status = horStatusAtual(currentUser.key);
   if(status!=='fora'){ toast('Você já iniciou o expediente hoje.'); return; }
   horObterIP(function(ip){
-    horCriarEvento(currentUser.key, 'entrada', {ip:ip});
-    horAuditar('Marcação de ponto', currentUser.name+' registrou entrada às '+horAgoraHM());
-    renderHorarioPage();
-    toast('Entrada registrada às '+horAgoraHM());
+    horCriarEvento(currentUser.key, 'entrada', {ip:ip}, function(){
+      horAuditar('Marcação de ponto', currentUser.name+' registrou entrada às '+horAgoraHM());
+      renderHorarioPage();
+      toast('Entrada registrada às '+horAgoraHM());
+    });
   });
 }
 
@@ -5811,10 +6364,11 @@ function horAcaoSaidaAlmoco(){
   if(status!=='expediente'){ toast('Só é possível sair para o almoço durante o expediente.'); return; }
   if(horJaAlmocouHoje(currentUser.key)){ toast('O horário de almoço de hoje já foi registrado.'); return; }
   horObterIP(function(ip){
-    horCriarEvento(currentUser.key, 'saida_almoco', {ip:ip});
-    horAuditar('Saída para almoço', currentUser.name+' saiu para o almoço às '+horAgoraHM());
-    renderHorarioPage();
-    toast('Saída para almoço registrada às '+horAgoraHM());
+    horCriarEvento(currentUser.key, 'saida_almoco', {ip:ip}, function(){
+      horAuditar('Saída para almoço', currentUser.name+' saiu para o almoço às '+horAgoraHM());
+      renderHorarioPage();
+      toast('Saída para almoço registrada às '+horAgoraHM());
+    });
   });
 }
 
@@ -5822,10 +6376,11 @@ function horAcaoRetornoAlmoco(){
   var status = horStatusAtual(currentUser.key);
   if(status!=='almoco'){ toast('Nenhuma saída de almoço em aberto.'); return; }
   horObterIP(function(ip){
-    horCriarEvento(currentUser.key, 'retorno_almoco', {ip:ip});
-    horAuditar('Retorno do almoço', currentUser.name+' retornou do almoço às '+horAgoraHM());
-    renderHorarioPage();
-    toast('Retorno do almoço registrado às '+horAgoraHM());
+    horCriarEvento(currentUser.key, 'retorno_almoco', {ip:ip}, function(){
+      horAuditar('Retorno do almoço', currentUser.name+' retornou do almoço às '+horAgoraHM());
+      renderHorarioPage();
+      toast('Retorno do almoço registrado às '+horAgoraHM());
+    });
   });
 }
 
@@ -5836,12 +6391,13 @@ function horAcaoSaidaTemp(){
   var obs = (document.getElementById('hor-just-obs').value||'').trim();
   if(!motivo){ toast('Informe o motivo da saída.'); return; }
   horObterIP(function(ip){
-    horCriarEvento(currentUser.key, 'saida_temp', {motivo:motivo, obs:obs, ip:ip});
-    horAuditar('Saída temporária', currentUser.name+' saiu às '+horAgoraHM()+' — '+motivo);
-    document.getElementById('hor-just-motivo').value='';
-    document.getElementById('hor-just-obs').value='';
-    renderHorarioPage();
-    toast('Saída registrada às '+horAgoraHM());
+    horCriarEvento(currentUser.key, 'saida_temp', {motivo:motivo, obs:obs, ip:ip}, function(){
+      horAuditar('Saída temporária', currentUser.name+' saiu às '+horAgoraHM()+' — '+motivo);
+      document.getElementById('hor-just-motivo').value='';
+      document.getElementById('hor-just-obs').value='';
+      renderHorarioPage();
+      toast('Saída registrada às '+horAgoraHM());
+    });
   });
 }
 
@@ -5849,10 +6405,11 @@ function horAcaoRetorno(){
   var status = horStatusAtual(currentUser.key);
   if(status!=='saida_temp'){ toast('Nenhuma saída temporária em aberto.'); return; }
   horObterIP(function(ip){
-    horCriarEvento(currentUser.key, 'retorno', {ip:ip});
-    horAuditar('Retorno ao expediente', currentUser.name+' retornou às '+horAgoraHM());
-    renderHorarioPage();
-    toast('Retorno registrado às '+horAgoraHM());
+    horCriarEvento(currentUser.key, 'retorno', {ip:ip}, function(){
+      horAuditar('Retorno ao expediente', currentUser.name+' retornou às '+horAgoraHM());
+      renderHorarioPage();
+      toast('Retorno registrado às '+horAgoraHM());
+    });
   });
 }
 
@@ -5864,16 +6421,17 @@ function horAcaoSaidaFinal(){
   if(!confirm('Confirma o encerramento do seu expediente hoje?')) return;
   var extraAntes = horExtraSemanaMin(currentUser.key, horHojeISO());
   horObterIP(function(ip){
-    horCriarEvento(currentUser.key, 'saida_final', {ip:ip});
-    horAuditar('Encerramento de expediente', currentUser.name+' encerrou às '+horAgoraHM());
-    renderHorarioPage();
-    var extraDepois = horExtraSemanaMin(currentUser.key, horHojeISO());
-    if(extraDepois >= HOR_ALERTA_EXTRA_MIN && extraAntes < HOR_ALERTA_EXTRA_MIN){
-      toast('⚠️ Atenção: você ultrapassou 2h de hora extra nesta semana ('+horFmtMin(extraDepois)+' de excedente).');
-      horAuditar('Alerta de hora extra', currentUser.name+' ultrapassou o limite de 2h de extra semanal — excedente atual: '+horFmtMin(extraDepois));
-    } else {
-      toast('Expediente encerrado às '+horAgoraHM());
-    }
+    horCriarEvento(currentUser.key, 'saida_final', {ip:ip}, function(){
+      horAuditar('Encerramento de expediente', currentUser.name+' encerrou às '+horAgoraHM());
+      renderHorarioPage();
+      var extraDepois = horExtraSemanaMin(currentUser.key, horHojeISO());
+      if(extraDepois >= HOR_ALERTA_EXTRA_MIN && extraAntes < HOR_ALERTA_EXTRA_MIN){
+        toast('⚠️ Atenção: você ultrapassou 2h de hora extra nesta semana ('+horFmtMin(extraDepois)+' de excedente).');
+        horAuditar('Alerta de hora extra', currentUser.name+' ultrapassou o limite de 2h de extra semanal — excedente atual: '+horFmtMin(extraDepois));
+      } else {
+        toast('Expediente encerrado às '+horAgoraHM());
+      }
+    });
   });
 }
 
@@ -5917,15 +6475,49 @@ function horEnviarSolicitacaoCorrecao(){
   var justificativa = (document.getElementById('hc-justificativa').value||'').trim();
   if(!novoHorario){ toast('Informe o novo horário desejado.'); return; }
   if(!justificativa){ toast('A justificativa é obrigatória.'); return; }
-  if(!PONTOS._solicitacoes) PONTOS._solicitacoes = [];
-  PONTOS._solicitacoes.push({
-    id: horUid(), userKey: horCorrecaoCtx.userKey, eventoId: horCorrecaoCtx.eventoId,
-    horaNova: novoHorario, justificativa: justificativa, status:'pendente', solicitadoEm: Date.now()
+  if(!sbClient){ toast('Sem conexão com o banco.'); return; }
+
+  var ev = horEventos(horCorrecaoCtx.userKey).find(function(e){return e.id===horCorrecaoCtx.eventoId;});
+  var colaboradorObj = USERS[horCorrecaoCtx.userKey];
+  if(!ev || !colaboradorObj || !colaboradorObj._supabaseId){ toast('Não foi possível localizar este evento no banco.'); return; }
+
+  sbClient.from('solicitacoes_correcao').insert({
+    evento_id: ev.id, // já é o UUID real, atribuído por horCriarEvento
+    colaborador_id: colaboradorObj._supabaseId,
+    hora_nova: novoHorario + ':00',
+    justificativa: justificativa,
+    status: 'pendente'
+  }).then(function(res){
+    if(res.error){ toast('Erro ao enviar solicitação: '+res.error.message); return; }
+    if(!PONTOS._solicitacoes) PONTOS._solicitacoes = [];
+    PONTOS._solicitacoes.push({
+      id: res.data ? res.data[0].id : horUid(), userKey: horCorrecaoCtx.userKey, eventoId: horCorrecaoCtx.eventoId,
+      horaNova: novoHorario, justificativa: justificativa, status:'pendente', solicitadoEm: Date.now()
+    });
+    horSave();
+    horAuditar('Solicitação de correção', currentUser.name+' solicitou correção de horário — '+justificativa);
+    closeModal('modal-hor-correcao');
+    toast('Solicitação enviada ao ADMIN para análise.');
   });
-  horSave();
-  horAuditar('Solicitação de correção', currentUser.name+' solicitou correção de horário — '+justificativa);
-  closeModal('modal-hor-correcao');
-  toast('Solicitação enviada ao ADMIN para análise.');
+}
+
+// Busca do banco as solicitações pendentes de TODOS os colaboradores (o
+// admin precisa ver de todo mundo, não só do próprio cache local).
+function horCarregarSolicitacoesDoBanco(callback){
+  if(!sbClient){ if(callback) callback(); return; }
+  sbClient.from('solicitacoes_correcao').select('*').eq('status','pendente').then(function(res){
+    if(!res.error && res.data){
+      PONTOS._solicitacoes = res.data.map(function(s){
+        var colaboradorObj = Object.keys(USERS).map(function(k){return {key:k,u:USERS[k]};}).find(function(x){ return x.u._supabaseId===s.colaborador_id; });
+        return {
+          id: s.id, userKey: colaboradorObj?colaboradorObj.key:s.colaborador_id, eventoId: s.evento_id,
+          horaNova: (s.hora_nova||'').slice(0,5), justificativa: s.justificativa,
+          status: s.status, solicitadoEm: s.solicitado_em ? new Date(s.solicitado_em).getTime() : Date.now()
+        };
+      });
+    }
+    if(callback) callback();
+  });
 }
 
 function horSolicitacoesPendentes(){ return (PONTOS._solicitacoes||[]).filter(function(s){return s.status==='pendente';}); }
@@ -5933,49 +6525,66 @@ function horSolicitacoesPendentes(){ return (PONTOS._solicitacoes||[]).filter(fu
 function renderHorSolicitacoes(){
   var wrap = document.getElementById('hor-solicitacoes-list');
   if(!wrap) return;
-  var itens = horSolicitacoesPendentes();
-  if(!itens.length){ wrap.innerHTML = 'Nenhuma solicitação pendente.'; return; }
-  wrap.innerHTML = itens.map(function(s){
-    var ev = horEventos(s.userKey).find(function(e){return e.id===s.eventoId;});
-    if(!ev) return '';
-    var info = HOR_TIPOS[ev.tipo];
-    return '<div class="panel" style="margin-bottom:8px;">'+
-      '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">'+
-      '<div><b>'+(USERS[s.userKey]?USERS[s.userKey].name:s.userKey)+'</b> · '+horDataBR(ev.dataISO)+' · '+info.label+
-      '<div style="color:var(--text2);margin-top:2px;">De <b>'+ev.hora+'</b> para <b>'+s.horaNova+'</b></div>'+
-      '<div style="color:var(--text2);margin-top:2px;font-style:italic;">"'+esc(s.justificativa)+'"</div></div>'+
-      '<div style="display:flex;gap:6px;align-items:flex-start;">'+
-      '<button class="btn btn-sm btn-rosa" onclick="horAprovarSolicitacao(\''+s.id+'\')"><i class="ti ti-check" style="font-size:11px;"></i> Aprovar</button>'+
-      '<button class="btn btn-sm btn-danger" onclick="horNegarSolicitacao(\''+s.id+'\')"><i class="ti ti-x" style="font-size:11px;"></i> Negar</button>'+
-      '</div></div></div>';
-  }).join('');
+  horCarregarSolicitacoesDoBanco(function(){
+    var itens = horSolicitacoesPendentes();
+    if(!itens.length){ wrap.innerHTML = 'Nenhuma solicitação pendente.'; return; }
+    wrap.innerHTML = itens.map(function(s){
+      var ev = horEventos(s.userKey).find(function(e){return e.id===s.eventoId;});
+      var infoLabel = ev ? HOR_TIPOS[ev.tipo].label : 'Marcação';
+      var dataLabel = ev ? horDataBR(ev.dataISO) : '';
+      var horaAtual = ev ? ev.hora : '—';
+      return '<div class="panel" style="margin-bottom:8px;">'+
+        '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">'+
+        '<div><b>'+(USERS[s.userKey]?USERS[s.userKey].name:s.userKey)+'</b> · '+dataLabel+' · '+infoLabel+
+        '<div style="color:var(--text2);margin-top:2px;">De <b>'+horaAtual+'</b> para <b>'+s.horaNova+'</b></div>'+
+        '<div style="color:var(--text2);margin-top:2px;font-style:italic;">"'+esc(s.justificativa)+'"</div></div>'+
+        '<div style="display:flex;gap:6px;align-items:flex-start;">'+
+        '<button class="btn btn-sm btn-rosa" onclick="horAprovarSolicitacao(\''+s.id+'\')"><i class="ti ti-check" style="font-size:11px;"></i> Aprovar</button>'+
+        '<button class="btn btn-sm btn-danger" onclick="horNegarSolicitacao(\''+s.id+'\')"><i class="ti ti-x" style="font-size:11px;"></i> Negar</button>'+
+        '</div></div></div>';
+    }).join('');
+  });
 }
 
 function horAprovarSolicitacao(solId){
   var s = (PONTOS._solicitacoes||[]).find(function(x){return x.id===solId;});
-  if(!s) return;
+  if(!s || !sbClient) return;
   var ev = horEventos(s.userKey).find(function(e){return e.id===s.eventoId;});
-  if(ev){
-    ev.substituido = true;
-    horCriarEvento(s.userKey, ev.tipo, {dataISO:ev.dataISO, hora:s.horaNova, motivo:ev.motivo, obs:ev.obs, editadoPorAdmin:true, justificativaAdmin:s.justificativa});
-  }
-  s.status='aprovada';
-  horSave();
-  horAuditar('Correção aprovada', (USERS[s.userKey]?USERS[s.userKey].name:s.userKey)+' — '+HOR_TIPOS[ev?ev.tipo:'entrada'].label+' alterado para '+s.horaNova);
-  renderHorSolicitacoes(); renderHorAdminTabela(); renderHorAdminMetrics(); renderHorAuditoria();
-  if(currentUser && currentUser.key===s.userKey){ renderHorTimelineHoje(); renderHorMeuHistorico(); horAtualizarBotoesEstado(); }
-  toast('Correção aprovada e aplicada.');
+
+  sbClient.from('solicitacoes_correcao').update({status:'aprovada'}).eq('id', s.id).then(function(res){
+    if(res.error){ toast('Erro ao aprovar: '+res.error.message); return; }
+    if(ev && ev.id){
+      // Marca o evento antigo como substituído, e cria um novo com a hora
+      // corrigida — mesmo padrão já usado no lançamento manual do admin.
+      sbClient.from('eventos_ponto').update({substituido:true}).eq('id', ev.id).then(function(){
+        ev.substituido = true;
+        horCriarEvento(s.userKey, ev.tipo, {dataISO:ev.dataISO, hora:s.horaNova, motivo:ev.motivo, obs:ev.obs, editadoPorAdmin:true, justificativaAdmin:s.justificativa}, function(){
+          s.status='aprovada';
+          horAuditar('Correção aprovada', (USERS[s.userKey]?USERS[s.userKey].name:s.userKey)+' — '+HOR_TIPOS[ev.tipo].label+' alterado para '+s.horaNova);
+          renderHorSolicitacoes(); renderHorAdminTabela(); renderHorAdminMetrics(); renderHorAuditoria();
+          if(currentUser && currentUser.key===s.userKey){ renderHorTimelineHoje(); renderHorMeuHistorico(); horAtualizarBotoesEstado(); }
+          toast('Correção aprovada e aplicada.');
+        });
+      });
+    } else {
+      s.status='aprovada';
+      renderHorSolicitacoes();
+      toast('Correção aprovada (evento original não encontrado no cache local).');
+    }
+  });
 }
 window.horAprovarSolicitacao = horAprovarSolicitacao;
 
 function horNegarSolicitacao(solId){
   var s = (PONTOS._solicitacoes||[]).find(function(x){return x.id===solId;});
-  if(!s) return;
-  s.status='negada';
-  horSave();
-  horAuditar('Correção negada', (USERS[s.userKey]?USERS[s.userKey].name:s.userKey)+' teve solicitação negada');
-  renderHorSolicitacoes(); renderHorAuditoria();
-  toast('Solicitação negada.');
+  if(!s || !sbClient) return;
+  sbClient.from('solicitacoes_correcao').update({status:'negada'}).eq('id', s.id).then(function(res){
+    if(res.error){ toast('Erro ao negar: '+res.error.message); return; }
+    s.status='negada';
+    horAuditar('Correção negada', (USERS[s.userKey]?USERS[s.userKey].name:s.userKey)+' teve solicitação negada');
+    renderHorSolicitacoes(); renderHorAuditoria();
+    toast('Solicitação negada.');
+  });
 }
 window.horNegarSolicitacao = horNegarSolicitacao;
 
@@ -6302,12 +6911,13 @@ function horAdminSalvarLancamento(){
   var hora = document.getElementById('ha-hora').value;
   if(!hora){ toast('Informe o horário.'); return; }
   var motivo = document.getElementById('ha-motivo').value||'';
-  horCriarEvento(horAdminEditCtx.userKey, tipo, {dataISO:data, hora:hora, motivo:motivo, editadoPorAdmin:true, justificativaAdmin:justificativa});
-  horAuditar('Lançamento manual (Admin)', currentUser.name+' lançou '+HOR_TIPOS[tipo].label+' para '+(USERS[horAdminEditCtx.userKey]?USERS[horAdminEditCtx.userKey].name:horAdminEditCtx.userKey)+' às '+hora+' — '+justificativa);
-  closeModal('modal-hor-admin-editar');
-  renderHorAdminTabela(); renderHorAdminMetrics(); renderHorAuditoria();
-  if(currentUser && currentUser.key===horAdminEditCtx.userKey){ renderHorTimelineHoje(); renderHorMeuHistorico(); horAtualizarBotoesEstado(); }
-  toast('Evento lançado/corrigido pelo ADMIN.');
+  horCriarEvento(horAdminEditCtx.userKey, tipo, {dataISO:data, hora:hora, motivo:motivo, editadoPorAdmin:true, justificativaAdmin:justificativa}, function(){
+    horAuditar('Lançamento manual (Admin)', currentUser.name+' lançou '+HOR_TIPOS[tipo].label+' para '+(USERS[horAdminEditCtx.userKey]?USERS[horAdminEditCtx.userKey].name:horAdminEditCtx.userKey)+' às '+hora+' — '+justificativa);
+    closeModal('modal-hor-admin-editar');
+    renderHorAdminTabela(); renderHorAdminMetrics(); renderHorAuditoria();
+    if(currentUser && currentUser.key===horAdminEditCtx.userKey){ renderHorTimelineHoje(); renderHorMeuHistorico(); horAtualizarBotoesEstado(); }
+    toast('Evento lançado/corrigido pelo ADMIN.');
+  });
 }
 
 // ── CADASTRO DE COLABORADORES ──
@@ -6364,26 +6974,29 @@ function horSalvarAjuste(){
   if(!userKey){ toast('Selecione o colaborador.'); return; }
   if(!valor || valor<=0){ toast('Informe um valor válido.'); return; }
   if(!motivo){ toast('Informe o motivo do lançamento.'); return; }
-  horCriarAjuste(userKey, dataISO, tipo, valor, motivo);
-  horAuditar('Ajuste financeiro lançado', (USERS[userKey]?USERS[userKey].name:userKey)+' — '+(tipo==='adicional'?'+':'-')+horFmtValor(valor)+' ('+motivo+')');
-  closeModal('modal-hor-ajuste');
-  renderHorTabelaAjustes();
-  renderHorAdminMetrics();
-  renderHorAuditoria();
-  if(currentUser && currentUser.key===userKey){ renderHorMeuHistorico(); }
-  toast('Lançamento salvo: '+(tipo==='adicional'?'+':'-')+horFmtValor(valor)+' para '+(USERS[userKey]?USERS[userKey].name:userKey));
+  horCriarAjuste(userKey, dataISO, tipo, valor, motivo, function(ajuste){
+    if(!ajuste) return; // erro já mostrado dentro de horCriarAjuste
+    horAuditar('Ajuste financeiro lançado', (USERS[userKey]?USERS[userKey].name:userKey)+' — '+(tipo==='adicional'?'+':'-')+horFmtValor(valor)+' ('+motivo+')');
+    closeModal('modal-hor-ajuste');
+    renderHorTabelaAjustes();
+    renderHorAdminMetrics();
+    renderHorAuditoria();
+    if(currentUser && currentUser.key===userKey){ renderHorMeuHistorico(); }
+    toast('Lançamento salvo: '+(tipo==='adicional'?'+':'-')+horFmtValor(valor)+' para '+(USERS[userKey]?USERS[userKey].name:userKey));
+  });
 }
 
 function horConfirmarRemoverAjuste(id){
   var a = AJUSTES.find(function(x){ return x.id===id; });
   if(!a) return;
   if(!confirm('Remover este lançamento de '+(a.tipo==='adicional'?'adicional':'desconto')+' de '+horFmtValor(a.valor)+'? Esta ação não pode ser desfeita.')) return;
-  horRemoverAjuste(id);
-  renderHorTabelaAjustes();
-  renderHorAdminMetrics();
-  renderHorAuditoria();
-  if(currentUser && currentUser.key===a.userKey){ renderHorMeuHistorico(); }
-  toast('Lançamento removido.');
+  horRemoverAjuste(id, function(){
+    renderHorTabelaAjustes();
+    renderHorAdminMetrics();
+    renderHorAuditoria();
+    if(currentUser && currentUser.key===a.userKey){ renderHorMeuHistorico(); }
+    toast('Lançamento removido.');
+  });
 }
 window.horConfirmarRemoverAjuste = horConfirmarRemoverAjuste;
 
@@ -6912,8 +7525,8 @@ function renderHorAuditoria(){
       <div style="font-weight:600;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;">Acesso ao sistema</div>
       <div class="form-grid-2">
         <div class="form-group">
-          <label class="form-label">Login (sem espaços) *</label>
-          <input class="form-input" id="usr-login" placeholder="ex: karla"/>
+          <label class="form-label">Telefone (com DDD, é o login) *</label>
+          <input class="form-input" id="usr-login" placeholder="Ex: 35999998888" inputmode="numeric"/>
         </div>
         <div class="form-group">
           <label class="form-label">Senha *</label>
