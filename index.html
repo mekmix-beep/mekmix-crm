@@ -857,9 +857,18 @@ input, textarea { cursor: text; }
             </div>
           </div>
           <div class="chat-footer">
-            <div style="font-size:10px;color:var(--text3);padding:0 4px 6px;display:none;" id="ci-anexo-aviso">
-              <i class="ti ti-info-circle" style="font-size:11px;"></i> Envio de imagem, arquivo e áudio chega em breve, assim que o armazenamento (Supabase) estiver ligado.
+            <div id="ci-anexo-preview" style="display:none;padding:6px 4px;background:#FAF6FB;border-radius:8px;margin-bottom:6px;font-size:11px;display:none;align-items:center;gap:8px;">
+              <i class="ti ti-paperclip" style="font-size:13px;color:#772583;"></i>
+              <span id="ci-anexo-preview-nome" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+              <button id="ci-anexo-cancelar" style="background:none;border:none;color:#791F1F;cursor:pointer;font-size:14px;">×</button>
             </div>
+            <div id="ci-gravando-audio" style="display:none;padding:6px 4px;background:#FCEBEB;border-radius:8px;margin-bottom:6px;font-size:11px;align-items:center;gap:8px;">
+              <i class="ti ti-microphone" style="font-size:13px;color:#791F1F;"></i>
+              <span>Gravando áudio... <span id="ci-audio-timer">0:00</span></span>
+              <button id="ci-audio-cancelar" style="background:none;border:none;color:#791F1F;cursor:pointer;font-size:11px;margin-left:auto;">Cancelar</button>
+              <button id="ci-audio-parar" class="btn btn-sm btn-rosa" style="padding:2px 8px;">Enviar</button>
+            </div>
+            <input type="file" id="ci-file-input" style="display:none;" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"/>
             <div class="input-row">
               <button class="icon-btn hide-mob" id="ci-btn-attach"><i class="ti ti-paperclip" style="font-size:15px;"></i></button>
               <input type="text" class="msg-input" id="ci-msg-input" placeholder="Mensagem..." disabled/>
@@ -6149,6 +6158,11 @@ function ciGerarUUID(){
   });
 }
 
+// Guarda o arquivo escolhido (aguardando confirmação de envio) e o estado
+// da gravação de áudio em andamento — em memória, só durante a sessão.
+var ciAnexoPendente = null; // {file, tipo:'imagem'|'arquivo'}
+var ciGravacao = null; // {mediaRecorder, chunks, timerInterval, segundos}
+
 function renderChatInternoPage(){
   if(!currentUser) return;
   // Busca TODOS os colaboradores cadastrados no banco antes de montar a
@@ -6165,16 +6179,58 @@ function renderChatInternoPage(){
     buscaEl.addEventListener('input', function(){ renderCiConvList(this.value); });
     buscaEl._bound = true;
   }
+
+  // Anexo de arquivo/imagem: abre o seletor nativo do sistema.
   var attachBtn = document.getElementById('ci-btn-attach');
+  var fileInput = document.getElementById('ci-file-input');
+  if(attachBtn && !attachBtn._bound){
+    attachBtn.addEventListener('click', function(){
+      if(!ciConversaAtual){ toast('Escolha uma conversa primeiro.'); return; }
+      fileInput.click();
+    });
+    attachBtn._bound = true;
+  }
+  if(fileInput && !fileInput._bound){
+    fileInput.addEventListener('change', function(){
+      var file = this.files[0];
+      if(!file) return;
+      if(file.size > 10*1024*1024){ toast('Arquivo muito grande — limite de 10MB.'); this.value=''; return; }
+      ciAnexoPendente = { file: file, tipo: file.type.indexOf('image/')===0 ? 'imagem' : 'arquivo' };
+      var preview = document.getElementById('ci-anexo-preview');
+      document.getElementById('ci-anexo-preview-nome').textContent = file.name;
+      preview.style.display = 'flex';
+      this.value = ''; // permite escolher o mesmo arquivo de novo depois, se cancelar
+    });
+    fileInput._bound = true;
+  }
+  var btnCancelarAnexo = document.getElementById('ci-anexo-cancelar');
+  if(btnCancelarAnexo && !btnCancelarAnexo._bound){
+    btnCancelarAnexo.addEventListener('click', function(){
+      ciAnexoPendente = null;
+      document.getElementById('ci-anexo-preview').style.display = 'none';
+    });
+    btnCancelarAnexo._bound = true;
+  }
+
+  // Áudio: grava direto no navegador via MediaRecorder, sem depender de
+  // nenhum serviço externo além do próprio Supabase Storage para guardar
+  // o arquivo gerado.
   var micBtn = document.getElementById('ci-btn-mic');
-  [attachBtn, micBtn].forEach(function(btn){
-    if(btn && !btn._bound){
-      btn.addEventListener('click', function(){
-        toast('Envio de imagem/arquivo/áudio chega em breve.');
-      });
-      btn._bound = true;
-    }
-  });
+  if(micBtn && !micBtn._bound){
+    micBtn.addEventListener('click', ciIniciarGravacaoAudio);
+    micBtn._bound = true;
+  }
+  var btnAudioParar = document.getElementById('ci-audio-parar');
+  if(btnAudioParar && !btnAudioParar._bound){
+    btnAudioParar.addEventListener('click', function(){ ciFinalizarGravacaoAudio(true); });
+    btnAudioParar._bound = true;
+  }
+  var btnAudioCancelar = document.getElementById('ci-audio-cancelar');
+  if(btnAudioCancelar && !btnAudioCancelar._bound){
+    btnAudioCancelar.addEventListener('click', function(){ ciFinalizarGravacaoAudio(false); });
+    btnAudioCancelar._bound = true;
+  }
+
   var sendBtn = document.getElementById('ci-btn-send');
   if(sendBtn && !sendBtn._bound){
     sendBtn.addEventListener('click', ciEnviarMensagem);
@@ -6185,6 +6241,52 @@ function renderChatInternoPage(){
     inputEl.addEventListener('keydown', function(e){ if(e.key==='Enter'){ ciEnviarMensagem(); } });
     inputEl._bound = true;
   }
+}
+
+function ciIniciarGravacaoAudio(){
+  if(!ciConversaAtual){ toast('Escolha uma conversa primeiro.'); return; }
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    toast('Seu navegador não permite gravar áudio aqui.');
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+    var chunks = [];
+    var mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = function(e){ if(e.data.size>0) chunks.push(e.data); };
+    var segundos = 0;
+    var timerInterval = setInterval(function(){
+      segundos++;
+      var min = Math.floor(segundos/60), seg = segundos%60;
+      document.getElementById('ci-audio-timer').textContent = min+':'+(seg<10?'0':'')+seg;
+    }, 1000);
+    ciGravacao = { mediaRecorder: mediaRecorder, chunks: chunks, timerInterval: timerInterval, segundos: function(){return segundos;}, stream: stream };
+    mediaRecorder.start();
+    document.getElementById('ci-gravando-audio').style.display = 'flex';
+    document.getElementById('ci-msg-input').disabled = true;
+  }).catch(function(){
+    toast('Não foi possível acessar o microfone. Verifique a permissão do navegador.');
+  });
+}
+
+function ciFinalizarGravacaoAudio(enviar){
+  if(!ciGravacao) return;
+  clearInterval(ciGravacao.timerInterval);
+  var segundosGravados = ciGravacao.segundos();
+  var mediaRecorder = ciGravacao.mediaRecorder;
+  var chunks = ciGravacao.chunks;
+  var stream = ciGravacao.stream;
+
+  mediaRecorder.onstop = function(){
+    stream.getTracks().forEach(function(t){ t.stop(); });
+    document.getElementById('ci-gravando-audio').style.display = 'none';
+    document.getElementById('ci-msg-input').disabled = false;
+    ciGravacao = null;
+    if(enviar && chunks.length && segundosGravados>0){
+      var blob = new Blob(chunks, {type:'audio/webm'});
+      ciEnviarAudio(blob, segundosGravados);
+    }
+  };
+  mediaRecorder.stop();
 }
 
 // Lista todos os colaboradores cadastrados, exceto o próprio usuário logado —
@@ -6250,7 +6352,10 @@ function ciCarregarMensagens(conversaId, callback){
         return {
           autor: autorObj ? autorObj.key : m.autor_id,
           texto: m.texto||'',
-          hora: m.criado_em ? new Date(m.criado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : ''
+          hora: m.criado_em ? new Date(m.criado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : '',
+          tipo: m.tipo||'texto',
+          storagePath: m.storage_path||null,
+          duracaoSeg: m.duracao_audio_seg||null
         };
       });
     }
@@ -6273,12 +6378,24 @@ function ciAssinarRealtime(conversaId, loginColega){
       ciGetConversa(loginColega).msgs.push({
         autor: autorObj ? autorObj.key : m.autor_id,
         texto: m.texto||'',
-        hora: new Date(m.criado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})
+        hora: new Date(m.criado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),
+        tipo: m.tipo||'texto',
+        storagePath: m.storage_path||null,
+        duracaoSeg: m.duracao_audio_seg||null
       });
       renderCiMensagens();
       renderCiConvList(document.getElementById('ci-conv-search').value);
     })
     .subscribe();
+}
+
+// Gera uma URL assinada temporária (1h) para exibir o arquivo — os buckets
+// são privados, então não dá para linkar direto sem essa assinatura.
+function ciUrlAssinada(bucket, path, callback){
+  if(!sbClient){ callback(null); return; }
+  sbClient.storage.from(bucket).createSignedUrl(path, 3600).then(function(res){
+    callback(res.error ? null : res.data.signedUrl);
+  });
 }
 
 function renderCiMensagens(){
@@ -6289,19 +6406,68 @@ function renderCiMensagens(){
     body.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:12px;font-style:italic;padding:30px 20px;">Nenhuma mensagem ainda. Diga oi 👋</div>';
     return;
   }
-  body.innerHTML = conv.msgs.map(function(m){
+  body.innerHTML = conv.msgs.map(function(m, idx){
     var out = m.autor===currentUser.key;
+    var conteudo;
+    if(m.tipo==='imagem'){
+      var srcImg = m.urlLocal || ''; // preenchido depois via URL assinada, se vier do banco
+      conteudo = '<div class="msg-anexo-imagem" data-msg-idx="'+idx+'" data-storage-path="'+esc(m.storagePath||'')+'">'+
+        (srcImg ? '<img src="'+srcImg+'" style="max-width:220px;border-radius:8px;display:block;'+(m.enviando?'opacity:.6;':'')+'"/>' : '<div style="width:220px;height:120px;background:#eee;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#999;font-size:11px;">Carregando imagem...</div>')+
+        (m.enviando ? '<div style="font-size:10px;color:var(--text3);margin-top:3px;">Enviando...</div>' : '')+
+      '</div>';
+    } else if(m.tipo==='audio'){
+      var srcAudio = m.urlLocal || '';
+      conteudo = '<div class="msg-anexo-audio" data-msg-idx="'+idx+'" data-storage-path="'+esc(m.storagePath||'')+'">'+
+        (srcAudio ? '<audio controls src="'+srcAudio+'" style="max-width:220px;height:36px;"></audio>' : '<div style="font-size:11px;color:var(--text3);">🎤 Carregando áudio...</div>')+
+        (m.enviando ? '<div style="font-size:10px;color:var(--text3);margin-top:3px;">Enviando...</div>' : '')+
+      '</div>';
+    } else if(m.tipo==='arquivo'){
+      var srcArq = m.urlLocal || '';
+      conteudo = '<div class="msg-anexo-arquivo" data-msg-idx="'+idx+'" data-storage-path="'+esc(m.storagePath||'')+'" style="display:flex;align-items:center;gap:8px;">'+
+        '<i class="ti ti-file-text" style="font-size:20px;"></i>'+
+        (srcArq ? '<a href="'+srcArq+'" target="_blank" style="color:inherit;text-decoration:underline;">'+esc(m.texto)+'</a>' : '<span>'+esc(m.texto)+'</span>')+
+        (m.enviando ? '<span style="font-size:10px;color:var(--text3);">(enviando...)</span>' : '')+
+      '</div>';
+    } else {
+      conteudo = esc(m.texto).replace(/\n/g,'<br>');
+    }
     return '<div class="msg '+(out?'msg-out':'msg-in')+'">'+
       (out?'':'<div class="msg-author">'+esc(USERS[m.autor]?USERS[m.autor].name:m.autor)+'</div>')+
-      '<div class="msg-bubble">'+esc(m.texto).replace(/\n/g,'<br>')+'</div>'+
+      '<div class="msg-bubble">'+conteudo+'</div>'+
       '<div class="msg-meta">'+m.hora+'</div>'+
     '</div>';
   }).join('');
   body.scrollTop = body.scrollHeight;
+
+  // Para mensagens vindas do banco (sem urlLocal ainda, porque só existem
+  // localmente quando acabaram de ser enviadas nesta mesma sessão), busca
+  // a URL assinada e atualiza o elemento na tela.
+  conv.msgs.forEach(function(m, idx){
+    if(m.urlLocal || !m.storagePath) return;
+    var bucket = m.tipo==='audio' ? 'chat-audios' : 'chat-anexos';
+    ciUrlAssinada(bucket, m.storagePath, function(url){
+      if(!url) return;
+      m.urlLocal = url; // cache para não re-assinar toda hora
+      var el = body.querySelector('[data-msg-idx="'+idx+'"]');
+      if(!el) return;
+      if(m.tipo==='imagem'){ el.innerHTML = '<img src="'+url+'" style="max-width:220px;border-radius:8px;display:block;"/>'; }
+      else if(m.tipo==='audio'){ el.innerHTML = '<audio controls src="'+url+'" style="max-width:220px;height:36px;"></audio>'; }
+      else if(m.tipo==='arquivo'){ el.innerHTML = '<i class="ti ti-file-text" style="font-size:20px;"></i><a href="'+url+'" target="_blank" style="color:inherit;text-decoration:underline;">'+esc(m.texto)+'</a>'; }
+    });
+  });
 }
 
 function ciEnviarMensagem(){
   if(!ciConversaAtual) return;
+  // Se há um arquivo/imagem esperando confirmação, envia ele em vez do
+  // texto (o texto digitado junto, se houver, vira uma mensagem separada
+  // logo em seguida — mantém o histórico simples de entender).
+  if(ciAnexoPendente){
+    ciEnviarAnexo(ciAnexoPendente.file, ciAnexoPendente.tipo);
+    ciAnexoPendente = null;
+    document.getElementById('ci-anexo-preview').style.display = 'none';
+    return;
+  }
   var input = document.getElementById('ci-msg-input');
   var texto = (input.value||'').trim();
   if(!texto) return;
@@ -6313,7 +6479,7 @@ function ciEnviarMensagem(){
   // Adiciona localmente na hora (resposta imediata na tela), e persiste
   // no banco em seguida — se der erro, avisa mas não desfaz visualmente,
   // já que o usuário já viu a mensagem "enviada".
-  conv.msgs.push({autor: currentUser.key, texto: texto, hora: horaAgora});
+  conv.msgs.push({autor: currentUser.key, texto: texto, hora: horaAgora, tipo:'texto'});
   renderCiMensagens();
   renderCiConvList(document.getElementById('ci-conv-search').value);
 
@@ -6326,6 +6492,85 @@ function ciEnviarMensagem(){
     if(res.error){ toast('⚠️ Mensagem pode não ter sido salva: '+res.error.message); }
   });
 }
+
+// Envia imagem ou arquivo: sobe pro bucket certo do Supabase Storage
+// (chat-anexos), depois registra a mensagem apontando pro caminho salvo.
+// O caminho segue o padrão "conversaId/timestamp_nomearquivo", para nunca
+// colidir entre conversas diferentes ou uploads simultâneos.
+function ciEnviarAnexo(file, tipo){
+  var conv = ciGetConversa(ciConversaAtual);
+  if(!conv.conversaId || !sbClient){ toast('Conversa ainda não está pronta, aguarde.'); return; }
+  var horaAgora = (typeof horAgoraHM==='function') ? horAgoraHM() : '';
+  var nomeSeguro = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+  var caminho = conv.conversaId + '/' + Date.now() + '_' + nomeSeguro;
+
+  // Mostra na tela como "enviando", com o preview local do arquivo (para
+  // imagem, já usa a própria imagem escolhida; para outros arquivos, só
+  // o nome), enquanto o upload roda em segundo plano.
+  var urlLocal = tipo==='imagem' ? URL.createObjectURL(file) : null;
+  var msgTemp = {autor: currentUser.key, texto: file.name, hora: horaAgora, tipo: tipo, urlLocal: urlLocal, enviando: true};
+  conv.msgs.push(msgTemp);
+  renderCiMensagens();
+
+  sbClient.storage.from('chat-anexos').upload(caminho, file).then(function(resUpload){
+    if(resUpload.error){
+      toast('Erro ao enviar arquivo: '+resUpload.error.message);
+      msgTemp.enviando = false; msgTemp.erro = true;
+      renderCiMensagens();
+      return;
+    }
+    sbClient.from('mensagens').insert({
+      conversa_id: conv.conversaId,
+      autor_id: currentUser._supabaseId,
+      tipo: tipo,
+      texto: file.name,
+      storage_path: caminho
+    }).then(function(res){
+      msgTemp.enviando = false;
+      msgTemp.storagePath = caminho;
+      if(res.error){ toast('⚠️ Arquivo enviado, mas a mensagem pode não ter sido salva: '+res.error.message); }
+      renderCiMensagens();
+      renderCiConvList(document.getElementById('ci-conv-search').value);
+    });
+  });
+}
+
+// Envia áudio gravado: mesmo padrão do anexo, só que no bucket
+// "chat-audios" e guardando a duração em segundos junto.
+function ciEnviarAudio(blob, segundos){
+  var conv = ciGetConversa(ciConversaAtual);
+  if(!conv.conversaId || !sbClient){ toast('Conversa ainda não está pronta, aguarde.'); return; }
+  var horaAgora = (typeof horAgoraHM==='function') ? horAgoraHM() : '';
+  var caminho = conv.conversaId + '/' + Date.now() + '_audio.webm';
+
+  var urlLocal = URL.createObjectURL(blob);
+  var msgTemp = {autor: currentUser.key, texto: '', hora: horaAgora, tipo:'audio', urlLocal: urlLocal, duracaoSeg: segundos, enviando: true};
+  conv.msgs.push(msgTemp);
+  renderCiMensagens();
+
+  sbClient.storage.from('chat-audios').upload(caminho, blob, {contentType:'audio/webm'}).then(function(resUpload){
+    if(resUpload.error){
+      toast('Erro ao enviar áudio: '+resUpload.error.message);
+      msgTemp.enviando = false; msgTemp.erro = true;
+      renderCiMensagens();
+      return;
+    }
+    sbClient.from('mensagens').insert({
+      conversa_id: conv.conversaId,
+      autor_id: currentUser._supabaseId,
+      tipo: 'audio',
+      storage_path: caminho,
+      duracao_audio_seg: segundos
+    }).then(function(res){
+      msgTemp.enviando = false;
+      msgTemp.storagePath = caminho;
+      if(res.error){ toast('⚠️ Áudio enviado, mas a mensagem pode não ter sido salva: '+res.error.message); }
+      renderCiMensagens();
+      renderCiConvList(document.getElementById('ci-conv-search').value);
+    });
+  });
+}
+
 
 // Busca do banco os eventos de ponto do colaborador logado (últimos 90
 // dias, o suficiente para os relatórios de Horário) e popula PONTOS —
