@@ -631,6 +631,8 @@ input, textarea { cursor: text; }
       <button class="sb-btn" data-page="etiquetas"><i class="ti ti-tag"></i><span class="sb-btn-lbl">Etiquetas</span></button>
       <button class="sb-btn" data-page="acoes"><i class="ti ti-trophy"></i><span class="sb-btn-lbl">Ações de vendas</span></button>
       <button class="sb-btn" data-page="estoque"><i class="ti ti-package"></i><span class="sb-btn-lbl">Estoque</span><span class="sb-badge" id="sb-estoque-badge" style="display:none;">0</span></button>
+      <button class="sb-btn" data-page="caixasprontas"><i class="ti ti-box-seam"></i><span class="sb-btn-lbl">Caixas Prontas</span></button>
+      <button class="sb-btn" data-page="caixasprontas"><i class="ti ti-box"></i><span class="sb-btn-lbl">Caixas Prontas</span></button>
       <button class="sb-btn admin-only desktop-only" data-page="relatorio"><i class="ti ti-chart-bar"></i><span class="sb-btn-lbl">Relatórios</span></button>
       <button class="sb-btn admin-only desktop-only" data-page="broadcast"><i class="ti ti-send"></i><span class="sb-btn-lbl">Broadcast</span></button>
       <button class="sb-btn" data-page="templates"><i class="ti ti-template"></i><span class="sb-btn-lbl">Templates</span></button>
@@ -1176,8 +1178,10 @@ input, textarea { cursor: text; }
               <div class="stock-field"><label>Tamanho</label><select id="ent-tam"><option>330ml</option><option>400ml</option><option>500ml</option><option>770ml</option></select></div>
               <div class="stock-field"><label>Caixas fechadas</label><input type="number" id="ent-caixas" min="0" placeholder="0"/></div>
               <div class="stock-field"><label>Unidades avulsas</label><input type="number" id="ent-unid" min="0" placeholder="0"/></div>
+              <div class="stock-field"><label>Custo por caixa (R$)</label><input type="number" id="ent-custo" min="0" step="0.01" placeholder="Ex: 180,00"/></div>
               <div class="stock-field"><label>Nota fiscal</label><input type="text" id="ent-nf" placeholder="NF 12345"/></div>
             </div>
+            <div style="font-size:10px;color:var(--text3);margin-top:4px;"><i class="ti ti-info-circle" style="font-size:11px;"></i> O custo por caixa é usado para calcular a margem de lucro (não inclui frete — frete entra separado no Financeiro).</div>
             <button class="btn btn-rosa" id="btn-confirm-entrada" style="width:100%;justify-content:center;margin-top:12px;"><i class="ti ti-check" style="font-size:12px;"></i> Confirmar entrada</button>
           </div>
           <!-- ABRIR CAIXA -->
@@ -1223,6 +1227,40 @@ input, textarea { cursor: text; }
         <div class="stock-card">
           <div class="panel-head"><span class="panel-title">Histórico de movimentações</span></div>
           <div class="stock-log" id="stock-log"></div>
+        </div>
+
+        <!-- INVENTÁRIO DE MATERIAIS DE CONSUMO — separado do estoque de copos -->
+        <div class="stock-card" style="margin-top:20px;border-top:3px solid #772583;">
+          <div class="stock-header">
+            <span class="stock-title">📋 Inventário — Materiais de consumo</span>
+            <button class="btn btn-rosa btn-sm" id="btn-inv-novo-item" style="display:none;"><i class="ti ti-plus" style="font-size:12px;"></i> Novo item</button>
+          </div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">Tintas, químicos, materiais de tela, limpeza, escritório e embalagem — controle por unidade (ex: 1 lata de tinta, 1 pacote de durex = 10 unidades no estoque). Não há controle por litro/grama parcial.</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
+            <div class="search-wrap" style="max-width:280px;"><i class="ti ti-search" style="font-size:13px;color:var(--text3);"></i><input type="text" id="inv-busca" placeholder="Buscar por nome ou código..."/></div>
+            <select class="sel" id="inv-filtro-categoria" style="width:180px;"><option value="">Todas categorias</option></select>
+          </div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Código</th><th>Item</th><th>Categoria</th><th>Qtd. atual</th><th>Custo unit.</th><th>Ação</th></tr></thead><tbody id="inv-itens-tbody">
+            <tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px;">Carregando...</td></tr>
+          </tbody></table></div>
+        </div>
+      </div>
+
+      <!-- CAIXAS PRONTAS — estoque de produto já impresso, pronto para venda imediata -->
+      <div id="page-caixasprontas" class="page">
+        <div class="page-title">Caixas Prontas
+          <button class="btn btn-rosa btn-sm" id="btn-cp-nova" style="display:none;"><i class="ti ti-plus" style="font-size:12px;"></i> Nova combinação</button>
+        </div>
+        <div class="panel" style="margin-bottom:12px;font-size:11px;color:var(--text2);">
+          <i class="ti ti-info-circle" style="font-size:12px;"></i> Caixas já impressas e prontas para venda imediata — quando vendidas, o pedido já nasce "Pronto para despacho", sem passar pela fila de produção.
+        </div>
+        <div class="panel">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
+            <div class="search-wrap" style="max-width:280px;"><i class="ti ti-search" style="font-size:13px;color:var(--text3);"></i><input type="text" id="cp-busca" placeholder="Buscar por arte, cor, marca..."/></div>
+          </div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Tamanho</th><th>Arte (logo)</th><th>Cor da logo</th><th>Marca do copo</th><th>Qtd. caixas</th><th>Custo/caixa</th><th>Ação</th></tr></thead><tbody id="cp-tbody">
+            <tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px;">Carregando...</td></tr>
+          </tbody></table></div>
         </div>
       </div>
 
@@ -1855,6 +1893,53 @@ input, textarea { cursor: text; }
     </div>
   </div>
 </div>
+<!-- MODAL: NOVO ITEM DE INVENTÁRIO -->
+<div class="modal-overlay" id="modal-inv-item"><div class="modal"><div class="modal-head"><span class="modal-title" id="inv-item-modal-title">Novo item de inventário</span><button class="modal-close" data-close="modal-inv-item">×</button></div><div class="modal-body">
+  <div class="form-group"><label class="form-label">Código *</label><input class="form-input" id="inv-it-codigo" placeholder="Ex: TIN-ROXA-001"/></div>
+  <div class="form-group"><label class="form-label">Nome *</label><input class="form-input" id="inv-it-nome" placeholder="Ex: Tinta Roxa"/></div>
+  <div class="form-group"><label class="form-label">Categoria *</label><select class="form-input" id="inv-it-categoria"></select></div>
+  <div class="form-grid-2">
+    <div class="form-group"><label class="form-label">Como é contado</label><select class="form-input" id="inv-it-unidade"><option value="un">Unidade (ex: 1 lata, 1 pacote)</option></select></div>
+    <div class="form-group"><label class="form-label">Quantidade mínima (alerta)</label><input class="form-input" type="number" id="inv-it-minima" min="0" step="0.01" placeholder="0"/></div>
+  </div>
+  <div class="form-group"><label class="form-label">Observação</label><input class="form-input" id="inv-it-obs" placeholder="Opcional"/></div>
+</div><div class="modal-footer"><button class="btn" data-close="modal-inv-item">Cancelar</button><button class="btn btn-rosa" id="btn-inv-item-salvar">Salvar item</button></div></div></div>
+
+<!-- MODAL: LANÇAR MOVIMENTO DE INVENTÁRIO -->
+<div class="modal-overlay" id="modal-inv-mov"><div class="modal"><div class="modal-head"><span class="modal-title">Lançar movimento</span><button class="modal-close" data-close="modal-inv-mov">×</button></div><div class="modal-body">
+  <div class="form-group"><label class="form-label">Item</label><div style="font-size:13px;font-weight:500;" id="inv-mov-item-nome">—</div></div>
+  <div class="form-group"><label class="form-label">Tipo de movimento *</label><select class="form-input" id="inv-mov-tipo"><option value="entrada">Entrada (compra)</option><option value="saida">Saída (consumo/uso)</option><option value="ajuste">Ajuste (correção de contagem)</option></select></div>
+  <div class="form-grid-2">
+    <div class="form-group"><label class="form-label">Quantidade *</label><input class="form-input" type="number" id="inv-mov-qtd" min="0" step="0.01" placeholder="0"/></div>
+    <div class="form-group" id="inv-mov-custo-wrap"><label class="form-label">Custo unitário (R$)</label><input class="form-input" type="number" id="inv-mov-custo" min="0" step="0.01" placeholder="Só para entrada"/></div>
+  </div>
+  <div class="form-group" id="inv-mov-nf-wrap"><label class="form-label">Nota fiscal</label><input class="form-input" id="inv-mov-nf" placeholder="Opcional"/></div>
+  <div class="form-group"><label class="form-label">Motivo *</label><input class="form-input" id="inv-mov-motivo" placeholder="Ex: compra fornecedor, usado na produção do pedido X..."/></div>
+</div><div class="modal-footer"><button class="btn" data-close="modal-inv-mov">Cancelar</button><button class="btn btn-rosa" id="btn-inv-mov-salvar">Confirmar movimento</button></div></div></div>
+
+<!-- MODAL: NOVA COMBINAÇÃO DE CAIXA PRONTA -->
+<div class="modal-overlay" id="modal-cp-nova"><div class="modal"><div class="modal-head"><span class="modal-title">Nova combinação de caixa pronta</span><button class="modal-close" data-close="modal-cp-nova">×</button></div><div class="modal-body">
+  <div class="form-grid-2">
+    <div class="form-group"><label class="form-label">Tamanho (ml) *</label><select class="form-input" id="cp-tamanho"><option value="330">330ml</option><option value="400">400ml</option><option value="500">500ml</option><option value="770">770ml</option></select></div>
+    <div class="form-group"><label class="form-label">Quantidade inicial (caixas)</label><input class="form-input" type="number" id="cp-qtd-inicial" min="0" placeholder="0"/></div>
+  </div>
+  <div class="form-group"><label class="form-label">Arte (logo) *</label><input class="form-input" id="cp-arte" placeholder="Ex: Logo Empresa X"/></div>
+  <div class="form-grid-2">
+    <div class="form-group"><label class="form-label">Cor da logo *</label><input class="form-input" id="cp-cor" placeholder="Ex: Azul"/></div>
+    <div class="form-group"><label class="form-label">Marca do copo</label><input class="form-input" id="cp-marca" placeholder="Opcional"/></div>
+  </div>
+  <div class="form-group"><label class="form-label">Custo por caixa (R$)</label><input class="form-input" type="number" id="cp-custo" min="0" step="0.01" placeholder="Opcional"/></div>
+  <div class="form-group"><label class="form-label">Observação</label><input class="form-input" id="cp-obs" placeholder="Opcional"/></div>
+</div><div class="modal-footer"><button class="btn" data-close="modal-cp-nova">Cancelar</button><button class="btn btn-rosa" id="btn-cp-salvar">Salvar combinação</button></div></div></div>
+
+<!-- MODAL: MOVIMENTO DE CAIXA PRONTA -->
+<div class="modal-overlay" id="modal-cp-mov"><div class="modal"><div class="modal-head"><span class="modal-title">Lançar movimento — Caixas Prontas</span><button class="modal-close" data-close="modal-cp-mov">×</button></div><div class="modal-body">
+  <div class="form-group"><label class="form-label">Combinação</label><div style="font-size:13px;font-weight:500;" id="cp-mov-nome">—</div></div>
+  <div class="form-group"><label class="form-label">Tipo *</label><select class="form-input" id="cp-mov-tipo"><option value="entrada">Entrada (produzimos mais)</option><option value="saida">Saída (uso avulso, não venda)</option><option value="ajuste">Ajuste (correção de contagem)</option></select></div>
+  <div class="form-group"><label class="form-label">Quantidade de caixas *</label><input class="form-input" type="number" id="cp-mov-qtd" min="0" placeholder="0"/></div>
+  <div class="form-group"><label class="form-label">Motivo *</label><input class="form-input" id="cp-mov-motivo" placeholder="Ex: produção extra, amostra, correção..."/></div>
+</div><div class="modal-footer"><button class="btn" data-close="modal-cp-mov">Cancelar</button><button class="btn btn-rosa" id="btn-cp-mov-salvar">Confirmar</button></div></div></div>
+
 <!-- MODAL: CONFIG CNPJ -->
 <div class="modal-overlay" id="modal-config-cnpj">
   <div class="modal" style="max-width:400px;">
@@ -1969,23 +2054,13 @@ var TEMPLATES=[
   {key:'/followup',text:'Oi {nome}! 👋 Já faz um tempinho desde o seu pedido. Tudo certo com os copos? Estamos com novidades e condições especiais este mês. Posso te ajudar com um novo pedido? 😊'}
 ];
 
-var CONVDATA={
-  AC:{init:'AC',bg:'#FBEAF0',color:'#72243E',name:'Ana Clara',sub:'WhatsApp · (19) 99123-4567 · online agora',cidade:'Campinas/SP',wapp:'(19) 99123-4567',canalTxt:'WhatsApp',canalHtml:'<i class="ti ti-brand-whatsapp" style="font-size:12px;color:#25D366;"></i> WhatsApp',vendedor:'João',status:'Novo lead',pill:'p-novo',nota:'Evento de formatura em agosto. Arte ainda não tem.',hist:[{prod:'500ml · 2 caixas',data:'Jun/2025',vend:'João',valor:'R$1.078,00',status:'Em andamento'}],msgs:[{t:'in',s:'Lara (IA)',m:'Olá! 👋 Sou a Lara, do time comercial da MekMix. Como posso te ajudar hoje?',h:'14:28'},{t:'out',w:'Ana Clara',m:'Oi! Quero copos personalizados de 500ml para meu evento',h:'14:29'},{t:'in',s:'Lara (IA)',m:'Que ótimo! Qual seu nome? 😊',h:'14:29'},{t:'out',w:'Ana Clara',m:'Ana Clara!',h:'14:30'},{t:'in',s:'Lara (IA)',m:'Ana, quantas caixas você precisa?',h:'14:30'},{t:'out',w:'Ana Clara',m:'2 caixas de 500ml!',h:'14:31'},{t:'in',s:'Lara (IA)',m:'Perfeito! 2.000 copos. Tem arte pronta? 📦',h:'14:31'},{t:'note',w:'João',m:'Evento formatura agosto. Arte não tem — nosso time cria. Orçamento: R$1.078,00.'},{t:'out',w:'João (vendedor)',m:'Oi Ana! Aqui é o João. Vou te enviar o orçamento agora 😊',h:'14:33'},{t:'audio',h:'14:34'},{t:'out',w:'João',m:'Orçamento:\n📦 2cx 500ml transparente\n🎨 Tinta preta · Frente e verso\n🖼️ Arte inclusa\n💰 R$1.078,00 (entrada R$323,40)\n📅 12 dias úteis\n\nVamos fechar? 😊',h:'14:35'}]},
-  RS:{init:'RS',bg:'#EEEDFE',color:'#3C3489',name:'Rafael Silva',sub:'WhatsApp · (31) 98765-4321',cidade:'BH/MG',wapp:'(31) 98765-4321',canalTxt:'WhatsApp',canalHtml:'<i class="ti ti-brand-whatsapp" style="font-size:12px;color:#25D366;"></i> WhatsApp',vendedor:'Maria',status:'Em produção',pill:'p-prod',nota:'3cx 770ml em produção. Prazo 30/06.',hist:[{prod:'770ml · 3 caixas',data:'Jun/2025',vend:'Maria',valor:'R$1.347,00',status:'Em produção'},{prod:'330ml · 1 caixa',data:'Jan/2025',vend:'Maria',valor:'R$409,00',status:'Entregue'}],msgs:[{t:'in',s:'Lara (IA)',m:'Olá Rafael! Como posso te ajudar?',h:'13:05'},{t:'out',w:'Rafael Silva',m:'Quando meu pedido fica pronto?',h:'13:07'},{t:'in',s:'Maria (vendedor)',m:'Oi Rafael! Pedido de 770ml em produção. Prazo estimado: 30/06. 😊',h:'13:10'}]},
-  PL:{init:'PL',bg:'#FAEEDA',color:'#633806',name:'Pedro Lima',sub:'Instagram · @pedrolima_sp',cidade:'SP/SP',wapp:'(11) 97654-3210',canalTxt:'Instagram',canalHtml:'<i class="ti ti-brand-instagram" style="font-size:12px;color:#E1306C;"></i> Instagram',vendedor:'—',status:'Novo lead',pill:'p-novo',nota:'',hist:[],msgs:[{t:'in',s:'Lara (IA)',m:'Olá! 👋 Sou a Lara da MekMix. Como posso te ajudar?',h:'11:40'},{t:'out',w:'Pedro Lima',m:'Vi no instagram de vocês, quero saber mais sobre os copos',h:'11:45'}]},
-  MF:{init:'MF',bg:'#E6F1FB',color:'#0C447C',name:'Marina Fonseca',sub:'Facebook · Marina Fonseca',cidade:'RJ/RJ',wapp:'(21) 96543-2100',canalTxt:'Facebook',canalHtml:'<i class="ti ti-brand-facebook" style="font-size:12px;color:#1877F2;"></i> Facebook',vendedor:'—',status:'Novo lead',pill:'p-novo',nota:'',hist:[],msgs:[{t:'in',s:'Lara (IA)',m:'Olá Marina! Sou a Lara da MekMix. Como posso te ajudar? 😊',h:'10:18'},{t:'out',w:'Marina Fonseca',m:'Oi, vi o anúncio! Quero saber os preços.',h:'10:20'}]},
-  TC:{init:'TC',bg:'#FCEBEB',color:'#791F1F',name:'Thiago Costa',sub:'WhatsApp · (35) 99888-7766',cidade:'Pouso Alegre/MG',wapp:'(35) 99888-7766',canalTxt:'WhatsApp',canalHtml:'<i class="ti ti-brand-whatsapp" style="font-size:12px;color:#25D366;"></i> WhatsApp',vendedor:'João',status:'Orçamento enviado',pill:'p-orc',nota:'Mandou áudio perguntando prazo.',hist:[{prod:'500ml · 5 caixas',data:'Mai/2025',vend:'João',valor:'R$2.245,00',status:'Entregue'},{prod:'400ml · 2 caixas',data:'Fev/2025',vend:'João',valor:'R$918,00',status:'Entregue'}],msgs:[{t:'audio',h:'09:55'},{t:'in',s:'João (vendedor)',m:'Oi Thiago! O prazo é 12 dias úteis após confirmação de pagamento. Posso enviar o link de pagamento?',h:'10:02'}]},
-  LR:{init:'LR',bg:'#E1F5EE',color:'#085041',name:'Luana Reis',sub:'WhatsApp · (31) 98877-6655',cidade:'BH/MG',wapp:'(31) 98877-6655',canalTxt:'WhatsApp',canalHtml:'<i class="ti ti-brand-whatsapp" style="font-size:12px;color:#25D366;"></i> WhatsApp',vendedor:'Maria',status:'Entregue',pill:'p-entregue',nota:'Entregue 27/05. Follow-up venceu hoje.',hist:[{prod:'330ml · 2 caixas',data:'Mai/2025',vend:'Maria',valor:'R$818,00',status:'Entregue'}],msgs:[{t:'out',w:'Maria (vendedor)',m:'Oi Luana! Tudo certo com os copos? 😊',h:'08:25'},{t:'out',w:'Luana Reis',m:'Ok perfeito, pode fazer!',h:'08:30'}]}
-};
-
-var CONVLIST=[
-  {key:'AC',chBg:'#25D366',chIcon:'ti-brand-whatsapp',preview:'Quero 2 caixas de 500ml...',time:'14:32',pill:'p-novo',pillTxt:'Novo lead',unread:2,vend:'João'},
-  {key:'RS',chBg:'#25D366',chIcon:'ti-brand-whatsapp',preview:'Quando fica pronto meu pedido?',time:'13:10',pill:'p-prod',pillTxt:'Em produção',vend:'Maria'},
-  {key:'PL',chBg:'#E1306C',chIcon:'ti-brand-instagram',preview:'Vi no instagram de vocês...',time:'11:45',pill:'p-novo',pillTxt:'Novo lead',unread:1},
-  {key:'MF',chBg:'#1877F2',chIcon:'ti-brand-facebook',preview:'Oi, vi o anúncio de vocês!',time:'10:20',pill:'p-novo',pillTxt:'Novo lead',unread:4},
-  {key:'TC',chBg:'#25D366',chIcon:'ti-brand-whatsapp',preview:'🎤 Áudio · 0:34',time:'09:55',pill:'p-orc',pillTxt:'Orçamento enviado',vend:'João'},
-  {key:'LR',chBg:'#25D366',chIcon:'ti-brand-whatsapp',preview:'Ok perfeito, pode fazer!',time:'08:30',pill:'p-entregue',pillTxt:'Entregue',pill2:'p-follow',pill2Txt:'Follow-up',vend:'Maria'}
-];
+// O Chat ao vivo (integração com WhatsApp/Instagram/Facebook) ainda não
+// está conectado a nenhum serviço real — depende da verificação da
+// Business Manager e da decisão de API oficial, como já registrado em
+// outras partes do projeto. Por enquanto fica vazio de propósito, para
+// não passar a impressão de que já existe atendimento real acontecendo.
+var CONVDATA={};
+var CONVLIST=[];
 
 var PRICES={'330ml':{1:409,3:369},'400ml':{1:489,3:459},'500ml':{1:539,3:489},'770ml':{1:449,3:429}};
 var WAVE=[8,12,18,14,22,16,10,20,15,12,18,22,10,16,14,20,8,18,12,16];
@@ -2433,7 +2508,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // Fix: mover páginas novas para dentro do content-area
   (function(){
     var ca = document.querySelector('.content-area');
-    ['page-pedidos','page-producao','page-etiquetas','page-estoque','page-clientes','page-acoes','page-financeiro','page-notasfiscais','page-script','page-followup','page-horario','page-chatinterno','page-relatorio','page-broadcast','page-templates','page-whatsapp','page-equipe','page-config'].forEach(function(id){
+    ['page-pedidos','page-producao','page-etiquetas','page-estoque','page-caixasprontas','page-clientes','page-acoes','page-financeiro','page-notasfiscais','page-script','page-followup','page-horario','page-chatinterno','page-relatorio','page-broadcast','page-templates','page-whatsapp','page-equipe','page-config'].forEach(function(id){
       var el = document.getElementById(id);
       if(el && el.parentElement && !el.parentElement.classList.contains('content-area')){
         ca.appendChild(el);
@@ -3149,6 +3224,17 @@ document.addEventListener('DOMContentLoaded',function(){
                 renderProdQueue();
                 toast('📦 Baixa automática: ' + caixasBaixar + 'cx de ' + tam + ' — ' + order.client);
                 checkStockAlerts();
+                // Consome os lotes PEPS e salva o custo real do pedido —
+                // mesmo cálculo usado na criação, para este segundo caminho
+                // de baixa (pedido que nasceu com outro status e só depois
+                // foi movido para "Em produção").
+                estoqueConsumirPEPS(tam, caixasBaixar, function(custoItem, consumos){
+                  estoqueRegistrarConsumoPedido(order._uuid, consumos, function(){
+                    sbClient.from('pedidos').update({custo_total: custoItem}).eq('id', order._uuid).then(function(){
+                      order.custoTotal = custoItem;
+                    });
+                  });
+                });
               });
             });
           });
@@ -3256,8 +3342,26 @@ document.addEventListener('DOMContentLoaded',function(){
             if(typeof renderStockGrid==='function') renderStockGrid();
             if(typeof renderStockLog==='function') renderStockLog();
             if(typeof checkStockAlerts==='function') checkStockAlerts();
-            pendentes--;
-            if(pendentes===0) persistirAprovacao();
+            // O estorno vira um lote NOVO, no fim da fila PEPS — não volta
+            // para o lote original de onde saiu (decisão já confirmada).
+            // O custo desse lote de estorno é a média ponderada do que foi
+            // efetivamente consumido deste item pelo pedido cancelado.
+            sbClient.from('pedido_consumo_lotes').select('quantidade_caixas, custo_unitario_caixa').eq('pedido_id', order._uuid).then(function(resConsumo){
+              var custoMedio = 0;
+              if(!resConsumo.error && resConsumo.data && resConsumo.data.length){
+                var totalQtd = resConsumo.data.reduce(function(s,c){ return s+c.quantidade_caixas; },0);
+                var totalCusto = resConsumo.data.reduce(function(s,c){ return s+(c.quantidade_caixas*c.custo_unitario_caixa); },0);
+                custoMedio = totalQtd>0 ? totalCusto/totalQtd : 0;
+              }
+              sbClient.from('estoque_lotes').insert({
+                tamanho: item.tam, custo_unitario_caixa: custoMedio,
+                quantidade_caixas_original: item.qtd, quantidade_caixas_restante: item.qtd,
+                nota_fiscal: null, lancado_por: currentUser._supabaseId
+              }).then(function(){
+                pendentes--;
+                if(pendentes===0) persistirAprovacao();
+              });
+            });
           });
         });
       });
@@ -4057,6 +4161,71 @@ document.addEventListener('DOMContentLoaded',function(){
     });
   }
 
+  /* ============================================================
+     CONSUMO DE ESTOQUE POR LOTE (PEPS/FIFO)
+     ============================================================
+     Quando um pedido baixa estoque de verdade (venda), este é o ponto
+     que descobre QUAIS lotes foram consumidos e A QUE CUSTO — sempre
+     o lote mais antigo primeiro (Primeiro que Entra, Primeiro que Sai).
+     O resultado final é o custo_total real daquele pedido, usado depois
+     para calcular a margem de lucro.
+
+     Se não houver lote suficiente registrado (ex: estoque foi cadastrado
+     sem custo antes desta funcionalidade existir), o consumo segue sem
+     custo para aquela parte — melhor deixar sem margem calculada do que
+     travar a venda.
+     ============================================================ */
+  function estoqueConsumirPEPS(tamanho, quantidadeCaixas, callback){
+    if(!sbClient || quantidadeCaixas<=0){ callback(0, []); return; }
+    sbClient.from('estoque_lotes')
+      .select('*')
+      .eq('tamanho', tamanho)
+      .gt('quantidade_caixas_restante', 0)
+      .order('criado_em', {ascending:true}) // mais antigo primeiro = PEPS
+      .then(function(res){
+        if(res.error || !res.data || !res.data.length){ callback(0, []); return; }
+
+        var restante = quantidadeCaixas;
+        var custoTotal = 0;
+        var consumos = []; // {loteId, quantidade, custoUnitario}
+        var lotesParaAtualizar = [];
+
+        for(var i=0; i<res.data.length && restante>0; i++){
+          var lote = res.data[i];
+          var consumirDoLote = Math.min(restante, lote.quantidade_caixas_restante);
+          if(consumirDoLote<=0) continue;
+          custoTotal += consumirDoLote * lote.custo_unitario_caixa;
+          consumos.push({loteId: lote.id, quantidade: consumirDoLote, custoUnitario: lote.custo_unitario_caixa});
+          lotesParaAtualizar.push({id: lote.id, novoRestante: lote.quantidade_caixas_restante - consumirDoLote});
+          restante -= consumirDoLote;
+        }
+
+        // Atualiza a quantidade restante de cada lote consumido, em sequência.
+        function atualizarProximoLote(idx){
+          if(idx>=lotesParaAtualizar.length){ callback(custoTotal, consumos); return; }
+          var l = lotesParaAtualizar[idx];
+          sbClient.from('estoque_lotes').update({quantidade_caixas_restante: l.novoRestante}).eq('id', l.id).then(function(){
+            atualizarProximoLote(idx+1);
+          });
+        }
+        atualizarProximoLote(0);
+      });
+  }
+
+  // Registra, para um pedido, quais lotes foram consumidos — usado para
+  // rastreabilidade (histórico de custo) e para poder estornar certinho
+  // se o pedido for cancelado depois.
+  function estoqueRegistrarConsumoPedido(pedidoUuid, consumos, callback){
+    if(!consumos.length){ if(callback) callback(); return; }
+    var registros = consumos.map(function(c){
+      return {pedido_id: pedidoUuid, lote_id: c.loteId, quantidade_caixas: c.quantidade, custo_unitario_caixa: c.custoUnitario};
+    });
+    sbClient.from('pedido_consumo_lotes').insert(registros).then(function(res){
+      if(res.error){ toast('⚠️ Baixa feita, mas houve erro ao registrar o custo do lote: '+res.error.message); }
+      if(callback) callback();
+    });
+  }
+
   function initEstoque() {
     carregarEstoqueDoBanco(function(){
       carregarEstoqueLogDoBanco(function(){
@@ -4084,12 +4253,32 @@ document.addEventListener('DOMContentLoaded',function(){
       var tam = document.getElementById('ent-tam').value;
       var caixas = parseInt(document.getElementById('ent-caixas').value)||0;
       var unid = parseInt(document.getElementById('ent-unid').value)||0;
+      var custo = parseFloat(document.getElementById('ent-custo').value)||0;
       var nf = document.getElementById('ent-nf').value||'';
       if(!caixas && !unid) { toast('Informe caixas ou unidades!'); return; }
-      estoquePersistirMovimento(tam, caixas, unid, 'entrada', 'Entrada manual'+(nf?' · '+nf:''), function(){
-        document.getElementById('ent-caixas').value=''; document.getElementById('ent-unid').value=''; document.getElementById('ent-nf').value='';
-        formEnt.style.display='none';
-        toast('✅ Estoque atualizado! +' + caixas + 'cx de ' + tam);
+      if(caixas>0 && !custo){ toast('Informe o custo por caixa — é o que permite calcular a margem de lucro depois.'); return; }
+
+      function registrarLoteSeNecessario(callback){
+        // O lote de custo (para PEPS) só faz sentido para caixas fechadas —
+        // unidades avulsas entrando sozinhas normalmente vêm de abertura de
+        // caixa, não de uma compra nova, então não geram lote próprio aqui.
+        if(caixas<=0){ callback(); return; }
+        sbClient.from('estoque_lotes').insert({
+          tamanho: tam, custo_unitario_caixa: custo,
+          quantidade_caixas_original: caixas, quantidade_caixas_restante: caixas,
+          nota_fiscal: nf||null, lancado_por: currentUser._supabaseId
+        }).then(function(res){
+          if(res.error){ toast('Estoque atualizado, mas houve erro ao registrar o lote de custo: '+res.error.message); }
+          callback();
+        });
+      }
+
+      estoquePersistirMovimento(tam, caixas, unid, 'entrada', 'Entrada manual'+(nf?' · '+nf:'')+(custo?' · custo R$'+custo.toFixed(2)+'/cx':''), function(){
+        registrarLoteSeNecessario(function(){
+          document.getElementById('ent-caixas').value=''; document.getElementById('ent-unid').value=''; document.getElementById('ent-custo').value=''; document.getElementById('ent-nf').value='';
+          formEnt.style.display='none';
+          toast('✅ Estoque atualizado! +' + caixas + 'cx de ' + tam + (custo?' (custo R$'+custo.toFixed(2)+'/cx)':''));
+        });
       });
     });
 
@@ -4167,6 +4356,376 @@ document.addEventListener('DOMContentLoaded',function(){
       estoquePersistirMovimento(tam, sinal*caixas, sinal*unid, 'ajuste', 'Ajuste/correção ('+(tipo==='somar'?'+':'-')+') — '+motivo, function(){
         document.getElementById('ajuste-caixas').value=''; document.getElementById('ajuste-unid').value=''; document.getElementById('ajuste-motivo').value='';
         toast('🔧 Ajuste aplicado: '+(tipo==='somar'?'+':'-')+caixas+'cx / '+(tipo==='somar'?'+':'-')+unid+'un de '+tam);
+      });
+    });
+
+    initInventario();
+  }
+
+  /* ============================================================
+     INVENTÁRIO DE MATERIAIS DE CONSUMO
+     ============================================================
+     Separado do estoque de copos: tintas, químicos, materiais de tela,
+     limpeza, escritório e embalagem. Mesma filosofia de permissão do
+     estoque de copos (só quem tem podeGerenciarEstoque/Admin Geral lança
+     movimento; todo mundo autenticado pode consultar).
+     ============================================================ */
+  var INV_ITENS = [];
+  var INV_CATEGORIAS = [];
+  var INV_MOV_ITEM_ATUAL = null; // item selecionado para lançar movimento
+
+  function invCarregarCategorias(callback){
+    if(!sbClient){ if(callback) callback(); return; }
+    sbClient.from('inventario_categorias').select('*').order('nome').then(function(res){
+      if(!res.error && res.data) INV_CATEGORIAS = res.data;
+      if(callback) callback();
+    });
+  }
+
+  function invCarregarItens(callback){
+    if(!sbClient){ if(callback) callback(); return; }
+    sbClient.from('inventario_itens').select('*, inventario_categorias(nome)').eq('ativo', true).order('nome').then(function(res){
+      if(!res.error && res.data) INV_ITENS = res.data;
+      if(callback) callback();
+    });
+  }
+
+  function initInventario(){
+    invCarregarCategorias(function(){
+      // Popula o filtro de categoria e o select do modal de novo item
+      var filtro = document.getElementById('inv-filtro-categoria');
+      var selModal = document.getElementById('inv-it-categoria');
+      if(filtro){
+        filtro.innerHTML = '<option value="">Todas categorias</option>' + INV_CATEGORIAS.map(function(c){ return '<option value="'+c.id+'">'+esc(c.nome)+'</option>'; }).join('');
+      }
+      if(selModal){
+        selModal.innerHTML = INV_CATEGORIAS.map(function(c){ return '<option value="'+c.id+'">'+esc(c.nome)+'</option>'; }).join('');
+      }
+      invCarregarItens(function(){ renderInvItens(); });
+    });
+
+    var podeGerenciar = estoquePodeGerenciar();
+    var btnNovoItem = document.getElementById('btn-inv-novo-item');
+    if(btnNovoItem) btnNovoItem.style.display = podeGerenciar ? '' : 'none';
+
+    var buscaEl = document.getElementById('inv-busca');
+    if(buscaEl && !buscaEl._bound){
+      buscaEl.addEventListener('input', function(){ renderInvItens(); });
+      buscaEl._bound = true;
+    }
+    var filtroEl = document.getElementById('inv-filtro-categoria');
+    if(filtroEl && !filtroEl._bound){
+      filtroEl.addEventListener('change', function(){ renderInvItens(); });
+      filtroEl._bound = true;
+    }
+    if(btnNovoItem && !btnNovoItem._bound){
+      btnNovoItem.addEventListener('click', function(){
+        document.getElementById('inv-item-modal-title').textContent = 'Novo item de inventário';
+        document.getElementById('inv-it-codigo').value='';
+        document.getElementById('inv-it-nome').value='';
+        document.getElementById('inv-it-unidade').value='un';
+        document.getElementById('inv-it-minima').value='';
+        document.getElementById('inv-it-obs').value='';
+        openModal('modal-inv-item');
+      });
+      btnNovoItem._bound = true;
+    }
+    var btnSalvarItem = document.getElementById('btn-inv-item-salvar');
+    if(btnSalvarItem && !btnSalvarItem._bound){
+      btnSalvarItem.addEventListener('click', invSalvarItem);
+      btnSalvarItem._bound = true;
+    }
+
+    var tipoMovSel = document.getElementById('inv-mov-tipo');
+    if(tipoMovSel && !tipoMovSel._bound){
+      tipoMovSel.addEventListener('change', function(){
+        var custoWrap = document.getElementById('inv-mov-custo-wrap');
+        var nfWrap = document.getElementById('inv-mov-nf-wrap');
+        var ehEntrada = this.value==='entrada';
+        custoWrap.style.display = ehEntrada ? '' : 'none';
+        nfWrap.style.display = ehEntrada ? '' : 'none';
+      });
+      tipoMovSel._bound = true;
+    }
+    var btnMovSalvar = document.getElementById('btn-inv-mov-salvar');
+    if(btnMovSalvar && !btnMovSalvar._bound){
+      btnMovSalvar.addEventListener('click', invSalvarMovimento);
+      btnMovSalvar._bound = true;
+    }
+  }
+
+  function renderInvItens(){
+    var tbody = document.getElementById('inv-itens-tbody');
+    if(!tbody) return;
+    var termo = (document.getElementById('inv-busca').value||'').trim().toLowerCase();
+    var catFiltro = document.getElementById('inv-filtro-categoria').value;
+    var podeGerenciar = estoquePodeGerenciar();
+
+    var filtrados = INV_ITENS.filter(function(item){
+      if(catFiltro && item.categoria_id!==catFiltro) return false;
+      if(termo && item.nome.toLowerCase().indexOf(termo)<0 && item.codigo.toLowerCase().indexOf(termo)<0) return false;
+      return true;
+    });
+
+    if(!filtrados.length){
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px;">Nenhum item encontrado.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = filtrados.map(function(item){
+      var abaixoMinimo = item.quantidade_atual < item.quantidade_minima;
+      var qtdTexto = item.quantidade_atual + ' ' + item.unidade_medida + (abaixoMinimo ? ' ⚠️' : '');
+      var categoriaNome = item.inventario_categorias ? item.inventario_categorias.nome : '—';
+      var custoTexto = item.preco_custo_atual ? 'R$ '+parseFloat(item.preco_custo_atual).toFixed(2) : '—';
+      var acao = podeGerenciar
+        ? '<button class="btn btn-sm" onclick="invAbrirMovimento(\''+item.id+'\')"><i class="ti ti-arrows-exchange" style="font-size:11px;"></i> Movimentar</button>'
+        : '';
+      return '<tr'+(abaixoMinimo?' style="background:#FCEBEB;"':'')+'><td>'+esc(item.codigo)+'</td><td>'+esc(item.nome)+'</td><td>'+esc(categoriaNome)+'</td><td>'+qtdTexto+'</td><td>'+custoTexto+'</td><td>'+acao+'</td></tr>';
+    }).join('');
+  }
+
+  function invSalvarItem(){
+    if(dbEscritaBloqueadaSeDemo()){ closeModal('modal-inv-item'); return; }
+    var codigo = (document.getElementById('inv-it-codigo').value||'').trim().toUpperCase();
+    var nome = (document.getElementById('inv-it-nome').value||'').trim();
+    var categoriaId = document.getElementById('inv-it-categoria').value;
+    var unidade = document.getElementById('inv-it-unidade').value;
+    var minima = parseFloat(document.getElementById('inv-it-minima').value)||0;
+    var obs = document.getElementById('inv-it-obs').value||'';
+    if(!codigo || !nome || !categoriaId){ toast('Preencha código, nome e categoria!'); return; }
+    if(!sbClient){ toast('Sem conexão com o banco.'); return; }
+
+    sbClient.from('inventario_itens').insert({
+      codigo: codigo, nome: nome, categoria_id: categoriaId,
+      unidade_medida: unidade, quantidade_minima: minima, observacao: obs||null
+    }).then(function(res){
+      if(res.error){ toast('Erro ao criar item: '+res.error.message); return; }
+      invCarregarItens(function(){
+        renderInvItens();
+        closeModal('modal-inv-item');
+        toast('✅ Item cadastrado: '+nome);
+      });
+    });
+  }
+
+  function invAbrirMovimento(itemId){
+    var item = INV_ITENS.find(function(i){ return i.id===itemId; });
+    if(!item) return;
+    INV_MOV_ITEM_ATUAL = item;
+    document.getElementById('inv-mov-item-nome').textContent = item.codigo+' — '+item.nome+' (atual: '+item.quantidade_atual+' '+item.unidade_medida+')';
+    document.getElementById('inv-mov-tipo').value = 'entrada';
+    document.getElementById('inv-mov-qtd').value = '';
+    document.getElementById('inv-mov-custo').value = '';
+    document.getElementById('inv-mov-nf').value = '';
+    document.getElementById('inv-mov-motivo').value = '';
+    document.getElementById('inv-mov-custo-wrap').style.display = '';
+    document.getElementById('inv-mov-nf-wrap').style.display = '';
+    openModal('modal-inv-mov');
+  }
+  window.invAbrirMovimento = invAbrirMovimento;
+
+  function invSalvarMovimento(){
+    if(dbEscritaBloqueadaSeDemo()){ closeModal('modal-inv-mov'); return; }
+    if(!INV_MOV_ITEM_ATUAL) return;
+    var tipo = document.getElementById('inv-mov-tipo').value;
+    var qtd = parseFloat(document.getElementById('inv-mov-qtd').value)||0;
+    var custo = parseFloat(document.getElementById('inv-mov-custo').value)||0;
+    var nf = document.getElementById('inv-mov-nf').value||'';
+    var motivo = (document.getElementById('inv-mov-motivo').value||'').trim();
+    if(!qtd || qtd<=0){ toast('Informe uma quantidade válida.'); return; }
+    if(!motivo){ toast('Informe o motivo do movimento.'); return; }
+    if(!sbClient){ toast('Sem conexão com o banco.'); return; }
+
+    var item = INV_MOV_ITEM_ATUAL;
+    var delta = tipo==='entrada' ? qtd : (tipo==='saida' ? -qtd : (document.getElementById('inv-mov-tipo').value)); // ajuste tratado abaixo
+    if(tipo==='ajuste'){
+      // Ajuste pode ser positivo ou negativo — usamos o sinal digitado
+      // implicitamente pelo usuário: aqui simplificamos pedindo sempre
+      // valor positivo e perguntando a direção via um segundo campo seria
+      // mais complexo; por ora, ajuste soma (uso mais comum é "achei a
+      // mais"), e para descontar o usuário lança como "saída" com o motivo
+      // "correção de contagem".
+      delta = qtd;
+    }
+    if((tipo==='saida') && qtd > item.quantidade_atual){
+      toast('⚠️ Quantidade maior que o disponível ('+item.quantidade_atual+' '+item.unidade_medida+'). Movimento não aplicado.');
+      return;
+    }
+
+    var novaQtd = item.quantidade_atual + delta;
+    sbClient.from('inventario_itens').update({
+      quantidade_atual: novaQtd,
+      preco_custo_atual: tipo==='entrada' && custo>0 ? custo : item.preco_custo_atual
+    }).eq('id', item.id).then(function(res){
+      if(res.error){ toast('Erro ao atualizar item: '+res.error.message); return; }
+      sbClient.from('inventario_log').insert({
+        item_id: item.id, tipo: tipo, quantidade: qtd,
+        preco_unitario_no_momento: tipo==='entrada' ? custo : null,
+        nota_fiscal: nf||null, motivo: motivo, lancado_por: currentUser._supabaseId
+      }).then(function(res2){
+        if(res2.error){ toast('Movimento salvo, mas houve erro no histórico: '+res2.error.message); }
+        invCarregarItens(function(){
+          renderInvItens();
+          closeModal('modal-inv-mov');
+          toast('✅ Movimento registrado: '+item.nome);
+        });
+      });
+    });
+  }
+
+  /* ============================================================
+     CAIXAS PRONTAS — estoque de produto acabado
+     ============================================================
+     Diferente do estoque de copos (que é "virgem", sem impressão), aqui
+     ficam caixas JÁ IMPRESSAS e prontas para venda imediata. Cada linha
+     é uma combinação única de tamanho + arte + cor + marca. Quando um
+     pedido vende dessas caixas, a venda pula a Fila de Produção e já
+     nasce "Pronto para despacho" — a arte já existe, não precisa
+     produzir de novo.
+     ============================================================ */
+  var CAIXAS_PRONTAS = [];
+
+  function cpCarregar(callback){
+    if(!sbClient){ if(callback) callback(); return; }
+    sbClient.from('caixas_prontas').select('*').order('tamanho_ml').then(function(res){
+      if(!res.error && res.data) CAIXAS_PRONTAS = res.data;
+      if(callback) callback();
+    });
+  }
+
+  function initCaixasProntas(){
+    cpCarregar(function(){ renderCpTabela(); });
+    var podeGerenciar = estoquePodeGerenciar();
+    var btnNova = document.getElementById('btn-cp-nova');
+    if(btnNova) btnNova.style.display = podeGerenciar ? '' : 'none';
+
+    var buscaEl = document.getElementById('cp-busca');
+    if(buscaEl && !buscaEl._bound){
+      buscaEl.addEventListener('input', function(){ renderCpTabela(); });
+      buscaEl._bound = true;
+    }
+    if(btnNova && !btnNova._bound){
+      btnNova.addEventListener('click', function(){
+        document.getElementById('cp-tamanho').value='330';
+        document.getElementById('cp-qtd-inicial').value='';
+        document.getElementById('cp-arte').value='';
+        document.getElementById('cp-cor').value='';
+        document.getElementById('cp-marca').value='';
+        document.getElementById('cp-custo').value='';
+        document.getElementById('cp-obs').value='';
+        openModal('modal-cp-nova');
+      });
+      btnNova._bound = true;
+    }
+    var btnSalvar = document.getElementById('btn-cp-salvar');
+    if(btnSalvar && !btnSalvar._bound){
+      btnSalvar.addEventListener('click', cpSalvarCombinacao);
+      btnSalvar._bound = true;
+    }
+    var btnMovSalvar = document.getElementById('btn-cp-mov-salvar');
+    if(btnMovSalvar && !btnMovSalvar._bound){
+      btnMovSalvar.addEventListener('click', cpSalvarMovimento);
+      btnMovSalvar._bound = true;
+    }
+  }
+
+  function renderCpTabela(){
+    var tbody = document.getElementById('cp-tbody');
+    if(!tbody) return;
+    var termo = (document.getElementById('cp-busca').value||'').trim().toLowerCase();
+    var podeGerenciar = estoquePodeGerenciar();
+
+    var filtradas = CAIXAS_PRONTAS.filter(function(c){
+      if(!termo) return true;
+      return c.arte.toLowerCase().indexOf(termo)>=0 || c.cor_logo.toLowerCase().indexOf(termo)>=0 || (c.marca_copo||'').toLowerCase().indexOf(termo)>=0;
+    });
+
+    if(!filtradas.length){
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px;">Nenhuma combinação cadastrada ainda.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = filtradas.map(function(c){
+      var custoTexto = c.custo_unitario_caixa ? 'R$ '+parseFloat(c.custo_unitario_caixa).toFixed(2) : '—';
+      var acao = podeGerenciar
+        ? '<button class="btn btn-sm" onclick="cpAbrirMovimento(\''+c.id+'\')"><i class="ti ti-arrows-exchange" style="font-size:11px;"></i> Movimentar</button>'
+        : '';
+      return '<tr'+(c.quantidade_caixas<=0?' style="opacity:.6;"':'')+'><td>'+c.tamanho_ml+'ml</td><td>'+esc(c.arte)+'</td><td>'+esc(c.cor_logo)+'</td><td>'+esc(c.marca_copo||'—')+'</td><td><b>'+c.quantidade_caixas+'</b></td><td>'+custoTexto+'</td><td>'+acao+'</td></tr>';
+    }).join('');
+  }
+
+  function cpSalvarCombinacao(){
+    if(dbEscritaBloqueadaSeDemo()){ closeModal('modal-cp-nova'); return; }
+    var tamanho = parseInt(document.getElementById('cp-tamanho').value);
+    var qtdInicial = parseInt(document.getElementById('cp-qtd-inicial').value)||0;
+    var arte = (document.getElementById('cp-arte').value||'').trim();
+    var cor = (document.getElementById('cp-cor').value||'').trim();
+    var marca = document.getElementById('cp-marca').value||'';
+    var custo = parseFloat(document.getElementById('cp-custo').value)||null;
+    var obs = document.getElementById('cp-obs').value||'';
+    if(!arte || !cor){ toast('Preencha arte e cor da logo!'); return; }
+    if(!sbClient){ toast('Sem conexão com o banco.'); return; }
+
+    sbClient.from('caixas_prontas').insert({
+      tamanho_ml: tamanho, arte: arte, cor_logo: cor, marca_copo: marca||null,
+      quantidade_caixas: qtdInicial, custo_unitario_caixa: custo, observacao: obs||null,
+      criado_por: currentUser._supabaseId
+    }).select().single().then(function(res){
+      if(res.error){ toast('Erro ao criar combinação: '+res.error.message); return; }
+      if(qtdInicial>0){
+        sbClient.from('caixas_prontas_log').insert({
+          caixa_pronta_id: res.data.id, tipo:'entrada', quantidade: qtdInicial,
+          motivo:'Cadastro inicial', lancado_por: currentUser._supabaseId
+        });
+      }
+      cpCarregar(function(){
+        renderCpTabela();
+        closeModal('modal-cp-nova');
+        toast('✅ Combinação cadastrada: '+arte+' ('+cor+')');
+      });
+    });
+  }
+
+  var CP_MOV_ATUAL = null;
+  function cpAbrirMovimento(id){
+    var c = CAIXAS_PRONTAS.find(function(x){ return x.id===id; });
+    if(!c) return;
+    CP_MOV_ATUAL = c;
+    document.getElementById('cp-mov-nome').textContent = c.tamanho_ml+'ml — '+c.arte+' ('+c.cor_logo+') — atual: '+c.quantidade_caixas+'cx';
+    document.getElementById('cp-mov-tipo').value = 'entrada';
+    document.getElementById('cp-mov-qtd').value = '';
+    document.getElementById('cp-mov-motivo').value = '';
+    openModal('modal-cp-mov');
+  }
+  window.cpAbrirMovimento = cpAbrirMovimento;
+
+  function cpSalvarMovimento(){
+    if(dbEscritaBloqueadaSeDemo()){ closeModal('modal-cp-mov'); return; }
+    if(!CP_MOV_ATUAL) return;
+    var tipo = document.getElementById('cp-mov-tipo').value;
+    var qtd = parseInt(document.getElementById('cp-mov-qtd').value)||0;
+    var motivo = (document.getElementById('cp-mov-motivo').value||'').trim();
+    if(!qtd || qtd<=0){ toast('Informe uma quantidade válida.'); return; }
+    if(!motivo){ toast('Informe o motivo.'); return; }
+    if(!sbClient){ toast('Sem conexão com o banco.'); return; }
+
+    var c = CP_MOV_ATUAL;
+    var delta = tipo==='saida' ? -qtd : qtd; // ajuste soma (mesmo padrão do inventário)
+    if(tipo==='saida' && qtd > c.quantidade_caixas){
+      toast('⚠️ Quantidade maior que o disponível ('+c.quantidade_caixas+'cx). Movimento não aplicado.');
+      return;
+    }
+    var novaQtd = c.quantidade_caixas + delta;
+    sbClient.from('caixas_prontas').update({quantidade_caixas: novaQtd}).eq('id', c.id).then(function(res){
+      if(res.error){ toast('Erro ao atualizar: '+res.error.message); return; }
+      sbClient.from('caixas_prontas_log').insert({
+        caixa_pronta_id: c.id, tipo: tipo, quantidade: qtd, motivo: motivo, lancado_por: currentUser._supabaseId
+      }).then(function(){
+        cpCarregar(function(){
+          renderCpTabela();
+          closeModal('modal-cp-mov');
+          toast('✅ Movimento registrado.');
+        });
       });
     });
   }
@@ -4312,7 +4871,7 @@ document.addEventListener('DOMContentLoaded',function(){
     dashboard:'Início / Dashboard', chats:'Chats ao vivo', chatinterno:'Chat interno', kanban:'Kanban',
     contatos:'Contatos', followup:'Follow-up 30d', clientes:'Clientes',
     acoes:'Ações de vendas', pedidos:'Pedidos', producao:'Fila de produção', etiquetas:'Etiquetas',
-    estoque:'Estoque', relatorio:'Relatórios', broadcast:'Broadcast',
+    estoque:'Estoque', caixasprontas:'Caixas Prontas', relatorio:'Relatórios', broadcast:'Broadcast',
     templates:'Templates', financeiro:'Financeiro', notasfiscais:'Notas Fiscais',
     equipe:'Equipe', config:'Configurações', script:'Script de vendas'
   };
@@ -4615,6 +5174,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if(id === 'producao') renderProdQueue();
     if(id === 'estoque') initEstoque();
     if(id === 'etiquetas') renderEtiquetas(document.getElementById('etq-busca') ? document.getElementById('etq-busca').value : '');
+    if(id === 'caixasprontas') initCaixasProntas();
   };
 
   // Filtros de pedidos
@@ -4753,8 +5313,11 @@ document.addEventListener('DOMContentLoaded',function(){
     if(el('np-restante')) el('np-restante').textContent = fmt(restante);
   }
 
+  var NP_ORIGEM = 'virgem'; // 'virgem' | 'pronta'
+
   function openNovoPedido() {
     NP_ITEMS = [];
+    NP_ORIGEM = 'virgem';
     NP_IMPRESSAO = 'Frente'; NP_TINTA = 'Preta'; NP_ARTE = 'Equipe MekMix cria';
     document.getElementById('np-id-label').textContent = 'PED-' + String(NP_COUNTER).padStart(3,'0');
     document.getElementById('np-nome').value = '';
@@ -4775,7 +5338,139 @@ document.addEventListener('DOMContentLoaded',function(){
     document.querySelectorAll('.tinta-btn').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-tinta') === 'Preta'); });
     document.getElementById('arte-nos').classList.add('active');
     document.getElementById('arte-cli').classList.remove('active');
+    // Reset seletor de origem, sempre volta para "virgem" por padrão
+    document.getElementById('origem-virgem').classList.add('active');
+    document.getElementById('origem-pronta').classList.remove('active');
+    document.getElementById('np-caixa-pronta-wrap').style.display = 'none';
+    document.getElementById('np-itens-normais-wrap').style.display = '';
+    document.getElementById('np-itens-normais-head').style.display = '';
+    document.getElementById('np-itens-normais-label').style.display = '';
+    npCarregarCaixasProntasParaSelect();
     openModal('modal-novo-pedido');
+  }
+
+  // Popula o select de combinações de caixa pronta disponíveis (com
+  // quantidade > 0) — usado quando o vendedor escolhe "Caixa pronta" como
+  // origem do pedido.
+  function npCarregarCaixasProntasParaSelect(){
+    if(!sbClient) return;
+    sbClient.from('caixas_prontas').select('*').gt('quantidade_caixas', 0).order('tamanho_ml').then(function(res){
+      var sel = document.getElementById('np-caixa-pronta-select');
+      if(!sel) return;
+      if(res.error || !res.data || !res.data.length){
+        sel.innerHTML = '<option value="">Nenhuma caixa pronta disponível</option>';
+        return;
+      }
+      sel.innerHTML = res.data.map(function(c){
+        return '<option value="'+c.id+'" data-qtd="'+c.quantidade_caixas+'" data-custo="'+(c.custo_unitario_caixa||0)+'">'+c.tamanho_ml+'ml — '+esc(c.arte)+' ('+esc(c.cor_logo)+') — '+c.quantidade_caixas+'cx disponíveis</option>';
+      }).join('');
+      npAtualizarDisponibilidadeCaixaPronta();
+    });
+  }
+
+  function npAtualizarDisponibilidadeCaixaPronta(){
+    var sel = document.getElementById('np-caixa-pronta-select');
+    var opt = sel.options[sel.selectedIndex];
+    var disp = document.getElementById('np-caixa-pronta-disponivel');
+    if(!opt || !opt.value){ disp.textContent=''; return; }
+    disp.textContent = 'Disponível: ' + opt.getAttribute('data-qtd') + ' caixas';
+  }
+
+  // Fluxo separado para venda de "caixa pronta" (já impressa): o pedido
+  // nasce direto como "Pronto para despacho" — nunca passa pela Fila de
+  // Produção, porque a arte já existe. A baixa acontece na tabela
+  // caixas_prontas, não no estoque de copos virgens/lotes PEPS.
+  function confirmarPedidoCaixaPronta(){
+    var nome = (document.getElementById('np-nome').value||'').trim();
+    if(!nome) { toast('Informe o nome do cliente!'); return; }
+    var sel = document.getElementById('np-caixa-pronta-select');
+    var caixaId = sel.value;
+    if(!caixaId){ toast('Selecione uma combinação de caixa pronta.'); return; }
+    var opt = sel.options[sel.selectedIndex];
+    var qtdDisponivel = parseInt(opt.getAttribute('data-qtd'))||0;
+    var custoUnit = parseFloat(opt.getAttribute('data-custo'))||0;
+    var qtdVenda = parseInt(document.getElementById('np-caixa-pronta-qtd').value)||0;
+    var precoVenda = parseFloat(document.getElementById('np-caixa-pronta-preco').value)||0;
+    if(!qtdVenda || qtdVenda<=0){ toast('Informe a quantidade de caixas.'); return; }
+    if(qtdVenda > qtdDisponivel){ toast('⚠️ Quantidade maior que o disponível ('+qtdDisponivel+' caixas).'); return; }
+    if(!precoVenda){ toast('Informe o preço de venda por caixa.'); return; }
+    if(!sbClient){ toast('Sem conexão com o banco.'); return; }
+
+    var c = CAIXAS_PRONTAS.find(function(x){ return x.id===caixaId; });
+    if(!c){ toast('Combinação não encontrada.'); return; }
+    var vendedorNome = document.getElementById('np-vendedor').value;
+    var vendedorObj = Object.keys(USERS).map(function(k){return USERS[k];}).find(function(u){ return u.name===vendedorNome; });
+    var total = precoVenda * qtdVenda;
+    var custoTotalPedido = custoUnit * qtdVenda;
+
+    var btnConfirmar = document.getElementById('btn-confirmar-pedido');
+    if(btnConfirmar){ btnConfirmar.disabled = true; }
+
+    sbClient.rpc('gerar_numero_pedido').then(function(resNum){
+      if(resNum.error){ toast('Erro ao gerar número do pedido: '+resNum.error.message); if(btnConfirmar) btnConfirmar.disabled=false; return; }
+      var pid = resNum.data;
+
+      var registroPedido = {
+        numero: pid,
+        status: statusParaBanco('Pronto para despacho'), // já nasce pronto — não passa por produção
+        nome: nome,
+        empresa: document.getElementById('np-doc').value||null,
+        whatsapp: document.getElementById('np-wapp').value||null,
+        cidade: document.getElementById('np-cidade').value||null,
+        vendedor_id: vendedorObj ? vendedorObj._supabaseId : null,
+        valor_estimado: total,
+        custo_total: custoTotalPedido,
+        entrada_paga: true, // venda de caixa pronta é sempre à vista/imediata
+        estoque_baixado: true
+      };
+
+      sbClient.from('pedidos').insert(registroPedido).select().single().then(function(resPed){
+        if(resPed.error){ toast('Erro ao criar pedido: '+resPed.error.message); if(btnConfirmar) btnConfirmar.disabled=false; return; }
+        var pedidoUuid = resPed.data.id;
+
+        sbClient.from('itens_pedido').insert({
+          pedido_id: pedidoUuid, produto_ml: c.tamanho_ml,
+          quantidade_caixas: qtdVenda, preco_unitario_cx: precoVenda,
+          caixa_pronta_id: c.id
+        }).then(function(){
+          // Baixa da caixa pronta
+          var novaQtd = c.quantidade_caixas - qtdVenda;
+          sbClient.from('caixas_prontas').update({quantidade_caixas: novaQtd}).eq('id', c.id).then(function(){
+            sbClient.from('caixas_prontas_log').insert({
+              caixa_pronta_id: c.id, tipo:'saida', quantidade: qtdVenda,
+              motivo:'Venda — Pedido '+pid+' — '+nome, pedido_id: pedidoUuid, lancado_por: currentUser._supabaseId
+            }).then(function(){
+              c.quantidade_caixas = novaQtd;
+
+              var newOrder = {
+                id: pid, _uuid: pedidoUuid, client: nome,
+                cidade: (document.getElementById('np-cidade').value||'—'),
+                rua: (document.getElementById('np-rua').value||''),
+                bairro: (document.getElementById('np-bairro').value||''),
+                prod: c.tamanho_ml+'ml', prodDesc: qtdVenda+'cx '+c.tamanho_ml+'ml (pronta: '+c.arte+')',
+                qtd: qtdVenda, unid: qtdVenda*(UNID_PER_CX[c.tamanho_ml+'ml']||1000),
+                valor: total, status: 'Pronto para despacho',
+                vendedor: vendedorNome, vendedorId: vendedorObj?vendedorObj._supabaseId:null,
+                data: new Date().toLocaleDateString('pt-BR'), pill: 'p-despacho',
+                itens: [{tam:c.tamanho_ml+'ml', tipo:'caixas', qtd:qtdVenda, subtotal:total}],
+                doc: document.getElementById('np-doc').value||'', wapp: document.getElementById('np-wapp').value||'',
+                obs: document.getElementById('np-obs').value||'',
+                entradaPaga: true, cancelamento: null, estoqueBaixado: true, custoTotal: custoTotalPedido
+              };
+              ORDERS.unshift(newOrder);
+              // Já nasce pronto — gera etiqueta direto, sem passar pela fila
+              if(typeof etqGerarParaPedido==='function') etqGerarParaPedido(newOrder);
+              if(typeof notifPedidoProntoDespacho==='function') notifPedidoProntoDespacho(newOrder);
+              if(typeof renderEtiquetas==='function') renderEtiquetas();
+              renderOrders();
+              closeModal('modal-novo-pedido');
+              if(btnConfirmar) btnConfirmar.disabled=false;
+              toast('✅ Pedido '+pid+' criado a partir de caixa pronta — já pronto para despacho!');
+            });
+          });
+        });
+      });
+    });
   }
 
   function confirmarPedido(rascunho) {
@@ -4877,9 +5572,13 @@ document.addEventListener('DOMContentLoaded',function(){
           }
 
           // 4) Baixa de estoque real no banco — só quando não é rascunho.
+          // Além de atualizar o agregado (STOCK), consome os lotes na
+          // ordem PEPS para descobrir o custo real do que foi vendido —
+          // é esse valor que vira a margem de lucro do pedido.
           if(!rascunho){
             var tamanhosComFalta = [];
             var pendentes = NP_ITEMS.length;
+            var custoTotalPedido = 0;
             if(pendentes===0){ finalizarNaTela([]); return; }
             NP_ITEMS.forEach(function(item){
               var disponivel = STOCK[item.tam] ? STOCK[item.tam].caixas : 0;
@@ -4891,8 +5590,18 @@ document.addEventListener('DOMContentLoaded',function(){
                   motivo:'Pedido '+pid+' — '+nome, lancado_por: currentUser._supabaseId
                 }).then(function(){
                   if(STOCK[item.tam]) STOCK[item.tam].caixas = novoValor;
-                  pendentes--;
-                  if(pendentes===0) finalizarNaTela(tamanhosComFalta);
+                  estoqueConsumirPEPS(item.tam, item.qtd, function(custoItem, consumos){
+                    custoTotalPedido += custoItem;
+                    estoqueRegistrarConsumoPedido(pedidoUuid, consumos, function(){
+                      pendentes--;
+                      if(pendentes===0){
+                        sbClient.from('pedidos').update({custo_total: custoTotalPedido}).eq('id', pedidoUuid).then(function(){
+                          newOrder.custoTotal = custoTotalPedido;
+                          finalizarNaTela(tamanhosComFalta);
+                        });
+                      }
+                    });
+                  });
                 });
               });
             });
@@ -4912,6 +5621,26 @@ document.addEventListener('DOMContentLoaded',function(){
   if(npEntradaStatus) npEntradaStatus.addEventListener('change', function(){
     document.getElementById('np-entrada-previsto-wrap').style.display = this.value==='previsto' ? '' : 'none';
   });
+
+  // Alterna entre "estoque virgem" (fluxo normal, vai para produção) e
+  // "caixa pronta" (já impressa, pula produção) — esconde/mostra os
+  // blocos de formulário correspondentes.
+  var btnOrigemVirgem = document.getElementById('origem-virgem');
+  var btnOrigemPronta = document.getElementById('origem-pronta');
+  function npSelecionarOrigem(origem){
+    NP_ORIGEM = origem;
+    btnOrigemVirgem.classList.toggle('active', origem==='virgem');
+    btnOrigemPronta.classList.toggle('active', origem==='pronta');
+    document.getElementById('np-caixa-pronta-wrap').style.display = origem==='pronta' ? '' : 'none';
+    document.getElementById('np-itens-normais-wrap').style.display = origem==='pronta' ? 'none' : '';
+    document.getElementById('np-itens-normais-head').style.display = origem==='pronta' ? 'none' : '';
+    document.getElementById('np-itens-normais-label').style.display = origem==='pronta' ? 'none' : '';
+    if(origem==='pronta') npCarregarCaixasProntasParaSelect();
+  }
+  if(btnOrigemVirgem) btnOrigemVirgem.addEventListener('click', function(){ npSelecionarOrigem('virgem'); });
+  if(btnOrigemPronta) btnOrigemPronta.addEventListener('click', function(){ npSelecionarOrigem('pronta'); });
+  var npCaixaProntaSelect = document.getElementById('np-caixa-pronta-select');
+  if(npCaixaProntaSelect) npCaixaProntaSelect.addEventListener('change', npAtualizarDisponibilidadeCaixaPronta);
 
   var btnPcdConfirmar = document.getElementById('btn-pcd-confirmar');
   if(btnPcdConfirmar) btnPcdConfirmar.addEventListener('click', function(){
@@ -4933,7 +5662,10 @@ document.addEventListener('DOMContentLoaded',function(){
   if(btnAddItem) btnAddItem.addEventListener('click', addItem);
 
   var btnConfirmar = document.getElementById('btn-confirmar-pedido');
-  if(btnConfirmar) btnConfirmar.addEventListener('click', function(){ confirmarPedido(false); });
+  if(btnConfirmar) btnConfirmar.addEventListener('click', function(){
+    if(NP_ORIGEM==='pronta') confirmarPedidoCaixaPronta();
+    else confirmarPedido(false);
+  });
 
   var btnRascunho = document.getElementById('btn-salvar-rascunho');
   if(btnRascunho) btnRascunho.addEventListener('click', function(){ confirmarPedido(true); });
@@ -7597,11 +8329,31 @@ function renderHorAuditoria(){
           </div>
         </div>
 
+        <!-- Origem do estoque: copo virgem (vai para produção) ou caixa já pronta (pula produção) -->
+        <div class="fg" style="margin-bottom:14px;">
+          <label>Origem do produto</label>
+          <div class="imp-btns">
+            <button class="imp-btn active" data-origem="virgem" id="origem-virgem">📦 Estoque virgem (vai para produção)</button>
+            <button class="imp-btn" data-origem="pronta" id="origem-pronta">✅ Caixa pronta (já impressa, pula produção)</button>
+          </div>
+        </div>
+
+        <!-- Seleção de caixa pronta — só aparece quando a origem acima é "pronta" -->
+        <div class="fg" id="np-caixa-pronta-wrap" style="display:none;margin-bottom:14px;">
+          <label>Combinação de caixa pronta</label>
+          <select class="form-input" id="np-caixa-pronta-select"></select>
+          <div style="font-size:11px;color:var(--text2);margin-top:6px;"><span id="np-caixa-pronta-disponivel"></span></div>
+          <div class="form-grid-2" style="margin-top:10px;">
+            <div class="fg"><label>Quantidade de caixas</label><input type="number" min="1" id="np-caixa-pronta-qtd" value="1"/></div>
+            <div class="fg"><label>Preço de venda por caixa (R$)</label><input type="number" min="0" step="0.01" id="np-caixa-pronta-preco"/></div>
+          </div>
+        </div>
+
         <!-- Itens do pedido -->
-        <div class="fg" style="margin-bottom:8px;">
+        <div class="fg" style="margin-bottom:8px;" id="np-itens-normais-label">
           <label>Itens</label>
         </div>
-        <div class="item-row-head">
+        <div class="item-row-head" id="np-itens-normais-head">
           <span class="item-head-lbl">Tamanho</span>
           <span class="item-head-lbl">Tipo qtd</span>
           <span class="item-head-lbl">Quantidade</span>
@@ -7610,10 +8362,12 @@ function renderHorAuditoria(){
           <span class="item-head-lbl">Unidades</span>
           <span></span>
         </div>
+        <div id="np-itens-normais-wrap">
         <div id="np-items"></div>
         <button class="btn btn-sm" id="btn-add-item" style="margin-top:4px;">
           <i class="ti ti-plus" style="font-size:11px;"></i> Adicionar item
         </button>
+        </div>
 
         <!-- Observação do pedido -->
         <div class="fg" style="margin-top:14px;">
