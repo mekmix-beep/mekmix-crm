@@ -142,6 +142,9 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;}
 .msg-bubble{padding:8px 12px;border-radius:12px;font-size:12px;line-height:1.6;}
 .msg-in .msg-bubble{background:var(--white);border:1px solid var(--border);border-bottom-left-radius:3px;color:var(--text);}
 .msg-out .msg-bubble{background:var(--rosa);color:#fff;border-bottom-right-radius:3px;}
+.msg-download-btn{display:inline-flex;align-items:center;gap:4px;margin-top:6px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:500;cursor:pointer;border:1px solid rgba(0,0,0,.12);background:rgba(255,255,255,.85);color:inherit;}
+.msg-out .msg-download-btn{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;}
+.msg-download-btn:hover{opacity:.8;}
 .msg-meta{font-size:10px;color:var(--text3);margin-top:3px;}
 .msg-out .msg-meta{text-align:right;}
 .msg-author{font-size:10px;color:var(--text3);margin-bottom:2px;font-weight:500;}
@@ -533,6 +536,18 @@ input, textarea { cursor: text; }
 .badge-inativo-u{background:#f0f0f2;color:#666;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;}
 
 /* FINANCEIRO */
+.fin-tabs{display:flex;gap:4px;border-bottom:2px solid var(--border);margin-bottom:16px;}
+.fin-tab{background:none;border:none;padding:10px 16px;font-size:13px;font-weight:600;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;}
+.fin-tab.active{color:var(--rosa);border-bottom-color:var(--rosa);}
+.fin-tab:hover:not(.active){color:var(--text2);}
+.fin-tab-content{animation:fadeIn .2s ease;}
+.dre-linha{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;}
+.dre-linha:last-child{border-bottom:none;}
+.dre-linha-label{font-weight:500;}
+.dre-linha-valor{font-weight:700;}
+.dre-linha.dre-total{background:#FAF6FB;font-size:15px;padding:16px;}
+.dre-linha.dre-subtotal{background:#F7F7F9;font-weight:700;}
+.dre-linha .dre-linha-sub{font-size:10px;color:var(--text3);font-weight:400;margin-top:2px;}
 .fin-resumo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
 .fin-resumo-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;}
 .fin-resumo-val{font-size:20px;font-weight:700;}
@@ -632,7 +647,6 @@ input, textarea { cursor: text; }
       <button class="sb-btn" data-page="acoes"><i class="ti ti-trophy"></i><span class="sb-btn-lbl">Ações de vendas</span></button>
       <button class="sb-btn" data-page="estoque"><i class="ti ti-package"></i><span class="sb-btn-lbl">Estoque</span><span class="sb-badge" id="sb-estoque-badge" style="display:none;">0</span></button>
       <button class="sb-btn" data-page="caixasprontas"><i class="ti ti-box-seam"></i><span class="sb-btn-lbl">Caixas Prontas</span></button>
-      <button class="sb-btn" data-page="caixasprontas"><i class="ti ti-box"></i><span class="sb-btn-lbl">Caixas Prontas</span></button>
       <button class="sb-btn admin-only desktop-only" data-page="relatorio"><i class="ti ti-chart-bar"></i><span class="sb-btn-lbl">Relatórios</span></button>
       <button class="sb-btn admin-only desktop-only" data-page="broadcast"><i class="ti ti-send"></i><span class="sb-btn-lbl">Broadcast</span></button>
       <button class="sb-btn" data-page="templates"><i class="ti ti-template"></i><span class="sb-btn-lbl">Templates</span></button>
@@ -806,13 +820,13 @@ input, textarea { cursor: text; }
       </div>
       <div id="page-kanban" class="page">
         <div class="page-title">Kanban de vendedores</div>
-        <div class="panel"><div class="panel-head"><span class="panel-title">Pipeline</span><select class="sel" style="width:130px;"><option>Todos</option><option>João</option><option>Maria</option><option>Pedro</option></select></div>
-        <div class="kanban-wrap"><div class="kanban">
-          <div class="k-col"><div class="k-head kh-novo">Novo lead <span>3</span></div><div class="k-card"><div class="k-card-name">Ana Clara</div><div class="k-card-info">500ml·2cx·Campinas</div><div class="k-card-foot"><span class="pill p-novo" style="font-size:10px;">João</span></div></div><div class="k-card"><div class="k-card-name">Beatriz Alves</div><div class="k-card-info">330ml·1cx·SP</div><div class="k-card-foot"><span class="pill p-novo" style="font-size:10px;">Maria</span></div></div></div>
-          <div class="k-col"><div class="k-head kh-orc">Orçamento <span>2</span></div><div class="k-card"><div class="k-card-name">Rafael Silva</div><div class="k-card-info">330ml·1cx·BH</div><div class="k-card-foot"><span class="pill p-orc" style="font-size:10px;">Maria</span></div></div><div class="k-card"><div class="k-card-name">Cláudia Neves</div><div class="k-card-info">400ml·2cx·Uberlândia</div><div class="k-card-foot"><span class="pill p-orc" style="font-size:10px;">Pedro</span></div></div></div>
-          <div class="k-col"><div class="k-head kh-arte">Arte <span>1</span></div><div class="k-card"><div class="k-card-name">Marina Fonseca</div><div class="k-card-info">400ml·2cx·RJ</div><div class="k-card-foot"><span class="pill p-arte" style="font-size:10px;">Pedro</span></div></div></div>
-          <div class="k-col"><div class="k-head kh-prod">Em produção <span>2</span></div><div class="k-card"><div class="k-card-name">Pedro Lima</div><div class="k-card-info">770ml·3cx·SP</div><div class="k-card-foot"><span class="pill p-prod" style="font-size:10px;">João</span></div></div><div class="k-card"><div class="k-card-name">Fernanda Cruz</div><div class="k-card-info">500ml·2cx·Curitiba</div><div class="k-card-foot"><span class="pill p-prod" style="font-size:10px;">Pedro</span></div></div></div>
-          <div class="k-col"><div class="k-head kh-ent">Entregue <span>5</span></div><div class="k-card"><div class="k-card-name">Thiago Costa</div><div class="k-card-info">500ml·5cx</div><div class="k-card-foot"><span class="pill p-entregue" style="font-size:10px;">Maria</span></div></div><div class="k-card"><div class="k-card-name">Luana Reis</div><div class="k-card-info">330ml·2cx·BH</div><div class="k-card-foot"><span class="pill p-entregue" style="font-size:10px;">João</span></div></div></div>
+        <div class="panel"><div class="panel-head"><span class="panel-title">Pipeline</span><select class="sel" id="kanban-filtro-vendedor" style="width:130px;"><option value="">Todos</option></select></div>
+        <div class="kanban-wrap"><div class="kanban" id="kanban-cols">
+          <div class="k-col"><div class="k-head kh-novo">Novo lead <span id="kh-novo-count">0</span></div><div id="kh-novo-cards"></div></div>
+          <div class="k-col"><div class="k-head kh-orc">Orçamento <span id="kh-orc-count">0</span></div><div id="kh-orc-cards"></div></div>
+          <div class="k-col"><div class="k-head kh-arte">Arte <span id="kh-arte-count">0</span></div><div id="kh-arte-cards"></div></div>
+          <div class="k-col"><div class="k-head kh-prod">Em produção <span id="kh-prod-count">0</span></div><div id="kh-prod-cards"></div></div>
+          <div class="k-col"><div class="k-head kh-ent">Entregue <span id="kh-ent-count">0</span></div><div id="kh-ent-cards"></div></div>
         </div></div></div>
       </div>
       <div id="page-contatos" class="page">
@@ -820,14 +834,10 @@ input, textarea { cursor: text; }
         <div class="panel">
           <div class="panel-head">
             <div class="search-wrap" style="flex:1;max-width:280px;"><i class="ti ti-search" style="font-size:14px;color:#aaa;"></i><input type="search" id="contact-search" placeholder="Nome, WhatsApp ou cidade..."/></div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;"><select class="sel" style="width:120px;"><option value="">Todos status</option><option>Novo lead</option><option>Em produção</option><option>Entregue</option><option>Follow-up 30d</option></select><select class="sel" style="width:110px;"><option value="">Todos vendedores</option><option>João</option><option>Maria</option><option>Pedro</option></select></div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;"><select class="sel" id="contact-filter-status" style="width:120px;"><option value="">Todos status</option><option>Novo lead</option><option>Orçamento enviado</option><option>Arte pendente</option><option>Em produção</option><option>Pronto para despacho</option><option>Entregue</option><option>Follow-up 30d</option></select><select class="sel" id="contact-filter-vendedor" style="width:110px;"><option value="">Todos vendedores</option></select></div>
           </div>
-          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nome</th><th>WhatsApp</th><th>Cidade</th><th>Último pedido</th><th>Vendedor</th><th>Status</th><th></th></tr></thead><tbody>
-            <tr><td><b>Ana Clara</b></td><td>(19)99123-4567</td><td>Campinas/SP</td><td>500ml·24/06</td><td>João</td><td><span class="pill p-novo">Novo lead</span></td><td><button class="btn btn-sm" data-hist="AC">Histórico</button></td></tr>
-            <tr><td><b>Rafael Silva</b></td><td>(31)98765-4321</td><td>BH/MG</td><td>330ml·23/06</td><td>Maria</td><td><span class="pill p-orc">Orçamento</span></td><td><button class="btn btn-sm" data-hist="RS">Histórico</button></td></tr>
-            <tr><td><b>Pedro Lima</b></td><td>(11)97654-3210</td><td>SP/SP</td><td>770ml·20/06</td><td>João</td><td><span class="pill p-prod">Produção</span></td><td><button class="btn btn-sm" data-hist="PL">Histórico</button></td></tr>
-            <tr><td><b>Thiago Costa</b></td><td>(35)99888-7766</td><td>Pouso Alegre</td><td>500ml·25/05</td><td>João</td><td><span class="pill p-follow">Follow-up</span></td><td><button class="btn btn-sm" data-hist="TC">Histórico</button></td></tr>
-            <tr><td><b>Luana Reis</b></td><td>(31)98877-6655</td><td>BH/MG</td><td>330ml·27/05</td><td>Maria</td><td><span class="pill p-follow">Follow-up</span></td><td><button class="btn btn-sm" data-hist="LR">Histórico</button></td></tr>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nome</th><th>WhatsApp</th><th>Cidade</th><th>Último pedido</th><th>Vendedor</th><th>Status</th><th></th></tr></thead><tbody id="contatos-tbody">
+            <tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px;">Carregando...</td></tr>
           </tbody></table></div>
         </div>
       </div>
@@ -881,11 +891,14 @@ input, textarea { cursor: text; }
         </div>
       </div>
       <div id="page-relatorio" class="page">
-        <div class="page-title">Relatórios <div style="display:flex;gap:8px;"><select class="sel" style="width:130px;"><option>Junho 2025</option><option>Maio 2025</option></select><button class="btn btn-rosa btn-sm"><i class="ti ti-download" style="font-size:12px;"></i> Exportar</button></div></div>
-        <div class="metrics"><div class="metric"><div class="metric-ico" style="background:#FBEAF0;"><i class="ti ti-users" style="font-size:16px;color:#E31787;"></i></div><div class="metric-val">47</div><div class="metric-lbl">Total de leads</div><div class="metric-change up">↑ 18%</div></div><div class="metric"><div class="metric-ico" style="background:#E1F5EE;"><i class="ti ti-check" style="font-size:16px;color:#085041;"></i></div><div class="metric-val">23%</div><div class="metric-lbl">Taxa de conversão</div><div class="metric-change up">↑ 5%</div></div><div class="metric"><div class="metric-ico" style="background:#EEEDFE;"><i class="ti ti-clock" style="font-size:16px;color:#3C3489;"></i></div><div class="metric-val">4 min</div><div class="metric-lbl">Tempo médio resp.</div><div class="metric-change up">↓ 2min</div></div><div class="metric"><div class="metric-ico" style="background:#E1F5EE;"><i class="ti ti-currency-dollar" style="font-size:16px;color:#085041;"></i></div><div class="metric-val">R$18.340</div><div class="metric-lbl">Faturamento</div><div class="metric-change up">↑ 12%</div></div></div>
-        <div class="report-card"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;"><div class="report-av" style="background:#E31787;">JO</div><div><div style="font-size:14px;font-weight:600;">João</div><div style="font-size:11px;color:#666;">Vendedor</div></div><span class="pill p-entregue" style="margin-left:auto;">Top vendedor</span></div><div class="report-stats"><div class="report-stat"><div class="report-stat-val">18</div><div class="report-stat-lbl">Leads</div></div><div class="report-stat"><div class="report-stat-val" style="color:#E31787;">28%</div><div class="report-stat-lbl">Conversão</div></div><div class="report-stat"><div class="report-stat-val">3 min</div><div class="report-stat-lbl">Resp. média</div></div><div class="report-stat"><div class="report-stat-val" style="color:#E31787;">R$8.120</div><div class="report-stat-lbl">Faturamento</div></div></div><div class="progress-bar"><div class="progress-fill" style="width:70%;"></div></div></div>
-        <div class="report-card"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;"><div class="report-av" style="background:#633806;">MA</div><div><div style="font-size:14px;font-weight:600;">Maria</div><div style="font-size:11px;color:#666;">Vendedor</div></div></div><div class="report-stats"><div class="report-stat"><div class="report-stat-val">16</div><div class="report-stat-lbl">Leads</div></div><div class="report-stat"><div class="report-stat-val" style="color:#E31787;">25%</div><div class="report-stat-lbl">Conversão</div></div><div class="report-stat"><div class="report-stat-val">5 min</div><div class="report-stat-lbl">Resp. média</div></div><div class="report-stat"><div class="report-stat-val" style="color:#E31787;">R$6.890</div><div class="report-stat-lbl">Faturamento</div></div></div><div class="progress-bar"><div class="progress-fill" style="width:55%;"></div></div></div>
-        <div class="report-card"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;"><div class="report-av" style="background:#3C3489;">PE</div><div><div style="font-size:14px;font-weight:600;">Pedro</div><div style="font-size:11px;color:#666;">Vendedor</div></div></div><div class="report-stats"><div class="report-stat"><div class="report-stat-val">13</div><div class="report-stat-lbl">Leads</div></div><div class="report-stat"><div class="report-stat-val" style="color:#E31787;">15%</div><div class="report-stat-lbl">Conversão</div></div><div class="report-stat"><div class="report-stat-val">6 min</div><div class="report-stat-lbl">Resp. média</div></div><div class="report-stat"><div class="report-stat-val" style="color:#E31787;">R$3.330</div><div class="report-stat-lbl">Faturamento</div></div></div><div class="progress-bar"><div class="progress-fill" style="width:35%;"></div></div></div>
+        <div class="page-title">Relatórios <div style="display:flex;gap:8px;"><select class="sel" id="rel-mes-select" style="width:150px;"></select></div></div>
+        <div class="metrics" id="rel-metrics">
+          <div class="metric"><div class="metric-ico" style="background:#FBEAF0;"><i class="ti ti-users" style="font-size:16px;color:#E31787;"></i></div><div class="metric-val" id="rel-total-leads">0</div><div class="metric-lbl">Total de pedidos</div></div>
+          <div class="metric"><div class="metric-ico" style="background:#E1F5EE;"><i class="ti ti-check" style="font-size:16px;color:#085041;"></i></div><div class="metric-val" id="rel-conversao">0%</div><div class="metric-lbl">Taxa de entrega</div></div>
+          <div class="metric"><div class="metric-ico" style="background:#EEEDFE;"><i class="ti ti-clock" style="font-size:16px;color:#3C3489;"></i></div><div class="metric-val" id="rel-cancelados">0</div><div class="metric-lbl">Cancelados</div></div>
+          <div class="metric"><div class="metric-ico" style="background:#E1F5EE;"><i class="ti ti-currency-dollar" style="font-size:16px;color:#085041;"></i></div><div class="metric-val" id="rel-faturamento">R$0</div><div class="metric-lbl">Faturamento</div></div>
+        </div>
+        <div id="rel-vendedores-lista"></div>
       </div>
       <div id="page-broadcast" class="page">
         <div class="page-title">Broadcast — Disparo em massa</div>
@@ -1161,6 +1174,7 @@ input, textarea { cursor: text; }
 
       <!-- ESTOQUE -->
       <div id="page-estoque" class="page">
+        <datalist id="lista-tamanhos-conhecidos"></datalist>
         <div class="page-title">Estoque de copos</div>
         <div class="stock-alert" id="stock-alert" style="display:none;">
           <i class="ti ti-alert-triangle" style="font-size:16px;flex-shrink:0;"></i>
@@ -1172,77 +1186,115 @@ input, textarea { cursor: text; }
         </div>
 
         <div id="estoque-gestor-wrap" style="display:none;">
-          <div class="stock-card" id="form-entrada" style="display:none;">
-            <div class="panel-head"><span class="panel-title">Registrar entrada de estoque</span><button class="btn btn-icon" id="btn-close-entrada">×</button></div>
-            <div class="stock-inp-row">
-              <div class="stock-field"><label>Tamanho</label><select id="ent-tam"><option>330ml</option><option>400ml</option><option>500ml</option><option>770ml</option></select></div>
-              <div class="stock-field"><label>Caixas fechadas</label><input type="number" id="ent-caixas" min="0" placeholder="0"/></div>
-              <div class="stock-field"><label>Unidades avulsas</label><input type="number" id="ent-unid" min="0" placeholder="0"/></div>
-              <div class="stock-field"><label>Custo por caixa (R$)</label><input type="number" id="ent-custo" min="0" step="0.01" placeholder="Ex: 180,00"/></div>
-              <div class="stock-field"><label>Nota fiscal</label><input type="text" id="ent-nf" placeholder="NF 12345"/></div>
+          <div class="acc-panel collapsed" data-acc="est-entrada">
+            <div class="acc-head" data-acc-toggle="est-entrada" onclick="estAccToggle('est-entrada')">
+              <div class="acc-head-left"><span class="panel-title" style="color:#E31787;">➕ Registrar entrada de estoque</span></div>
+              <i class="ti ti-chevron-down acc-chevron"></i>
             </div>
-            <div style="font-size:10px;color:var(--text3);margin-top:4px;"><i class="ti ti-info-circle" style="font-size:11px;"></i> O custo por caixa é usado para calcular a margem de lucro (não inclui frete — frete entra separado no Financeiro).</div>
-            <button class="btn btn-rosa" id="btn-confirm-entrada" style="width:100%;justify-content:center;margin-top:12px;"><i class="ti ti-check" style="font-size:12px;"></i> Confirmar entrada</button>
-          </div>
-          <!-- ABRIR CAIXA -->
-          <div class="stock-card" style="border:1px solid #f0c040;">
-            <div class="panel-head"><span class="panel-title">📦 Abrir caixa (uso parcial)</span></div>
-            <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">Use quando abrir uma caixa fechada para retirar apenas alguns pacotes. O sistema baixa 1 caixa e credita os pacotes avulsos no estoque.</div>
-            <div class="stock-inp-row">
-              <div class="stock-field"><label>Tamanho</label><select id="abrir-tam"><option>330ml</option><option>400ml</option><option>500ml</option><option>770ml</option></select></div>
-              <div class="stock-field"><label>Pacotes na caixa</label><input type="number" id="abrir-total" min="1" placeholder="Ex: 25"/></div>
-              <div class="stock-field"><label>Pacotes usados agora</label><input type="number" id="abrir-usados" min="0" placeholder="0"/></div>
-              <div class="stock-field"><label>Motivo</label><input type="text" id="abrir-motivo" placeholder="Ex: Amostra cliente"/></div>
-            </div>
-            <div style="background:#FFFDE7;border-radius:8px;padding:8px 12px;font-size:11px;color:#5D4037;margin-top:8px;" id="abrir-preview" style="display:none;"></div>
-            <button class="btn" id="btn-confirm-abrir" style="width:100%;justify-content:center;margin-top:12px;background:#f0c040;color:#5D4037;border-color:#f0c040;font-weight:600;"><i class="ti ti-package-open" style="font-size:12px;"></i> Abrir caixa e lançar avulsos</button>
+            <div class="acc-body" id="acc-body-est-entrada"><div class="acc-body-inner">
+              <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
+                <input type="file" id="ent-xml-input" accept=".xml" style="display:none;"/>
+                <button class="btn btn-sm" id="btn-ent-importar-xml" style="background:#217346;color:#fff;border-color:#217346;"><i class="ti ti-file-upload" style="font-size:11px;"></i> Importar XML da NF-e</button>
+                <span style="font-size:10px;color:var(--text3);">Preenche os itens automaticamente — você ainda pode editar tudo antes de confirmar.</span>
+              </div>
+              <div id="ent-frete-wrap" style="display:none;background:#FAF6FB;border:1px solid #EEDFF3;border-radius:8px;padding:10px 14px;margin-bottom:10px;">
+                <div style="font-size:11px;font-weight:600;color:#772583;margin-bottom:6px;">Frete identificado na NF</div>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                  <div class="stock-field" style="margin:0;"><label>Valor do frete (R$)</label><input type="number" id="ent-xml-frete" min="0" step="0.01"/></div>
+                  <label style="font-size:11px;display:flex;align-items:center;gap:5px;margin-top:14px;"><input type="checkbox" id="ent-xml-lancar-frete" checked/> Já lançar como despesa no Financeiro (categoria Frete)</label>
+                </div>
+              </div>
+              <div id="ent-itens-lista"></div>
+              <button class="btn btn-sm" id="btn-ent-add-item" style="margin-top:6px;"><i class="ti ti-plus" style="font-size:11px;"></i> Adicionar outro item desta NF</button>
+              <div style="font-size:10px;color:var(--text3);margin-top:8px;"><i class="ti ti-info-circle" style="font-size:11px;"></i> O custo por caixa é usado para calcular a margem de lucro (não inclui frete — frete entra separado no Financeiro). Uma nota fiscal geralmente traz vários itens — adicione quantos precisar antes de confirmar.</div>
+              <button class="btn btn-rosa" id="btn-confirm-entrada" style="width:100%;justify-content:center;margin-top:12px;"><i class="ti ti-check" style="font-size:12px;"></i> Confirmar entrada(s)</button>
+            </div></div>
           </div>
 
-          <div class="stock-card">
-            <div class="panel-head"><span class="panel-title">Baixa manual de estoque</span></div>
-            <div class="stock-inp-row">
-              <div class="stock-field"><label>Tamanho</label><select id="baixa-tam"><option>330ml</option><option>400ml</option><option>500ml</option><option>770ml</option></select></div>
-              <div class="stock-field"><label>Caixas</label><input type="number" id="baixa-caixas" min="0" placeholder="0"/></div>
-              <div class="stock-field"><label>Unidades avulsas</label><input type="number" id="baixa-unid" min="0" placeholder="0"/></div>
-              <div class="stock-field"><label>Motivo</label><input type="text" id="baixa-motivo" placeholder="Ex: Amostras, descarte..."/></div>
+          <!-- ABRIR CAIXA -->
+          <div class="acc-panel collapsed" data-acc="est-abrir">
+            <div class="acc-head" data-acc-toggle="est-abrir" onclick="estAccToggle('est-abrir')">
+              <div class="acc-head-left"><span class="panel-title" style="color:#B8860B;">📦 Abrir caixa (uso parcial)</span></div>
+              <i class="ti ti-chevron-down acc-chevron"></i>
             </div>
-            <button class="btn btn-danger" id="btn-confirm-baixa" style="width:100%;justify-content:center;margin-top:12px;"><i class="ti ti-arrow-down" style="font-size:12px;"></i> Dar baixa</button>
+            <div class="acc-body" id="acc-body-est-abrir"><div class="acc-body-inner">
+              <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">Use quando abrir uma caixa fechada para retirar apenas alguns pacotes. O sistema baixa 1 caixa e credita os pacotes avulsos no estoque.</div>
+              <div class="stock-inp-row">
+                <div class="stock-field"><label>Tamanho (ml)</label><input type="number" id="abrir-tam" min="1" placeholder="Ex: 500" list="lista-tamanhos-conhecidos"/></div>
+                <div class="stock-field"><label>Pacotes na caixa</label><input type="number" id="abrir-total" min="1" placeholder="Ex: 25"/></div>
+                <div class="stock-field"><label>Pacotes usados agora</label><input type="number" id="abrir-usados" min="0" placeholder="0"/></div>
+                <div class="stock-field"><label>Motivo</label><input type="text" id="abrir-motivo" placeholder="Ex: Amostra cliente"/></div>
+              </div>
+              <div style="background:#FFFDE7;border-radius:8px;padding:8px 12px;font-size:11px;color:#5D4037;margin-top:8px;" id="abrir-preview" style="display:none;"></div>
+              <button class="btn" id="btn-confirm-abrir" style="width:100%;justify-content:center;margin-top:12px;background:#f0c040;color:#5D4037;border-color:#f0c040;font-weight:600;"><i class="ti ti-package-open" style="font-size:12px;"></i> Abrir caixa e lançar avulsos</button>
+            </div></div>
+          </div>
+
+          <div class="acc-panel collapsed" data-acc="est-baixa">
+            <div class="acc-head" data-acc-toggle="est-baixa" onclick="estAccToggle('est-baixa')">
+              <div class="acc-head-left"><span class="panel-title" style="color:#B8322F;">⬇ Baixa manual de estoque</span></div>
+              <i class="ti ti-chevron-down acc-chevron"></i>
+            </div>
+            <div class="acc-body" id="acc-body-est-baixa"><div class="acc-body-inner">
+              <div class="stock-inp-row">
+                <div class="stock-field"><label>Tamanho (ml)</label><input type="number" id="baixa-tam" min="1" placeholder="Ex: 500" list="lista-tamanhos-conhecidos"/></div>
+                <div class="stock-field"><label>Caixas</label><input type="number" id="baixa-caixas" min="0" placeholder="0"/></div>
+                <div class="stock-field"><label>Unidades avulsas</label><input type="number" id="baixa-unid" min="0" placeholder="0"/></div>
+                <div class="stock-field"><label>Motivo</label><input type="text" id="baixa-motivo" placeholder="Ex: Amostras, descarte..."/></div>
+              </div>
+              <button class="btn btn-danger" id="btn-confirm-baixa" style="width:100%;justify-content:center;margin-top:12px;"><i class="ti ti-arrow-down" style="font-size:12px;"></i> Dar baixa</button>
+            </div></div>
           </div>
 
           <!-- AJUSTE / CORREÇÃO MANUAL — separado de entrada/baixa comuns -->
-          <div class="stock-card" style="border:1px solid #3C3489;">
-            <div class="panel-head"><span class="panel-title"><i class="ti ti-adjustments" style="font-size:14px;color:#3C3489;"></i> Ajuste / correção de inventário</span></div>
-            <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">Use quando a contagem física não bate com o sistema — não é uma venda nem uma compra, é uma correção do número real em estoque. Fica registrado separadamente no histórico para não confundir com movimentações comerciais.</div>
-            <div class="stock-inp-row">
-              <div class="stock-field"><label>Tamanho</label><select id="ajuste-tam"><option>330ml</option><option>400ml</option><option>500ml</option><option>770ml</option></select></div>
-              <div class="stock-field"><label>Tipo de ajuste</label><select id="ajuste-tipo"><option value="somar">Somar ao estoque (achei a mais)</option><option value="subtrair">Subtrair do estoque (achei a menos)</option></select></div>
-              <div class="stock-field"><label>Caixas</label><input type="number" id="ajuste-caixas" min="0" placeholder="0"/></div>
-              <div class="stock-field"><label>Unidades avulsas</label><input type="number" id="ajuste-unid" min="0" placeholder="0"/></div>
+          <div class="acc-panel collapsed" data-acc="est-ajuste">
+            <div class="acc-head" data-acc-toggle="est-ajuste" onclick="estAccToggle('est-ajuste')">
+              <div class="acc-head-left"><span class="panel-title" style="color:#3C3489;"><i class="ti ti-adjustments" style="font-size:14px;"></i> Ajuste / correção de inventário</span></div>
+              <i class="ti ti-chevron-down acc-chevron"></i>
             </div>
-            <div class="stock-field" style="margin-top:8px;"><label>Motivo do ajuste *</label><input type="text" id="ajuste-motivo" placeholder="Ex: contagem física de fim de mês, avaria não lançada..."/></div>
-            <button class="btn" id="btn-confirm-ajuste" style="width:100%;justify-content:center;margin-top:12px;background:#3C3489;color:#fff;border-color:#3C3489;font-weight:600;"><i class="ti ti-adjustments" style="font-size:12px;"></i> Aplicar ajuste</button>
+            <div class="acc-body" id="acc-body-est-ajuste"><div class="acc-body-inner">
+              <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">Use quando a contagem física não bate com o sistema — não é uma venda nem uma compra, é uma correção do número real em estoque. Fica registrado separadamente no histórico para não confundir com movimentações comerciais.</div>
+              <div class="stock-inp-row">
+                <div class="stock-field"><label>Tamanho (ml)</label><input type="number" id="ajuste-tam" min="1" placeholder="Ex: 500" list="lista-tamanhos-conhecidos"/></div>
+                <div class="stock-field"><label>Tipo de ajuste</label><select id="ajuste-tipo"><option value="somar">Somar ao estoque (achei a mais)</option><option value="subtrair">Subtrair do estoque (achei a menos)</option></select></div>
+                <div class="stock-field"><label>Caixas</label><input type="number" id="ajuste-caixas" min="0" placeholder="0"/></div>
+                <div class="stock-field"><label>Unidades avulsas</label><input type="number" id="ajuste-unid" min="0" placeholder="0"/></div>
+                <div class="stock-field" id="ajuste-custo-wrap"><label>Custo por caixa (R$)</label><input type="number" id="ajuste-custo" min="0" step="0.01" placeholder="Ex: 180,00"/></div>
+              </div>
+              <div style="font-size:10px;color:var(--text3);margin-top:4px;" id="ajuste-custo-info"><i class="ti ti-info-circle" style="font-size:11px;"></i> Como esse ajuste soma caixas ao estoque, informe o custo real dessas caixas — é usado para calcular a margem de lucro nas vendas futuras.</div>
+              <div class="stock-field" style="margin-top:8px;"><label>Motivo do ajuste *</label><input type="text" id="ajuste-motivo" placeholder="Ex: contagem física de fim de mês, avaria não lançada..."/></div>
+              <button class="btn" id="btn-confirm-ajuste" style="width:100%;justify-content:center;margin-top:12px;background:#3C3489;color:#fff;border-color:#3C3489;font-weight:600;"><i class="ti ti-adjustments" style="font-size:12px;"></i> Aplicar ajuste</button>
+            </div></div>
           </div>
         </div>
 
-        <div class="stock-card">
-          <div class="panel-head"><span class="panel-title">Histórico de movimentações</span></div>
-          <div class="stock-log" id="stock-log"></div>
+        <div class="acc-panel collapsed" data-acc="est-historico">
+          <div class="acc-head" data-acc-toggle="est-historico" onclick="estAccToggle('est-historico')">
+            <div class="acc-head-left"><span class="panel-title" style="color:#555;">📜 Histórico de movimentações</span></div>
+            <i class="ti ti-chevron-down acc-chevron"></i>
+          </div>
+          <div class="acc-body" id="acc-body-est-historico"><div class="acc-body-inner">
+            <div class="stock-log" id="stock-log"></div>
+          </div></div>
         </div>
 
         <!-- INVENTÁRIO DE MATERIAIS DE CONSUMO — separado do estoque de copos -->
-        <div class="stock-card" style="margin-top:20px;border-top:3px solid #772583;">
-          <div class="stock-header">
-            <span class="stock-title">📋 Inventário — Materiais de consumo</span>
-            <button class="btn btn-rosa btn-sm" id="btn-inv-novo-item" style="display:none;"><i class="ti ti-plus" style="font-size:12px;"></i> Novo item</button>
+        <div class="acc-panel collapsed" data-acc="est-inventario" style="margin-top:20px;border-top:3px solid #772583;">
+          <div class="acc-head" data-acc-toggle="est-inventario" onclick="estAccToggle('est-inventario')">
+            <div class="acc-head-left"><span class="stock-title" style="color:#772583;">📋 Inventário — Materiais de consumo</span></div>
+            <i class="ti ti-chevron-down acc-chevron"></i>
           </div>
-          <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">Tintas, químicos, materiais de tela, limpeza, escritório e embalagem — controle por unidade (ex: 1 lata de tinta, 1 pacote de durex = 10 unidades no estoque). Não há controle por litro/grama parcial.</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
-            <div class="search-wrap" style="max-width:280px;"><i class="ti ti-search" style="font-size:13px;color:var(--text3);"></i><input type="text" id="inv-busca" placeholder="Buscar por nome ou código..."/></div>
-            <select class="sel" id="inv-filtro-categoria" style="width:180px;"><option value="">Todas categorias</option></select>
-          </div>
-          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Código</th><th>Item</th><th>Categoria</th><th>Qtd. atual</th><th>Custo unit.</th><th>Ação</th></tr></thead><tbody id="inv-itens-tbody">
-            <tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px;">Carregando...</td></tr>
-          </tbody></table></div>
+          <div class="acc-body" id="acc-body-est-inventario"><div class="acc-body-inner">
+            <div style="display:flex;justify-content:flex-end;margin-bottom:6px;"><button class="btn btn-rosa btn-sm" id="btn-inv-novo-item" style="display:none;"><i class="ti ti-plus" style="font-size:12px;"></i> Novo item</button></div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">Tintas, químicos, materiais de tela, limpeza, escritório e embalagem — controle por unidade (ex: 1 lata de tinta, 1 pacote de durex = 10 unidades no estoque). Não há controle por litro/grama parcial. Use o botão <b>Movimentar</b> em cada linha para dar baixa quando pegar um item para uso (ex: abrir uma lata de tinta, retirar um pacote de estopa).</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
+              <div class="search-wrap" style="max-width:280px;"><i class="ti ti-search" style="font-size:13px;color:var(--text3);"></i><input type="text" id="inv-busca" placeholder="Buscar por nome ou código..."/></div>
+              <select class="sel" id="inv-filtro-categoria" style="width:180px;"><option value="">Todas categorias</option></select>
+            </div>
+            <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Código</th><th>Item</th><th>Categoria</th><th>Qtd. atual</th><th>Custo unit.</th><th>Ação</th></tr></thead><tbody id="inv-itens-tbody">
+              <tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px;">Carregando...</td></tr>
+            </tbody></table></div>
+          </div></div>
         </div>
       </div>
 
@@ -1260,6 +1312,19 @@ input, textarea { cursor: text; }
           </div>
           <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Tamanho</th><th>Arte (logo)</th><th>Cor da logo</th><th>Marca do copo</th><th>Qtd. caixas</th><th>Custo/caixa</th><th>Ação</th></tr></thead><tbody id="cp-tbody">
             <tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px;">Carregando...</td></tr>
+          </tbody></table></div>
+        </div>
+
+        <!-- ESTOQUE DE REFUGO — caixas já produzidas sem dono (cancelamento
+             pós-produção, ou copos com defeito acumulados na produção) -->
+        <div class="panel" style="margin-top:20px;border-top:3px solid #9A3412;">
+          <div class="stock-header">
+            <span class="stock-title" style="color:#9A3412;">🔶 Estoque de Refugo</span>
+            <button class="btn btn-rosa btn-sm" id="btn-refugo-novo" style="display:none;"><i class="ti ti-plus" style="font-size:12px;"></i> Adicionar ao refugo</button>
+          </div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">Caixas já personalizadas, mas sem cliente — de cancelamento após produção, ou copos com defeito (amassados, tortos) acumulados até fechar uma caixa. Disponível para venda com condição negociada caso a caso.</div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Tamanho</th><th>Arte</th><th>Origem</th><th>Motivo</th><th>Qtd. caixas</th><th>Ação</th></tr></thead><tbody id="refugo-tbody">
+            <tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px;">Carregando...</td></tr>
           </tbody></table></div>
         </div>
       </div>
@@ -1316,15 +1381,15 @@ input, textarea { cursor: text; }
           <div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:10px;">🔔 Alertas pendentes hoje</div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="alertas-resumo">
             <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px;text-align:center;">
-              <div style="font-size:22px;font-weight:700;color:#fff;" id="alerta-count-brinde">2</div>
+              <div style="font-size:22px;font-weight:700;color:#fff;" id="alerta-count-brinde">0</div>
               <div style="font-size:10px;color:rgba(255,255,255,.8);">Brinde da 11ª caixa</div>
             </div>
             <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px;text-align:center;">
-              <div style="font-size:22px;font-weight:700;color:#fff;" id="alerta-count-desc">3</div>
+              <div style="font-size:22px;font-weight:700;color:#fff;" id="alerta-count-desc">0</div>
               <div style="font-size:10px;color:rgba(255,255,255,.8);">Descontos pendentes</div>
             </div>
             <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:10px;text-align:center;">
-              <div style="font-size:22px;font-weight:700;color:#fff;" id="alerta-count-aniv">1</div>
+              <div style="font-size:22px;font-weight:700;color:#fff;" id="alerta-count-aniv">0</div>
               <div style="font-size:10px;color:rgba(255,255,255,.8);">Aniversários / Indicações</div>
             </div>
           </div>
@@ -1335,57 +1400,19 @@ input, textarea { cursor: text; }
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
             <span style="font-size:18px;">🎁</span>
             <span style="font-weight:600;font-size:13px;">Brinde da 11ª caixa</span>
-            <span style="background:#FBEAF0;color:#72243E;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;">2 pendentes</span>
+            <span style="background:#FBEAF0;color:#72243E;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;" id="acv-brinde-badge">0 pendentes</span>
           </div>
-          <div class="alerta-item">
-            <div class="alerta-item-info">
-              <div class="alerta-item-nome">Thiago Costa</div>
-              <div class="alerta-item-desc">12 caixas em 30 dias · <span style="background:#EDE3F5;color:#5A1E7A;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">João</span> · Brinde na 11ª caixa · Preço tabela ✓</div>
-            </div>
-            <span class="alerta-status st-pendente">Pendente</span>
-            <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
-          </div>
-          <div class="alerta-item">
-            <div class="alerta-item-info">
-              <div class="alerta-item-nome">Fernanda Cruz</div>
-              <div class="alerta-item-desc">10 caixas em 28 dias · <span style="background:#E0F0FF;color:#1A5A9A;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">Pedro</span> · Brinde na 11ª caixa · Preço tabela ✓</div>
-            </div>
-            <span class="alerta-status st-pendente">Pendente</span>
-            <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
-          </div>
+          <div id="acv-brinde-lista"></div>
         </div>
 
         <!-- CATEGORIA: DESCONTOS -->
         <div class="panel" style="margin-bottom:12px;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
             <span style="font-size:18px;">💰</span>
-            <span style="font-weight:600;font-size:13px;">Descontos pendentes</span>
-            <span style="background:#E1F5EE;color:#085041;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;">3 pendentes</span>
+            <span style="font-weight:600;font-size:13px;">Descontos pendentes (compra de 10 caixas)</span>
+            <span style="background:#E1F5EE;color:#085041;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;" id="acv-desconto-badge">0 pendentes</span>
           </div>
-          <div class="alerta-item">
-            <div class="alerta-item-info">
-              <div class="alerta-item-nome">Rafael Silva</div>
-              <div class="alerta-item-desc">5 caixas em 20 dias · <span style="background:#FBEAF0;color:#A0184E;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">Maria</span> · 10% desconto próxima compra · Expira em 10 dias</div>
-            </div>
-            <span class="alerta-status st-pendente">Pendente</span>
-            <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
-          </div>
-          <div class="alerta-item">
-            <div class="alerta-item-info">
-              <div class="alerta-item-nome">Carlos Mota</div>
-              <div class="alerta-item-desc">6 caixas em 15 dias · <span style="background:#E0F0FF;color:#1A5A9A;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">Pedro</span> · 10% desconto próxima compra · Expira em 5 dias</div>
-            </div>
-            <span class="alerta-status st-pendente">Pendente</span>
-            <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
-          </div>
-          <div class="alerta-item">
-            <div class="alerta-item-info">
-              <div class="alerta-item-nome">Beatriz Alves</div>
-              <div class="alerta-item-desc">5 caixas em 30 dias · <span style="background:#EDE3F5;color:#5A1E7A;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">João</span> · 10% desconto · Expirou</div>
-            </div>
-            <span class="alerta-status st-expirado">Expirado</span>
-            <button class="btn btn-sm" disabled style="opacity:.5;">Expirado</button>
-          </div>
+          <div id="acv-desconto-lista"></div>
         </div>
 
         <!-- CATEGORIA: FIDELIDADE -->
@@ -1393,32 +1420,19 @@ input, textarea { cursor: text; }
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
             <span style="font-size:18px;">📅</span>
             <span style="font-weight:600;font-size:13px;">Fidelidade — 3º mês consecutivo</span>
-            <span style="background:#E1F5EE;color:#085041;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;">1 aplicado</span>
+            <span style="background:#E1F5EE;color:#085041;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;" id="acv-fidelidade-badge">0</span>
           </div>
-          <div class="alerta-item">
-            <div class="alerta-item-info">
-              <div class="alerta-item-nome">Luana Reis</div>
-              <div class="alerta-item-desc">3 meses seguidos · <span style="background:#FBEAF0;color:#A0184E;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">Maria</span> · 5% aplicado no último pedido</div>
-            </div>
-            <span class="alerta-status st-aplicado">Aplicado</span>
-          </div>
+          <div id="acv-fidelidade-lista"></div>
         </div>
 
         <!-- CATEGORIA: ANIVERSÁRIOS -->
         <div class="panel" style="margin-bottom:12px;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
             <span style="font-size:18px;">🎂</span>
-            <span style="font-weight:600;font-size:13px;">Aniversários de cadastro</span>
-            <span style="background:#FEF3C7;color:#7B5800;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;">1 em breve</span>
+            <span style="font-weight:600;font-size:13px;">Aniversários de cadastro (1 ano do 1º pedido)</span>
+            <span style="background:#FEF3C7;color:#7B5800;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;" id="acv-aniversario-badge">0</span>
           </div>
-          <div class="alerta-item">
-            <div class="alerta-item-info">
-              <div class="alerta-item-nome">Pedro Lima</div>
-              <div class="alerta-item-desc">1 ano de cadastro · Aniversário em 3 dias (28/06) · <span style="background:#EDE3F5;color:#5A1E7A;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">João</span></div>
-            </div>
-            <span class="alerta-status st-pendente">Em 3 dias</span>
-            <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar enviado</button>
-          </div>
+          <div id="acv-aniversario-lista"></div>
         </div>
 
         <!-- CATEGORIA: INDICAÇÕES -->
@@ -1426,66 +1440,19 @@ input, textarea { cursor: text; }
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
             <span style="font-size:18px;">🤝</span>
             <span style="font-weight:600;font-size:13px;">Programa de indicação</span>
-            <span style="background:#FBEAF0;color:#72243E;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;">1 pendente</span>
+            <span style="background:#FBEAF0;color:#72243E;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;" id="acv-indicacao-badge">0 pendente</span>
           </div>
-          <div class="alerta-item">
-            <div class="alerta-item-info">
-              <div class="alerta-item-nome">Ana Clara</div>
-              <div class="alerta-item-desc">Indicou Marina Fonseca · Primeiro pedido fechado · 10% pendente · Expira em 60 dias</div>
-            </div>
-            <span class="alerta-status st-pendente">Pendente</span>
-            <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar aplicado</button>
-          </div>
-        </div>
-
-        <!-- CATEGORIA: RECORRENTES / REATIVAÇÃO -->
-        <div class="panel" style="margin-bottom:12px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-            <span style="font-size:18px;">🔄</span>
-            <span style="font-weight:600;font-size:13px;">Contato recorrente sugerido</span>
-            <span style="background:#EFF6FF;color:#1E40AF;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;">2 para contatar</span>
-          </div>
-          <div class="alerta-item">
-            <div class="alerta-item-info">
-              <div class="alerta-item-nome">Thiago Costa</div>
-              <div class="alerta-item-desc">Pediu em Abril e Maio · <span style="background:#EDE3F5;color:#5A1E7A;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">João</span> · Contato sugerido para Junho</div>
-            </div>
-            <span class="alerta-status st-pendente">Contatar</span>
-            <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar contatado</button>
-          </div>
-          <div class="alerta-item">
-            <div class="alerta-item-info">
-              <div class="alerta-item-nome">Rafael Silva</div>
-              <div class="alerta-item-desc">Pediu em Abril e Maio · <span style="background:#FBEAF0;color:#A0184E;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">Maria</span> · Contato sugerido para Junho</div>
-            </div>
-            <span class="alerta-status st-pendente">Contatar</span>
-            <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar contatado</button>
-          </div>
+          <div id="acv-indicacao-lista"></div>
         </div>
 
         <!-- CATEGORIA: REATIVAÇÃO -->
         <div class="panel" style="margin-bottom:12px;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
             <span style="font-size:18px;">⏰</span>
-            <span style="font-weight:600;font-size:13px;">Reativação de inativos</span>
-            <span style="background:#FFF7ED;color:#9A3412;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;">2 inativos</span>
+            <span style="font-weight:600;font-size:13px;">Reativação de inativos (60+ dias sem comprar)</span>
+            <span style="background:#FFF7ED;color:#9A3412;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;" id="acv-reativacao-badge">0 inativos</span>
           </div>
-          <div class="alerta-item">
-            <div class="alerta-item-info">
-              <div class="alerta-item-nome">Carlos Mota</div>
-              <div class="alerta-item-desc">Sem compras há 75 dias · <span style="background:#E0F0FF;color:#1A5A9A;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">Pedro</span> · Último pedido: 12/04</div>
-            </div>
-            <span class="alerta-status st-expirado">75 dias</span>
-            <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar contatado</button>
-          </div>
-          <div class="alerta-item">
-            <div class="alerta-item-info">
-              <div class="alerta-item-nome">Marina Fonseca</div>
-              <div class="alerta-item-desc">Sem compras há 62 dias · <span style="background:#EDE3F5;color:#5A1E7A;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">João</span> · Último pedido: 25/04</div>
-            </div>
-            <span class="alerta-status st-expirado">62 dias</span>
-            <button class="btn btn-rosa btn-sm" onclick="marcarAcao(this,'aplicado')">Marcar contatado</button>
-          </div>
+          <div id="acv-reativacao-lista"></div>
         </div>
 
       </div>
@@ -1754,28 +1721,69 @@ input, textarea { cursor: text; }
 
       <!-- FINANCEIRO -->
       <div id="page-financeiro" class="page">
-        <div class="page-title">Financeiro — Contas a pagar
-          <div style="display:flex;gap:8px;">
-            <button class="btn btn-sm" id="btn-export-fin" style="background:#217346;color:#fff;border-color:#217346;"><i class="ti ti-file-spreadsheet" style="font-size:12px;"></i> Exportar Excel</button>
-            <button class="btn btn-rosa btn-sm" id="btn-nova-conta"><i class="ti ti-plus" style="font-size:12px;"></i> Nova conta</button>
+        <div class="page-title">Financeiro</div>
+
+        <!-- Abas internas -->
+        <div class="fin-tabs">
+          <button class="fin-tab active" data-fin-tab="contas" onclick="finMudarAba('contas')">💳 Contas a pagar</button>
+          <button class="fin-tab" data-fin-tab="dre" onclick="finMudarAba('dre')">📊 DRE Mensal</button>
+          <button class="fin-tab" data-fin-tab="capitalgiro" onclick="finMudarAba('capitalgiro')">🏦 Capital de Giro</button>
+        </div>
+
+        <!-- ABA: CONTAS A PAGAR -->
+        <div class="fin-tab-content" id="fin-tab-contas">
+          <div class="page-title" style="margin-top:0;">Contas a pagar
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-sm" id="btn-export-fin" style="background:#217346;color:#fff;border-color:#217346;"><i class="ti ti-file-spreadsheet" style="font-size:12px;"></i> Exportar Excel</button>
+              <button class="btn btn-rosa btn-sm" id="btn-nova-conta"><i class="ti ti-plus" style="font-size:12px;"></i> Nova conta</button>
+            </div>
+          </div>
+          <div class="fin-resumo-grid">
+            <div class="fin-resumo-card"><div class="fin-resumo-val" style="color:#791F1F;" id="fin-total-vencidas">R$ 0</div><div class="fin-resumo-lbl">Vencidas</div></div>
+            <div class="fin-resumo-card"><div class="fin-resumo-val" style="color:#E87000;" id="fin-total-proximas">R$ 0</div><div class="fin-resumo-lbl">Vencem em 7 dias</div></div>
+            <div class="fin-resumo-card"><div class="fin-resumo-val" style="color:var(--rosa);" id="fin-total-mes">R$ 0</div><div class="fin-resumo-lbl">Total do mes</div></div>
+          </div>
+          <div class="panel" style="margin-bottom:10px;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <div class="search-wrap" style="flex:1;max-width:260px;"><i class="ti ti-search" style="font-size:14px;color:#aaa;"></i><input type="search" id="fin-search" placeholder="Fornecedor ou descricao..."/></div>
+              <select class="sel" style="width:130px;" id="fin-filter-status"><option value="">Todos</option><option value="pendente">Pendentes</option><option value="vencida">Vencidas</option><option value="pago">Pagas</option></select>
+              <select class="sel" style="width:140px;" id="fin-filter-cat"><option value="">Todas categorias</option><option>Fornecedor</option><option>Aluguel</option><option>Servicos</option><option>Impostos</option><option>Folha</option><option>Frete</option><option>Outros</option></select>
+            </div>
+          </div>
+          <div class="panel" style="padding:0;overflow:hidden;">
+            <div class="conta-head-row"><span>Descrição</span><span>Categoria</span><span>Vencimento</span><span>Valor</span><span>Status</span><span>Ação</span></div>
+            <div id="fin-list"></div>
+            <div id="fin-empty" style="display:none;text-align:center;padding:40px;color:var(--text3);"><i class="ti ti-cash-off" style="font-size:40px;display:block;margin-bottom:10px;"></i>Nenhuma conta encontrada</div>
           </div>
         </div>
-        <div class="fin-resumo-grid">
-          <div class="fin-resumo-card"><div class="fin-resumo-val" style="color:#791F1F;" id="fin-total-vencidas">R$ 0</div><div class="fin-resumo-lbl">Vencidas</div></div>
-          <div class="fin-resumo-card"><div class="fin-resumo-val" style="color:#E87000;" id="fin-total-proximas">R$ 0</div><div class="fin-resumo-lbl">Vencem em 7 dias</div></div>
-          <div class="fin-resumo-card"><div class="fin-resumo-val" style="color:var(--rosa);" id="fin-total-mes">R$ 0</div><div class="fin-resumo-lbl">Total do mes</div></div>
-        </div>
-        <div class="panel" style="margin-bottom:10px;">
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-            <div class="search-wrap" style="flex:1;max-width:260px;"><i class="ti ti-search" style="font-size:14px;color:#aaa;"></i><input type="search" id="fin-search" placeholder="Fornecedor ou descricao..."/></div>
-            <select class="sel" style="width:130px;" id="fin-filter-status"><option value="">Todos</option><option value="pendente">Pendentes</option><option value="vencida">Vencidas</option><option value="pago">Pagas</option></select>
-            <select class="sel" style="width:140px;" id="fin-filter-cat"><option value="">Todas categorias</option><option>Fornecedor</option><option>Aluguel</option><option>Servicos</option><option>Impostos</option><option>Folha</option><option>Outros</option></select>
+
+        <!-- ABA: DRE MENSAL -->
+        <div class="fin-tab-content" id="fin-tab-dre" style="display:none;">
+          <div class="page-title" style="margin-top:0;">DRE — Demonstrativo de Resultado
+            <select class="sel" id="dre-mes-select" style="width:150px;"></select>
           </div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:14px;background:#FAF6FB;border:1px solid #EEDFF3;border-radius:8px;padding:10px 14px;">
+            <i class="ti ti-info-circle" style="font-size:12px;"></i> Receita e custo contam pedidos <b>criados</b> no mês. Despesas contam contas <b>pagas</b> no mês (independente de quando venceram). Imposto é um percentual sobre a receita, editável abaixo.
+          </div>
+          <div class="dre-linhas" id="dre-linhas"></div>
         </div>
-        <div class="panel" style="padding:0;overflow:hidden;">
-          <div class="conta-head-row"><span>Descrição</span><span>Categoria</span><span>Vencimento</span><span>Valor</span><span>Status</span><span>Ação</span></div>
-          <div id="fin-list"></div>
-          <div id="fin-empty" style="display:none;text-align:center;padding:40px;color:var(--text3);"><i class="ti ti-cash-off" style="font-size:40px;display:block;margin-bottom:10px;"></i>Nenhuma conta encontrada</div>
+
+        <!-- ABA: CAPITAL DE GIRO -->
+        <div class="fin-tab-content" id="fin-tab-capitalgiro" style="display:none;">
+          <div class="page-title" style="margin-top:0;">Capital de Giro
+            <button class="btn btn-rosa btn-sm" id="btn-nova-transferencia"><i class="ti ti-plus" style="font-size:12px;"></i> Registrar transferência</button>
+          </div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:14px;background:#FAF6FB;border:1px solid #EEDFF3;border-radius:8px;padding:10px 14px;">
+            <i class="ti ti-info-circle" style="font-size:12px;"></i> A cada venda, o <b>custo</b> das caixas vendidas (não o preço de venda) entra aqui como pendente — esse valor precisa ser transferido da conta operacional para a conta de reposição, para manter o capital de giro saudável.
+          </div>
+          <div class="fin-resumo-grid">
+            <div class="fin-resumo-card"><div class="fin-resumo-val" style="color:#E87000;" id="cg-total-pendente">R$ 0</div><div class="fin-resumo-lbl">Pendente de transferência</div></div>
+            <div class="fin-resumo-card"><div class="fin-resumo-val" style="color:#085041;" id="cg-total-transferido">R$ 0</div><div class="fin-resumo-lbl">Já transferido (total)</div></div>
+          </div>
+          <div class="panel" style="margin-bottom:14px;">
+            <div class="panel-head"><span class="panel-title">Histórico de transferências</span></div>
+            <div id="cg-transferencias-lista"></div>
+          </div>
         </div>
       </div>
 
@@ -1882,14 +1890,42 @@ input, textarea { cursor: text; }
         <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Fornecedor</label><input class="form-input" id="conta-forn" placeholder="Nome da empresa ou pessoa"/></div>
         <div class="form-group"><label class="form-label">Valor *</label><input class="form-input" type="number" step="0.01" id="conta-valor" placeholder="0,00"/></div>
         <div class="form-group"><label class="form-label">Vencimento *</label><input class="form-input" type="date" id="conta-venc"/></div>
-        <div class="form-group"><label class="form-label">Categoria</label><select class="form-input" id="conta-cat"><option>Fornecedor</option><option>Aluguel</option><option>Servicos</option><option>Impostos</option><option>Folha</option><option>Outros</option></select></div>
+        <div class="form-group"><label class="form-label">Categoria</label><select class="form-input" id="conta-cat"><option>Fornecedor</option><option>Aluguel</option><option>Servicos</option><option>Impostos</option><option>Folha</option><option>Frete</option><option>Outros</option></select></div>
         <div class="form-group"><label class="form-label">Recorrencia</label><select class="form-input" id="conta-recorr"><option value="unica">Unica</option><option value="mensal">Mensal</option><option value="trimestral">Trimestral</option><option value="anual">Anual</option></select></div>
+        <div class="form-group"><label class="form-label">Classificação DRE</label><select class="form-input" id="conta-classificacao-dre"><option value="">Não classificar</option><option value="despesa_fixa">Despesa fixa (aluguel, internet...)</option><option value="despesa_variavel">Despesa variável (frete, comissão...)</option><option value="despesa_administrativa">Despesa administrativa</option><option value="despesa_financeira">Despesa financeira (juros, taxas...)</option></select></div>
         <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Observacao</label><textarea class="form-textarea" id="conta-obs" rows="2" placeholder="Numero da NF, detalhes..."></textarea></div>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn" data-close="modal-nova-conta">Cancelar</button>
       <button class="btn btn-rosa" id="btn-salvar-conta">Salvar conta</button>
+    </div>
+  </div>
+</div>
+<!-- MODAL: NOVA TRANSFERÊNCIA DE CAPITAL DE GIRO -->
+<div class="modal-overlay" id="modal-nova-transferencia">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-head">
+      <div class="modal-title">Registrar transferência — Capital de Giro</div>
+      <button class="modal-close" data-close="modal-nova-transferencia">x</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:12px;background:#FAF6FB;border:1px solid #EEDFF3;border-radius:8px;padding:10px 14px;">Controle interno — não faz nenhuma movimentação bancária real, só registra que a transferência já foi feita manualmente.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group"><label class="form-label">Valor *</label><input class="form-input" type="number" step="0.01" id="cg-valor" placeholder="0,00"/></div>
+        <div class="form-group"><label class="form-label">Data *</label><input class="form-input" type="date" id="cg-data"/></div>
+        <div class="form-group"><label class="form-label">Banco de origem</label><input class="form-input" id="cg-banco-origem" placeholder="Ex: Banco X"/></div>
+        <div class="form-group"><label class="form-label">Banco de destino</label><input class="form-input" id="cg-banco-destino" placeholder="Ex: Banco Y"/></div>
+        <div class="form-group"><label class="form-label">Conta de origem</label><input class="form-input" id="cg-conta-origem" placeholder="Número da conta"/></div>
+        <div class="form-group"><label class="form-label">Conta de destino</label><input class="form-input" id="cg-conta-destino" placeholder="Número da conta"/></div>
+        <div class="form-group"><label class="form-label">Agência de origem</label><input class="form-input" id="cg-agencia-origem" placeholder="Agência"/></div>
+        <div class="form-group"><label class="form-label">Agência de destino</label><input class="form-input" id="cg-agencia-destino" placeholder="Agência"/></div>
+        <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Observação</label><textarea class="form-textarea" id="cg-obs" rows="2" placeholder="Opcional"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-close="modal-nova-transferencia">Cancelar</button>
+      <button class="btn btn-rosa" id="btn-salvar-transferencia">Registrar transferência</button>
     </div>
   </div>
 </div>
@@ -1920,7 +1956,7 @@ input, textarea { cursor: text; }
 <!-- MODAL: NOVA COMBINAÇÃO DE CAIXA PRONTA -->
 <div class="modal-overlay" id="modal-cp-nova"><div class="modal"><div class="modal-head"><span class="modal-title">Nova combinação de caixa pronta</span><button class="modal-close" data-close="modal-cp-nova">×</button></div><div class="modal-body">
   <div class="form-grid-2">
-    <div class="form-group"><label class="form-label">Tamanho (ml) *</label><select class="form-input" id="cp-tamanho"><option value="330">330ml</option><option value="400">400ml</option><option value="500">500ml</option><option value="770">770ml</option></select></div>
+    <div class="form-group"><label class="form-label">Tamanho (ml) *</label><input class="form-input" type="number" id="cp-tamanho" min="1" placeholder="Ex: 500" list="lista-tamanhos-conhecidos"/></div>
     <div class="form-group"><label class="form-label">Quantidade inicial (caixas)</label><input class="form-input" type="number" id="cp-qtd-inicial" min="0" placeholder="0"/></div>
   </div>
   <div class="form-group"><label class="form-label">Arte (logo) *</label><input class="form-input" id="cp-arte" placeholder="Ex: Logo Empresa X"/></div>
@@ -1939,6 +1975,18 @@ input, textarea { cursor: text; }
   <div class="form-group"><label class="form-label">Quantidade de caixas *</label><input class="form-input" type="number" id="cp-mov-qtd" min="0" placeholder="0"/></div>
   <div class="form-group"><label class="form-label">Motivo *</label><input class="form-input" id="cp-mov-motivo" placeholder="Ex: produção extra, amostra, correção..."/></div>
 </div><div class="modal-footer"><button class="btn" data-close="modal-cp-mov">Cancelar</button><button class="btn btn-rosa" id="btn-cp-mov-salvar">Confirmar</button></div></div></div>
+
+<!-- MODAL: ADICIONAR AO ESTOQUE DE REFUGO (manual) -->
+<div class="modal-overlay" id="modal-refugo-novo"><div class="modal"><div class="modal-head"><span class="modal-title">Adicionar ao Estoque de Refugo</span><button class="modal-close" data-close="modal-refugo-novo">×</button></div><div class="modal-body">
+  <div style="font-size:11px;color:var(--text2);margin-bottom:10px;background:#FFF7ED;border:1px solid #FDBA74;border-radius:8px;padding:8px 12px;">Use para copos com defeito (amassados, tortos) acumulados até fechar uma caixa. Para cancelamento pós-produção, o refugo já é gerado automaticamente ao aprovar o cancelamento.</div>
+  <div class="form-grid-2">
+    <div class="form-group"><label class="form-label">Tamanho (ml) *</label><input class="form-input" type="number" id="refugo-tamanho" min="1" placeholder="Ex: 500" list="lista-tamanhos-conhecidos"/></div>
+    <div class="form-group"><label class="form-label">Quantidade (caixas) *</label><input class="form-input" type="number" id="refugo-qtd" min="1" placeholder="0"/></div>
+  </div>
+  <div class="form-group"><label class="form-label">Arte (se souber)</label><input class="form-input" id="refugo-arte" placeholder="Opcional — pode ser genérico/misturado"/></div>
+  <div class="form-group"><label class="form-label">Motivo *</label><input class="form-input" id="refugo-motivo" placeholder="Ex: copos amassados acumulados na produção de agosto"/></div>
+  <div class="form-group"><label class="form-label">Observação</label><input class="form-input" id="refugo-obs" placeholder="Opcional"/></div>
+</div><div class="modal-footer"><button class="btn" data-close="modal-refugo-novo">Cancelar</button><button class="btn btn-rosa" id="btn-refugo-salvar">Adicionar ao refugo</button></div></div></div>
 
 <!-- MODAL: CONFIG CNPJ -->
 <div class="modal-overlay" id="modal-config-cnpj">
@@ -2532,12 +2580,26 @@ document.addEventListener('DOMContentLoaded',function(){
       document.getElementById('cliente-modal-sub').textContent='Preencha os dados cadastrais';
       ['cli-nome','cli-doc','cli-wapp','cli-email','cli-endereco','cli-cidade','cli-obs'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
       document.getElementById('cli-segmento').value='';
-      document.getElementById('cli-vendedor').value='João';
+      document.getElementById('cli-vendedor').value=currentUser?currentUser.name:'';
+      clientePopularSelectIndicacao();
       document.getElementById('cli-indicado').value='';
       document.querySelectorAll('input[name="preco-esp"]').forEach(function(r){ r.checked = r.value === 'nao'; });
       openModal('modal-novo-cliente');
     }
   });
+
+  // Popula o select de "indicado por" com os clientes já cadastrados —
+  // exclui o próprio cliente em edição, para não permitir que alguém se
+  // indique.
+  function clientePopularSelectIndicacao(excluirId){
+    var sel = document.getElementById('cli-indicado');
+    if(!sel) return;
+    var valorAtual = sel.value;
+    sel.innerHTML = '<option value="">Nenhum (não veio de indicação)</option>' +
+      CLIENTES.filter(function(c){ return c._uuid!==excluirId; })
+        .map(function(c){ return '<option value="'+c._uuid+'">'+esc(c.nome)+'</option>'; }).join('');
+    sel.value = valorAtual;
+  }
 
   var btnSalvarCli = document.getElementById('btn-salvar-cliente');
   if(btnSalvarCli) btnSalvarCli.addEventListener('click', function(){
@@ -2557,7 +2619,8 @@ document.addEventListener('DOMContentLoaded',function(){
       whatsapp: document.getElementById('cli-wapp').value||null,
       cidade: document.getElementById('cli-cidade').value||null,
       estado: document.getElementById('cli-estado').value||null,
-      vendedor_id: vendedorObj ? vendedorObj._supabaseId : null
+      vendedor_id: vendedorObj ? vendedorObj._supabaseId : null,
+      indicado_por_id: document.getElementById('cli-indicado').value||null
     };
 
     if(idxEdit>=0 && CLIENTES[idxEdit]._uuid){
@@ -2638,6 +2701,7 @@ document.addEventListener('DOMContentLoaded',function(){
       valor: val, vencimento: venc,
       categoria: document.getElementById('conta-cat').value||null,
       recorrencia: document.getElementById('conta-recorr').value||'unica',
+      classificacao_dre: document.getElementById('conta-classificacao-dre').value||null,
       observacao: document.getElementById('conta-obs').value||null,
       status: 'pendente'
     };
@@ -2650,6 +2714,9 @@ document.addEventListener('DOMContentLoaded',function(){
       });
     });
   });
+
+  var btnSalvarTransferencia = document.getElementById('btn-salvar-transferencia');
+  if(btnSalvarTransferencia) btnSalvarTransferencia.addEventListener('click', function(){ cgSalvarTransferencia(); });
 
   var btnSalvarCNPJ = document.getElementById('btn-salvar-cnpj');
   if(btnSalvarCNPJ) btnSalvarCNPJ.addEventListener('click', function(){
@@ -2917,83 +2984,112 @@ document.addEventListener('DOMContentLoaded',function(){
 
 
   // ── KANBAN DRAG & DROP ──
-  function initKanban() {
-    var dragging = null;
-    document.querySelectorAll('.k-card').forEach(function(card) {
-      card.setAttribute('draggable', 'true');
-      // Touch events para mobile
-      card.addEventListener('touchstart', function(e) {
-        dragging = this;
-        this.classList.add('dragging');
-      }, {passive: true});
-      card.addEventListener('touchend', function(e) {
-        if(dragging) dragging.classList.remove('dragging');
-        document.querySelectorAll('.k-col').forEach(function(col){ col.classList.remove('drag-over'); });
-        var touch = e.changedTouches[0];
-        var target = document.elementFromPoint(touch.clientX, touch.clientY);
-        var col = target ? target.closest('.k-col') : null;
-        if(col && dragging && !col.contains(dragging)) {
-          var head = col.querySelector('.k-head');
-          if(head) col.insertBefore(dragging, head.nextSibling);
-          var pillMap = {'kh-novo':'p-novo','kh-orc':'p-orc','kh-arte':'p-arte','kh-prod':'p-prod','kh-ent':'p-entregue'};
-          for(var cls in pillMap) {
-            if(head && head.classList.contains(cls)) {
-              var pill = dragging.querySelector('.pill');
-              if(pill) { pill.className = 'pill ' + pillMap[cls]; }
-            }
-          }
-          updateKanbanCounts();
-          toast('Card movido!');
-        }
-        dragging = null;
-      });
-      // Mouse drag para desktop
-      card.addEventListener('dragstart', function(e) {
-        dragging = this;
-        this.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-      });
-      card.addEventListener('dragend', function() {
-        this.classList.remove('dragging');
-        document.querySelectorAll('.k-col').forEach(function(col){ col.classList.remove('drag-over'); });
-        dragging = null;
-      });
+  // Mapeia cada coluna do Kanban para o status real do pedido (mesmo texto
+  // usado em ORDERS/ATUALIZAÇÃO DE STATUS) e para a classe de pill visual.
+  var KANBAN_COLUNAS = [
+    {id:'novo', status:'Novo lead', pill:'p-novo'},
+    {id:'orc', status:'Orçamento enviado', pill:'p-orc'},
+    {id:'arte', status:'Arte pendente', pill:'p-arte'},
+    {id:'prod', status:'Em produção', pill:'p-prod'},
+    {id:'ent', status:'Entregue', pill:'p-entregue'}
+  ];
+
+  function renderKanban(filtroVendedor){
+    var pedidosAtivos = ORDERS.filter(function(o){
+      return o.status!=='Cancelado' && o.status!=='Cancelamento solicitado';
     });
-    document.querySelectorAll('.k-col').forEach(function(col) {
-      col.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        document.querySelectorAll('.k-col').forEach(function(c){ c.classList.remove('drag-over'); });
-        this.classList.add('drag-over');
+    KANBAN_COLUNAS.forEach(function(col){
+      var pedidosDaColuna = pedidosAtivos.filter(function(o){
+        if(o.status!==col.status) return false;
+        if(filtroVendedor && o.vendedor!==filtroVendedor) return false;
+        return true;
       });
-      col.addEventListener('dragleave', function(e) {
-        if(!this.contains(e.relatedTarget)) this.classList.remove('drag-over');
-      });
-      col.addEventListener('drop', function(e) {
-        e.preventDefault();
-        this.classList.remove('drag-over');
-        if(dragging && !this.contains(dragging)) {
-          var head = this.querySelector('.k-head');
-          if(head) this.insertBefore(dragging, head.nextSibling);
-          var pillMap = {'kh-novo':'p-novo','kh-orc':'p-orc','kh-arte':'p-arte','kh-prod':'p-prod','kh-ent':'p-entregue'};
-          for(var cls in pillMap) {
-            if(head && head.classList.contains(cls)) {
-              var pill = dragging.querySelector('.pill');
-              if(pill) pill.className = 'pill ' + pillMap[cls];
-            }
-          }
-          updateKanbanCounts();
-          toast('Card movido!');
-        }
-      });
+      var countEl = document.getElementById('kh-'+col.id+'-count');
+      var cardsEl = document.getElementById('kh-'+col.id+'-cards');
+      if(countEl) countEl.textContent = pedidosDaColuna.length;
+      if(cardsEl){
+        cardsEl.innerHTML = pedidosDaColuna.map(function(o){
+          return '<div class="k-card" draggable="true" data-order-id="'+o.id+'">'+
+            '<div class="k-card-name">'+esc(o.client)+'</div>'+
+            '<div class="k-card-info">'+esc(o.prodDesc||o.prod)+'</div>'+
+            '<div class="k-card-foot"><span class="pill '+col.pill+'" style="font-size:10px;">'+esc(o.vendedor||'—')+'</span></div>'+
+          '</div>';
+        }).join('');
+      }
     });
   }
 
-  function updateKanbanCounts() {
-    document.querySelectorAll('.k-col').forEach(function(col) {
-      var head = col.querySelector('.k-head span');
-      var cards = col.querySelectorAll('.k-card');
-      if(head) head.textContent = cards.length;
+  // Popula o filtro de vendedor do Kanban com quem realmente tem pedido —
+  // não uma lista fixa de nomes.
+  function popularFiltroVendedorKanban(){
+    var sel = document.getElementById('kanban-filtro-vendedor');
+    if(!sel) return;
+    var vendedoresUnicos = Array.from(new Set(ORDERS.map(function(o){ return o.vendedor; }).filter(Boolean)));
+    var valorAtual = sel.value;
+    sel.innerHTML = '<option value="">Todos</option>' + vendedoresUnicos.map(function(v){ return '<option value="'+esc(v)+'">'+esc(v)+'</option>'; }).join('');
+    sel.value = valorAtual;
+  }
+
+  function initKanban() {
+    popularFiltroVendedorKanban();
+    renderKanban(document.getElementById('kanban-filtro-vendedor').value);
+
+    var filtroSel = document.getElementById('kanban-filtro-vendedor');
+    if(filtroSel && !filtroSel._bound){
+      filtroSel.addEventListener('change', function(){ renderKanban(this.value); });
+      filtroSel._bound = true;
+    }
+
+    var dragging = null;
+    // Delegação de evento: os cards são recriados a cada renderKanban, então
+    // os listeners ficam no container da coluna (fixo), não nos cards.
+    document.querySelectorAll('#kanban-cols .k-col').forEach(function(col){
+      if(col._dragBound) return;
+      col._dragBound = true;
+
+      col.addEventListener('dragstart', function(e){
+        var card = e.target.closest('.k-card');
+        if(!card) return;
+        dragging = card;
+        card.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      col.addEventListener('dragend', function(e){
+        var card = e.target.closest('.k-card');
+        if(card) card.classList.remove('dragging');
+        document.querySelectorAll('#kanban-cols .k-col').forEach(function(c){ c.classList.remove('drag-over'); });
+        dragging = null;
+      });
+      col.addEventListener('dragover', function(e){
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        document.querySelectorAll('#kanban-cols .k-col').forEach(function(c){ c.classList.remove('drag-over'); });
+        this.classList.add('drag-over');
+      });
+      col.addEventListener('dragleave', function(e){
+        if(!this.contains(e.relatedTarget)) this.classList.remove('drag-over');
+      });
+      col.addEventListener('drop', function(e){
+        e.preventDefault();
+        this.classList.remove('drag-over');
+        if(!dragging) return;
+        var orderId = dragging.getAttribute('data-order-id');
+        // Descobre a coluna de destino pelo próprio elemento da coluna (procura o k-head com a classe kh-*)
+        var headEl = this.querySelector('.k-head');
+        var destinoCol = KANBAN_COLUNAS.find(function(c){ return headEl && headEl.classList.contains('kh-'+c.id); });
+        if(!destinoCol) return;
+        var order = ORDERS.find(function(o){ return o.id===orderId; });
+        if(!order){ return; }
+        if(order.status===destinoCol.status){ return; } // soltou na mesma coluna
+
+        // Simula o mesmo caminho já usado pelo <select> de status em Pedidos
+        // — reaproveita updateOrderStatus, que já cuida de baixa de estoque,
+        // geração de etiqueta, notificação, etc.
+        var fakeSelect = { getAttribute: function(){ return orderId; }, value: destinoCol.status };
+        updateOrderStatus(fakeSelect);
+        renderKanban(document.getElementById('kanban-filtro-vendedor').value);
+        toast('Pedido movido para "'+destinoCol.status+'"!');
+      });
     });
   }
 
@@ -3001,7 +3097,7 @@ document.addEventListener('DOMContentLoaded',function(){
   var origGoPage = goPage;
   goPage = function(id, title) {
     origGoPage(id, title);
-    if(id === 'kanban') setTimeout(initKanban, 100);
+    if(id === 'kanban') carregarPedidosDoBanco(function(){ initKanban(); });
   };
 
 
@@ -3075,7 +3171,8 @@ document.addEventListener('DOMContentLoaded',function(){
               solicitadoPor: '', decididoPor: '', motivoDecisao: p.cancelamento_motivo_decisao||'',
               statusAnterior: p.status_anterior_cancelamento
             } : null,
-            estoqueBaixado: !!p.estoque_baixado
+            estoqueBaixado: !!p.estoque_baixado,
+            custoTotal: p.custo_total || 0
           });
         });
         // Resolve nome do vendedor a partir do cache USERS, quando já carregado
@@ -3232,6 +3329,7 @@ document.addEventListener('DOMContentLoaded',function(){
                   estoqueRegistrarConsumoPedido(order._uuid, consumos, function(){
                     sbClient.from('pedidos').update({custo_total: custoItem}).eq('id', order._uuid).then(function(){
                       order.custoTotal = custoItem;
+                      capitalGiroCriarPendencia(order._uuid, custoItem);
                     });
                   });
                 });
@@ -3287,13 +3385,14 @@ document.addEventListener('DOMContentLoaded',function(){
     return true;
   }
 
-  function pedAprovarCancelamento(orderId, motivoDecisao){
+  function pedAprovarCancelamento(orderId, motivoDecisao, destinoEstoque){
     if(!pedPodeAprovarCancelamento()){ toast('Você não tem permissão para aprovar cancelamentos.'); return; }
     var order = ORDERS.find(function(o){ return o.id === orderId; });
     if(!order || !order.cancelamento || order.cancelamento.status!=='pendente') return;
     if(!order._uuid || !sbClient){ toast('Não foi possível localizar este pedido no banco.'); return; }
+    destinoEstoque = destinoEstoque || 'devolver';
 
-    function persistirAprovacao(){
+    function persistirAprovacao(mensagemFinal){
       sbClient.from('pedidos').update({
         cancelamento_status: 'aprovado',
         cancelamento_decidido_por: currentUser._supabaseId,
@@ -3321,53 +3420,82 @@ document.addEventListener('DOMContentLoaded',function(){
         if(typeof renderCancelamentosPendentes==='function') renderCancelamentosPendentes();
         if(typeof renderNotificacoes==='function') renderNotificacoes();
         if(typeof renderEtiquetas==='function') renderEtiquetas();
-        toast('❌ Pedido '+orderId+' cancelado. Estoque estornado.');
+        toast(mensagemFinal);
       });
     }
 
-    // Estorno de estoque real no banco: só devolve se este pedido realmente
-    // tinha baixa feita.
-    if(order.estoqueBaixado && (order.itens||[]).length){
-      var itensParaEstornar = order.itens;
-      var pendentes = itensParaEstornar.length;
-      itensParaEstornar.forEach(function(item){
-        var novoValor = (STOCK[item.tam] ? STOCK[item.tam].caixas : 0) + item.qtd;
-        sbClient.from('estoque').update({caixas: novoValor}).eq('tamanho', item.tam).then(function(){
-          sbClient.from('estoque_log').insert({
-            tipo:'entrada', tamanho:item.tam, caixas:item.qtd, unidades:0,
-            motivo:'Estorno — cancelamento '+orderId+' aprovado', lancado_por: currentUser._supabaseId
-          }).then(function(){
-            if(STOCK[item.tam]) STOCK[item.tam].caixas = novoValor;
-            STOCK_LOG.unshift({tipo:'entrada',tam:item.tam,caixas:item.qtd,unid:0,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:'Estorno — cancelamento '+orderId+' aprovado',lancadoPor:currentUser.name+' (aprovação de cancelamento)'});
-            if(typeof renderStockGrid==='function') renderStockGrid();
-            if(typeof renderStockLog==='function') renderStockLog();
-            if(typeof checkStockAlerts==='function') checkStockAlerts();
-            // O estorno vira um lote NOVO, no fim da fila PEPS — não volta
-            // para o lote original de onde saiu (decisão já confirmada).
-            // O custo desse lote de estorno é a média ponderada do que foi
-            // efetivamente consumido deste item pelo pedido cancelado.
-            sbClient.from('pedido_consumo_lotes').select('quantidade_caixas, custo_unitario_caixa').eq('pedido_id', order._uuid).then(function(resConsumo){
-              var custoMedio = 0;
-              if(!resConsumo.error && resConsumo.data && resConsumo.data.length){
-                var totalQtd = resConsumo.data.reduce(function(s,c){ return s+c.quantidade_caixas; },0);
-                var totalCusto = resConsumo.data.reduce(function(s,c){ return s+(c.quantidade_caixas*c.custo_unitario_caixa); },0);
-                custoMedio = totalQtd>0 ? totalCusto/totalQtd : 0;
-              }
-              sbClient.from('estoque_lotes').insert({
-                tamanho: item.tam, custo_unitario_caixa: custoMedio,
-                quantidade_caixas_original: item.qtd, quantidade_caixas_restante: item.qtd,
-                nota_fiscal: null, lancado_por: currentUser._supabaseId
-              }).then(function(){
-                pendentes--;
-                if(pendentes===0) persistirAprovacao();
-              });
+    if(!order.estoqueBaixado || !(order.itens||[]).length){
+      persistirAprovacao('❌ Pedido '+orderId+' cancelado.');
+      return;
+    }
+
+    if(destinoEstoque==='refugo'){
+      // Caixa já foi produzida/personalizada — não pode voltar ao estoque
+      // normal (não é mais matéria-prima genérica), e o custo NÃO é
+      // estornado (o produto físico existe, o dinheiro já foi de fato
+      // gasto). Vai para o Estoque de Refugo, disponível para venda
+      // futura com condição negociada caso a caso.
+      var itensParaRefugo = order.itens;
+      var pendentesRefugo = itensParaRefugo.length;
+      itensParaRefugo.forEach(function(item){
+        sbClient.from('estoque_refugo').insert({
+          tamanho_ml: parseInt(item.tam), origem: 'cancelamento_pos_producao',
+          motivo: 'Cancelamento aprovado — '+orderId+(motivoDecisao?' — '+motivoDecisao:''),
+          quantidade_caixas: item.qtd, pedido_origem_id: order._uuid,
+          criado_por: currentUser._supabaseId
+        }).select().single().then(function(res){
+          if(!res.error && res.data){
+            sbClient.from('estoque_refugo_log').insert({
+              refugo_id: res.data.id, tipo:'entrada', quantidade: item.qtd,
+              motivo:'Cancelamento pós-produção — '+orderId, lancado_por: currentUser._supabaseId
+            });
+          }
+          pendentesRefugo--;
+          if(pendentesRefugo===0) persistirAprovacao('❌ Pedido '+orderId+' cancelado. Caixas movidas para o Estoque de Refugo (custo não estornado).');
+        });
+      });
+      return;
+    }
+
+    // destinoEstoque === 'devolver' — comportamento original: volta ao
+    // estoque normal, como se a caixa ainda fosse matéria-prima genérica.
+    var itensParaEstornar = order.itens;
+    var pendentes = itensParaEstornar.length;
+    itensParaEstornar.forEach(function(item){
+      var novoValor = (STOCK[item.tam] ? STOCK[item.tam].caixas : 0) + item.qtd;
+      sbClient.from('estoque').update({caixas: novoValor}).eq('tamanho', item.tam).then(function(){
+        sbClient.from('estoque_log').insert({
+          tipo:'entrada', tamanho:item.tam, caixas:item.qtd, unidades:0,
+          motivo:'Estorno — cancelamento '+orderId+' aprovado', lancado_por: currentUser._supabaseId
+        }).then(function(){
+          if(STOCK[item.tam]) STOCK[item.tam].caixas = novoValor;
+          STOCK_LOG.unshift({tipo:'entrada',tam:item.tam,caixas:item.qtd,unid:0,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:'Estorno — cancelamento '+orderId+' aprovado',lancadoPor:currentUser.name+' (aprovação de cancelamento)'});
+          if(typeof renderStockGrid==='function') renderStockGrid();
+          if(typeof renderStockLog==='function') renderStockLog();
+          if(typeof checkStockAlerts==='function') checkStockAlerts();
+          // O estorno vira um lote NOVO, no fim da fila PEPS — não volta
+          // para o lote original de onde saiu (decisão já confirmada).
+          // O custo desse lote de estorno é a média ponderada do que foi
+          // efetivamente consumido deste item pelo pedido cancelado.
+          sbClient.from('pedido_consumo_lotes').select('quantidade_caixas, custo_unitario_caixa').eq('pedido_id', order._uuid).then(function(resConsumo){
+            var custoMedio = 0;
+            if(!resConsumo.error && resConsumo.data && resConsumo.data.length){
+              var totalQtd = resConsumo.data.reduce(function(s,c){ return s+c.quantidade_caixas; },0);
+              var totalCusto = resConsumo.data.reduce(function(s,c){ return s+(c.quantidade_caixas*c.custo_unitario_caixa); },0);
+              custoMedio = totalQtd>0 ? totalCusto/totalQtd : 0;
+            }
+            sbClient.from('estoque_lotes').insert({
+              tamanho: item.tam, custo_unitario_caixa: custoMedio,
+              quantidade_caixas_original: item.qtd, quantidade_caixas_restante: item.qtd,
+              nota_fiscal: null, lancado_por: currentUser._supabaseId
+            }).then(function(){
+              pendentes--;
+              if(pendentes===0) persistirAprovacao('❌ Pedido '+orderId+' cancelado. Estoque estornado.');
             });
           });
         });
       });
-    } else {
-      persistirAprovacao();
-    }
+    });
   }
 
   function pedNegarCancelamento(orderId, motivoDecisao){
@@ -3537,6 +3665,14 @@ document.addEventListener('DOMContentLoaded',function(){
     document.getElementById('pcd-resumo').textContent = order ? (order.client+' · '+(order.prodDesc||order.prod)+' · R$'+order.valor.toLocaleString('pt-BR')) : '';
     document.getElementById('pcd-motivo-original').textContent = order && order.cancelamento ? order.cancelamento.motivo : '';
     document.getElementById('pcd-observacao').value = '';
+    // A decisão sobre o destino do estoque só faz sentido ao APROVAR — e
+    // só quando o pedido realmente tinha baixa de estoque feita (senão
+    // não existe nada físico para decidir o destino).
+    var destinoWrap = document.getElementById('pcd-destino-estoque-wrap');
+    if(destinoWrap){
+      destinoWrap.style.display = (acao==='aprovar' && order && order.estoqueBaixado) ? '' : 'none';
+      document.getElementById('pcd-destino-estoque').value = 'devolver';
+    }
     document.getElementById('btn-pcd-confirmar').textContent = acao==='aprovar' ? 'Confirmar aprovação' : 'Confirmar negativa';
     document.getElementById('btn-pcd-confirmar').className = 'btn btn-sm '+(acao==='aprovar'?'btn-rosa':'btn-danger');
     openModal('modal-pcd');
@@ -3920,10 +4056,13 @@ document.addEventListener('DOMContentLoaded',function(){
   function renderStockGrid() {
     var grid = document.getElementById('stock-grid');
     if(!grid) return;
-    var sizes = ['330ml','400ml','500ml','770ml'];
+    // A grade agora mostra QUALQUER tamanho já cadastrado no estoque —
+    // não mais uma lista fixa de 4. Ordenado do menor para o maior ml.
+    var sizes = Object.keys(STOCK).sort(function(a,b){ return parseInt(a)-parseInt(b); });
+    if(!sizes.length){ grid.innerHTML = '<div style="color:var(--text3);font-style:italic;font-size:12px;padding:10px;">Nenhum tamanho cadastrado ainda — registre a primeira entrada.</div>'; return; }
     grid.innerHTML = sizes.map(function(tam) {
       var s = STOCK[tam];
-      var totalUnid = s.caixas * UNID_PER_CX[tam] + s.unid;
+      var totalUnid = s.caixas * (UNID_PER_CX[tam]||1000) + s.unid;
       var negativo = s.caixas < 0;
       var low = !negativo && s.caixas < s.minCaixas;
       return '<div class="stock-item' + (negativo ? ' negativo' : (low ? ' low' : '')) + '">' +
@@ -3934,6 +4073,7 @@ document.addEventListener('DOMContentLoaded',function(){
         (negativo ? '<div style="font-size:10px;color:#791F1F;font-weight:600;margin-top:4px;">Estoque negativo — reponha o quanto antes</div>' : '') +
       '</div>';
     }).join('');
+    estAtualizarListaTamanhosConhecidos();
   }
 
   function renderStockLog() {
@@ -4142,9 +4282,17 @@ document.addEventListener('DOMContentLoaded',function(){
   // (entrada, baixa, abertura, ajuste), evitando repetir a mesma sequência
   // de chamadas ao Supabase em cada um.
   function estoquePersistirMovimento(tam, deltaCaixas, deltaUnid, tipoLog, motivo, callback){
+    // Tamanho pode não existir ainda no cache local nem no banco (medida
+    // nova, ex: 440ml, 550ml) — usa 0 como base e upsert para criar a
+    // linha se for a primeira movimentação desse tamanho.
+    if(!STOCK[tam]) STOCK[tam] = {caixas:0, unid:0, minCaixas:3};
+    if(!UNID_PER_CX[tam]) UNID_PER_CX[tam] = 1000;
     var novoCaixas = STOCK[tam].caixas + deltaCaixas;
     var novoUnid = STOCK[tam].unid + deltaUnid;
-    sbClient.from('estoque').update({caixas: novoCaixas, unidades_avulsas: novoUnid}).eq('tamanho', tam).then(function(res){
+    sbClient.from('estoque').upsert({
+      tamanho: tam, caixas: novoCaixas, unidades_avulsas: novoUnid,
+      minimo_caixas: STOCK[tam].minCaixas, unidades_por_caixa: UNID_PER_CX[tam]
+    }, {onConflict:'tamanho'}).then(function(res){
       if(res.error){ toast('Erro ao atualizar estoque: '+res.error.message); return; }
       sbClient.from('estoque_log').insert({
         tipo: tipoLog, tamanho: tam,
@@ -4226,7 +4374,80 @@ document.addEventListener('DOMContentLoaded',function(){
     });
   }
 
+  // Toda vez que um pedido recebe custo_total > 0, gera automaticamente a
+  // pendência de Capital de Giro correspondente — é o valor que precisa
+  // "voltar" da conta operacional para a conta de reposição de mercadoria.
+  // Não bloqueia o fluxo principal do pedido: se der erro, só avisa no
+  // console, sem travar a venda.
+  function capitalGiroCriarPendencia(pedidoUuid, valorCusto){
+    if(!sbClient || !valorCusto || valorCusto<=0) return;
+    sbClient.from('capital_giro_pendencias').insert({
+      pedido_id: pedidoUuid, valor_custo: valorCusto, status: 'pendente'
+    }).then(function(res){
+      if(res.error) console.error('Erro ao criar pendência de capital de giro:', res.error.message);
+    });
+  }
+
+  // Acordeão da tela de Estoque: sempre começa FECHADO toda vez que a aba
+  // é aberta (diferente do acordeão de Horário, que lembra estado entre
+  // aberturas) — decisão explícita para manter a tela limpa por padrão.
+  // Tamanhos de copo agora são valor livre (300, 330, 400, 440, 500, 550,
+  // 700, 770ml — e qualquer outro que o fornecedor trouxer), não mais uma
+  // lista fixa. Cada medida diferente é um tamanho totalmente separado no
+  // estoque, mesmo que próximo de outro (440ml nunca se mistura com
+  // 400ml). Esta função só garante o formato "500ml" a partir do número
+  // puro digitado no campo.
+  function estFormatarTamanho(valorDigitado){
+    var num = parseInt(valorDigitado);
+    if(!num || num<=0) return null;
+    return num+'ml';
+  }
+
+  // Popula a <datalist> com os tamanhos que já existem no estoque, na
+  // caixa pronta e no refugo — sugestão ao digitar, não trava a escolha.
+  function estAtualizarListaTamanhosConhecidos(){
+    var datalist = document.getElementById('lista-tamanhos-conhecidos');
+    if(!datalist) return;
+    var tamanhos = new Set();
+    Object.keys(STOCK).forEach(function(t){ tamanhos.add(parseInt(t)); });
+    (CAIXAS_PRONTAS||[]).forEach(function(c){ tamanhos.add(c.tamanho_ml); });
+    (ESTOQUE_REFUGO||[]).forEach(function(r){ tamanhos.add(r.tamanho_ml); });
+    var lista = Array.from(tamanhos).filter(Boolean).sort(function(a,b){ return a-b; });
+    datalist.innerHTML = lista.map(function(t){ return '<option value="'+t+'">'; }).join('');
+  }
+
+  function estAccToggle(id){
+    var painel = document.querySelector('.acc-panel[data-acc="'+id+'"]');
+    var body = document.getElementById('acc-body-'+id);
+    if(!painel || !body) return;
+    var estaFechado = painel.classList.contains('collapsed');
+    if(estaFechado){
+      painel.classList.remove('collapsed');
+      body.classList.add('open');
+      body.style.maxHeight = body.scrollHeight+'px';
+      setTimeout(function(){ if(body.classList.contains('open')) body.style.maxHeight=''; }, 260);
+    } else {
+      body.style.maxHeight = body.scrollHeight+'px';
+      requestAnimationFrame(function(){ body.style.maxHeight='0px'; });
+      body.classList.remove('open');
+      painel.classList.add('collapsed');
+    }
+  }
+  window.estAccToggle = estAccToggle;
+
+  function estAccFecharTodos(){
+    document.querySelectorAll('#page-estoque .acc-panel[data-acc]').forEach(function(painel){
+      var id = painel.getAttribute('data-acc');
+      var body = document.getElementById('acc-body-'+id);
+      if(!body) return;
+      painel.classList.add('collapsed');
+      body.classList.remove('open');
+      body.style.maxHeight = '0px';
+    });
+  }
+
   function initEstoque() {
+    estAccFecharTodos(); // sempre fechado ao (re)entrar na aba, como pedido
     carregarEstoqueDoBanco(function(){
       carregarEstoqueLogDoBanco(function(){
         renderStockGrid();
@@ -4243,51 +4464,215 @@ document.addEventListener('DOMContentLoaded',function(){
     if(!podeGerenciar) return; // sem a permissão, só visualização — não faz sentido religar os listeners abaixo
 
     var btnEnt = document.getElementById('btn-entrada-estoque');
-    var formEnt = document.getElementById('form-entrada');
-    var btnClose = document.getElementById('btn-close-entrada');
-    if(btnEnt) btnEnt.addEventListener('click', function(){ formEnt.style.display = formEnt.style.display==='none'?'block':'none'; });
-    if(btnClose) btnClose.addEventListener('click', function(){ formEnt.style.display='none'; });
+    if(btnEnt) btnEnt.addEventListener('click', function(){ estAccToggle('est-entrada'); });
+
+    // Entrada com múltiplos itens — uma NF de compra normalmente traz vários
+    // produtos (ex: 330ml, 500ml e 770ml na mesma nota). ENT_ITENS guarda as
+    // linhas ainda não confirmadas; cada uma vira um lote de custo separado.
+    var ENT_ITENS = [];
+    function estGerarNovaLinhaEntrada(){
+      return {id: 'ent'+Date.now()+Math.random().toString(36).slice(2,6), tamNum:'', caixas:0, unid:0, custo:0, nf:''};
+    }
+    function estRenderLinhasEntrada(){
+      var wrap = document.getElementById('ent-itens-lista');
+      if(!wrap) return;
+      wrap.innerHTML = ENT_ITENS.map(function(item, idx){
+        return '<div class="stock-inp-row" style="align-items:flex-end;margin-bottom:8px;padding-bottom:8px;'+(idx>0?'border-top:1px dashed var(--border);padding-top:10px;':'')+'">'+
+          '<div class="stock-field"><label>Tamanho (ml)</label><input type="number" min="1" data-ent-field="tamNum" data-ent-id="'+item.id+'" value="'+(item.tamNum||'')+'" placeholder="Ex: 500" list="lista-tamanhos-conhecidos"/></div>'+
+          '<div class="stock-field"><label>Caixas fechadas</label><input type="number" min="0" data-ent-field="caixas" data-ent-id="'+item.id+'" value="'+(item.caixas||'')+'" placeholder="0"/></div>'+
+          '<div class="stock-field"><label>Unidades avulsas</label><input type="number" min="0" data-ent-field="unid" data-ent-id="'+item.id+'" value="'+(item.unid||'')+'" placeholder="0"/></div>'+
+          '<div class="stock-field"><label>Custo por caixa (R$)</label><input type="number" min="0" step="0.01" data-ent-field="custo" data-ent-id="'+item.id+'" value="'+(item.custo||'')+'" placeholder="Ex: 180,00"/></div>'+
+          '<div class="stock-field"><label>Nota fiscal</label><input type="text" data-ent-field="nf" data-ent-id="'+item.id+'" value="'+esc(item.nf)+'" placeholder="NF 12345"/></div>'+
+          (ENT_ITENS.length>1 ? '<button class="btn btn-sm" data-ent-remover="'+item.id+'" title="Remover este item" style="color:#791F1F;"><i class="ti ti-trash" style="font-size:12px;"></i></button>' : '')+
+        '</div>';
+      }).join('');
+      wrap.querySelectorAll('[data-ent-field]').forEach(function(el){
+        el.addEventListener('input', function(){
+          var item = ENT_ITENS.find(function(i){ return i.id===this.getAttribute('data-ent-id'); }, this);
+          if(!item) return;
+          var campo = this.getAttribute('data-ent-field');
+          item[campo] = (campo==='nf') ? this.value : (parseFloat(this.value)||0);
+        });
+      });
+      wrap.querySelectorAll('[data-ent-remover]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var id = this.getAttribute('data-ent-remover');
+          ENT_ITENS = ENT_ITENS.filter(function(i){ return i.id!==id; });
+          estRenderLinhasEntrada();
+        });
+      });
+    }
+    // Inicializa com 1 linha sempre que a seção é aberta pela primeira vez
+    if(!ENT_ITENS.length){ ENT_ITENS.push(estGerarNovaLinhaEntrada()); estRenderLinhasEntrada(); }
+
+    // ── IMPORTAR XML DA NF-e ──
+    // Lê o arquivo XML da nota fiscal do fornecedor, extrai os itens
+    // (código, descrição, quantidade, valor unitário) e o frete, e
+    // pré-preenche o formulário — sempre editável antes de confirmar,
+    // porque o fornecedor pode enviar a nota com valor diferente do
+    // combinado, e o tamanho do copo precisa ser conferido (o XML só
+    // traz a descrição em texto livre, não sabe que "500ml" é um
+    // tamanho do nosso catálogo).
+    var btnImportarXml = document.getElementById('btn-ent-importar-xml');
+    var xmlInput = document.getElementById('ent-xml-input');
+    if(btnImportarXml && !btnImportarXml._bound){
+      btnImportarXml.addEventListener('click', function(){ xmlInput.click(); });
+      btnImportarXml._bound = true;
+    }
+    if(xmlInput && !xmlInput._bound){
+      xmlInput.addEventListener('change', function(){
+        var file = this.files[0];
+        if(!file) return;
+        var reader = new FileReader();
+        reader.onload = function(e){
+          try{
+            estProcessarXmlNF(e.target.result);
+          } catch(err){
+            toast('Não foi possível ler este XML. Confira se é uma NF-e válida.');
+            console.error(err);
+          }
+        };
+        reader.readAsText(file, 'UTF-8');
+        xmlInput.value = ''; // permite importar o mesmo arquivo de novo, se precisar
+      });
+      xmlInput._bound = true;
+    }
+
+    function estProcessarXmlNF(textoXml){
+      var parser = new DOMParser();
+      var xmlDoc = parser.parseFromString(textoXml, 'text/xml');
+      if(xmlDoc.querySelector('parsererror')){ toast('Arquivo XML inválido.'); return; }
+
+      var numeroNF = xmlDoc.querySelector('ide nNF');
+      var numeroNFTexto = numeroNF ? numeroNF.textContent : '';
+
+      var detalhes = xmlDoc.querySelectorAll('det');
+      if(!detalhes.length){ toast('Não encontrei itens neste XML.'); return; }
+
+      var novosItens = [];
+      detalhes.forEach(function(det){
+        var prod = det.querySelector('prod');
+        if(!prod) return;
+        var xProd = prod.querySelector('xProd') ? prod.querySelector('xProd').textContent : '';
+        var qCom = prod.querySelector('qCom') ? parseFloat(prod.querySelector('qCom').textContent) : 0;
+        var vUnCom = prod.querySelector('vUnCom') ? parseFloat(prod.querySelector('vUnCom').textContent) : 0;
+
+        // Heurística: procura um número seguido de "ML" na descrição do
+        // produto (ex: "COPO 440ML PERSONALIZADO" → 440). Funciona para
+        // qualquer medida, não só as 4 tradicionais — sempre confirmável/
+        // editável na tela antes de confirmar a entrada.
+        var tamanhoNumerico = '';
+        var match = xProd.toUpperCase().match(/(\d{3,4})\s*ML/);
+        if(match) tamanhoNumerico = match[1];
+
+        novosItens.push({
+          id: 'ent'+Date.now()+Math.random().toString(36).slice(2,6),
+          tamNum: tamanhoNumerico, caixas: Math.round(qCom), unid: 0,
+          custo: vUnCom, nf: numeroNFTexto ? 'NF '+numeroNFTexto : ''
+        });
+      });
+
+      if(!novosItens.length){ toast('Não encontrei produtos válidos neste XML.'); return; }
+      ENT_ITENS = novosItens;
+      estRenderLinhasEntrada();
+
+      // Frete: soma de todos os vFrete encontrados nos itens, ou o vFrete
+      // do total da nota, o que existir.
+      var freteTotal = 0;
+      var vFreteTotal = xmlDoc.querySelector('total ICMSTot vFrete');
+      if(vFreteTotal){ freteTotal = parseFloat(vFreteTotal.textContent)||0; }
+      else {
+        xmlDoc.querySelectorAll('det prod vFrete').forEach(function(el){ freteTotal += parseFloat(el.textContent)||0; });
+      }
+      if(freteTotal>0){
+        document.getElementById('ent-frete-wrap').style.display='';
+        document.getElementById('ent-xml-frete').value = freteTotal.toFixed(2);
+      } else {
+        document.getElementById('ent-frete-wrap').style.display='none';
+      }
+
+      toast('✅ XML importado! Confira os itens antes de confirmar a entrada.');
+    }
+
+    var btnAddItemEnt = document.getElementById('btn-ent-add-item');
+    if(btnAddItemEnt && !btnAddItemEnt._bound){
+      btnAddItemEnt.addEventListener('click', function(){
+        ENT_ITENS.push(estGerarNovaLinhaEntrada());
+        estRenderLinhasEntrada();
+      });
+      btnAddItemEnt._bound = true;
+    }
 
     var btnConf = document.getElementById('btn-confirm-entrada');
     if(btnConf) btnConf.addEventListener('click', function(){
-      var tam = document.getElementById('ent-tam').value;
-      var caixas = parseInt(document.getElementById('ent-caixas').value)||0;
-      var unid = parseInt(document.getElementById('ent-unid').value)||0;
-      var custo = parseFloat(document.getElementById('ent-custo').value)||0;
-      var nf = document.getElementById('ent-nf').value||'';
-      if(!caixas && !unid) { toast('Informe caixas ou unidades!'); return; }
-      if(caixas>0 && !custo){ toast('Informe o custo por caixa — é o que permite calcular a margem de lucro depois.'); return; }
+      ENT_ITENS.forEach(function(item){ item.tam = estFormatarTamanho(item.tamNum); });
+      var validos = ENT_ITENS.filter(function(item){ return item.tam && (item.caixas>0 || item.unid>0); });
+      if(!validos.length){ toast('Informe o tamanho (ml) e ao menos caixas ou unidades!'); return; }
+      var semCusto = validos.find(function(item){ return item.caixas>0 && !item.custo; });
+      if(semCusto){ toast('Informe o custo por caixa de todos os itens com caixas fechadas — é o que permite calcular a margem de lucro depois.'); return; }
 
-      function registrarLoteSeNecessario(callback){
-        // O lote de custo (para PEPS) só faz sentido para caixas fechadas —
-        // unidades avulsas entrando sozinhas normalmente vêm de abertura de
-        // caixa, não de uma compra nova, então não geram lote próprio aqui.
-        if(caixas<=0){ callback(); return; }
+      function registrarLoteSeNecessario(item, callback){
+        if(item.caixas<=0){ callback(); return; }
         sbClient.from('estoque_lotes').insert({
-          tamanho: tam, custo_unitario_caixa: custo,
-          quantidade_caixas_original: caixas, quantidade_caixas_restante: caixas,
-          nota_fiscal: nf||null, lancado_por: currentUser._supabaseId
+          tamanho: item.tam, custo_unitario_caixa: item.custo,
+          quantidade_caixas_original: item.caixas, quantidade_caixas_restante: item.caixas,
+          nota_fiscal: item.nf||null, lancado_por: currentUser._supabaseId
         }).then(function(res){
-          if(res.error){ toast('Estoque atualizado, mas houve erro ao registrar o lote de custo: '+res.error.message); }
+          if(res.error){ toast('Estoque atualizado, mas houve erro ao registrar o lote de custo de '+item.tam+': '+res.error.message); }
           callback();
         });
       }
 
-      estoquePersistirMovimento(tam, caixas, unid, 'entrada', 'Entrada manual'+(nf?' · '+nf:'')+(custo?' · custo R$'+custo.toFixed(2)+'/cx':''), function(){
-        registrarLoteSeNecessario(function(){
-          document.getElementById('ent-caixas').value=''; document.getElementById('ent-unid').value=''; document.getElementById('ent-custo').value=''; document.getElementById('ent-nf').value='';
-          formEnt.style.display='none';
-          toast('✅ Estoque atualizado! +' + caixas + 'cx de ' + tam + (custo?' (custo R$'+custo.toFixed(2)+'/cx)':''));
+      function processarItem(idx){
+        if(idx>=validos.length){
+          estLancarFreteSeNecessario(function(){
+            ENT_ITENS = [estGerarNovaLinhaEntrada()];
+            estRenderLinhasEntrada();
+            document.getElementById('ent-frete-wrap').style.display='none';
+            document.getElementById('ent-xml-frete').value='';
+            estAccToggle('est-entrada');
+            toast('✅ Estoque atualizado! '+validos.length+' item'+(validos.length>1?'s':'')+' lançado'+(validos.length>1?'s':'')+' com sucesso.');
+          });
+          return;
+        }
+        var item = validos[idx];
+        estoquePersistirMovimento(item.tam, item.caixas, item.unid, 'entrada', 'Entrada manual'+(item.nf?' · '+item.nf:'')+(item.custo?' · custo R$'+item.custo.toFixed(2)+'/cx':''), function(){
+          registrarLoteSeNecessario(item, function(){ processarItem(idx+1); });
         });
-      });
+      }
+      processarItem(0);
     });
+
+    // Se o XML trouxe frete e a caixa de "já lançar" está marcada, cria a
+    // despesa no Financeiro automaticamente (categoria Frete, classificada
+    // como despesa variável no DRE) — evita o passo manual de duplicar a
+    // informação numa segunda tela.
+    function estLancarFreteSeNecessario(callback){
+      var freteWrap = document.getElementById('ent-frete-wrap');
+      var lancarCheckbox = document.getElementById('ent-xml-lancar-frete');
+      if(!freteWrap || freteWrap.style.display==='none' || !lancarCheckbox || !lancarCheckbox.checked){ callback(); return; }
+      var valorFrete = parseFloat(document.getElementById('ent-xml-frete').value)||0;
+      if(valorFrete<=0){ callback(); return; }
+      var primeiroNf = ENT_ITENS[0] ? ENT_ITENS[0].nf : '';
+      sbClient.from('contas_a_pagar').insert({
+        descricao: 'Frete — compra de copos'+(primeiroNf?' ('+primeiroNf+')':''),
+        valor: valorFrete, vencimento: new Date().toISOString().split('T')[0],
+        categoria: 'Frete', classificacao_dre: 'despesa_variavel',
+        observacao: 'Lançado automaticamente ao importar XML da NF', status: 'pendente'
+      }).then(function(res){
+        if(res.error){ toast('Estoque atualizado, mas houve erro ao lançar o frete: '+res.error.message); }
+        else { toast('📦 Frete de R$'+valorFrete.toFixed(2)+' lançado em Contas a Pagar.'); }
+        callback();
+      });
+    }
 
     var btnBaixa = document.getElementById('btn-confirm-baixa');
     if(btnBaixa) btnBaixa.addEventListener('click', function(){
-      var tam = document.getElementById('baixa-tam').value;
+      var tam = estFormatarTamanho(document.getElementById('baixa-tam').value);
       var caixas = parseInt(document.getElementById('baixa-caixas').value)||0;
       var unid = parseInt(document.getElementById('baixa-unid').value)||0;
       var motivo = document.getElementById('baixa-motivo').value||'Baixa manual';
+      if(!tam){ toast('Informe o tamanho em ml!'); return; }
       if(!caixas && !unid) { toast('Informe caixas ou unidades!'); return; }
       // Proteção contra conflito de quantidade: nunca deixa dar baixa maior
       // do que existe disponível — avisa e não aplica, em vez de zerar
@@ -4322,12 +4707,13 @@ document.addEventListener('DOMContentLoaded',function(){
     // Botão Abrir caixa
     var btnAbrir = document.getElementById('btn-confirm-abrir');
     if(btnAbrir) btnAbrir.addEventListener('click', function(){
-      var tam = document.getElementById('abrir-tam').value;
+      var tam = estFormatarTamanho(document.getElementById('abrir-tam').value);
       var total = parseInt(document.getElementById('abrir-total').value)||0;
       var usados = parseInt(document.getElementById('abrir-usados').value)||0;
       var motivo = document.getElementById('abrir-motivo').value||'Abertura parcial';
+      if(!tam){ toast('Informe o tamanho em ml!'); return; }
       if(!total) { toast('Informe quantos pacotes tem a caixa!'); return; }
-      if(STOCK[tam].caixas < 1) { toast('⚠️ Sem caixas fechadas de ' + tam + ' em estoque!'); return; }
+      if(!STOCK[tam] || STOCK[tam].caixas < 1) { toast('⚠️ Sem caixas fechadas de ' + tam + ' em estoque!'); return; }
       var sobra = Math.max(0, total - usados);
       estoquePersistirMovimento(tam, -1, sobra, 'abertura', motivo + ' (abriu 1cx → ' + total + 'pct, usou ' + usados + ', sobra ' + sobra + ')', function(){
         document.getElementById('abrir-total').value=''; document.getElementById('abrir-usados').value=''; document.getElementById('abrir-motivo').value='';
@@ -4339,23 +4725,62 @@ document.addEventListener('DOMContentLoaded',function(){
     // Ajuste / correção de inventário — separado de entrada/baixa comuns,
     // para não misturar "movimentação comercial real" com "correção de
     // contagem". Também protegido contra deixar o estoque negativo.
+
+    // Campo de custo só faz sentido quando o ajuste SOMA caixas (é uma
+    // entrada de fato, precisa virar lote para o cálculo de margem via
+    // PEPS) — ao subtrair, não há lote novo envolvido.
+    var ajusteTipoSel = document.getElementById('ajuste-tipo');
+    if(ajusteTipoSel && !ajusteTipoSel._bound){
+      ajusteTipoSel.addEventListener('change', function(){
+        var mostrar = this.value==='somar';
+        document.getElementById('ajuste-custo-wrap').style.display = mostrar ? '' : 'none';
+        document.getElementById('ajuste-custo-info').style.display = mostrar ? '' : 'none';
+      });
+      ajusteTipoSel._bound = true;
+    }
+
     var btnAjuste = document.getElementById('btn-confirm-ajuste');
     if(btnAjuste) btnAjuste.addEventListener('click', function(){
-      var tam = document.getElementById('ajuste-tam').value;
+      var tam = estFormatarTamanho(document.getElementById('ajuste-tam').value);
       var tipo = document.getElementById('ajuste-tipo').value; // 'somar' | 'subtrair'
       var caixas = parseInt(document.getElementById('ajuste-caixas').value)||0;
       var unid = parseInt(document.getElementById('ajuste-unid').value)||0;
+      var custo = parseFloat(document.getElementById('ajuste-custo').value)||0;
       var motivo = document.getElementById('ajuste-motivo').value||'';
+      if(!tam){ toast('Informe o tamanho em ml!'); return; }
       if(!caixas && !unid) { toast('Informe caixas ou unidades para o ajuste!'); return; }
       if(!motivo.trim()) { toast('Informe o motivo do ajuste.'); return; }
+      if(tipo==='somar' && caixas>0 && !custo){ toast('Informe o custo por caixa — necessário para calcular a margem de lucro depois.'); return; }
+      // Tamanho ainda não existe no estoque — cadastra na hora com 1000
+      // unidades por caixa como padrão (mesmo valor já usado para os
+      // tamanhos tradicionais; editável depois se precisar).
+      if(!STOCK[tam]){
+        STOCK[tam] = {caixas:0, unid:0, minCaixas:3};
+        UNID_PER_CX[tam] = 1000;
+      }
       if(tipo==='subtrair' && (caixas > STOCK[tam].caixas || unid > STOCK[tam].unid)){
         toast('⚠️ Quantidade a subtrair maior que o disponível ('+STOCK[tam].caixas+'cx / '+STOCK[tam].unid+' un). Ajuste não aplicado.');
         return;
       }
       var sinal = tipo==='somar' ? 1 : -1;
-      estoquePersistirMovimento(tam, sinal*caixas, sinal*unid, 'ajuste', 'Ajuste/correção ('+(tipo==='somar'?'+':'-')+') — '+motivo, function(){
-        document.getElementById('ajuste-caixas').value=''; document.getElementById('ajuste-unid').value=''; document.getElementById('ajuste-motivo').value='';
-        toast('🔧 Ajuste aplicado: '+(tipo==='somar'?'+':'-')+caixas+'cx / '+(tipo==='somar'?'+':'-')+unid+'un de '+tam);
+
+      function registrarLoteSeNecessario(callback){
+        if(tipo!=='somar' || caixas<=0){ callback(); return; }
+        sbClient.from('estoque_lotes').insert({
+          tamanho: tam, custo_unitario_caixa: custo,
+          quantidade_caixas_original: caixas, quantidade_caixas_restante: caixas,
+          nota_fiscal: null, lancado_por: currentUser._supabaseId
+        }).then(function(res){
+          if(res.error){ toast('Ajuste aplicado, mas houve erro ao registrar o lote de custo: '+res.error.message); }
+          callback();
+        });
+      }
+
+      estoquePersistirMovimento(tam, sinal*caixas, sinal*unid, 'ajuste', 'Ajuste/correção ('+(tipo==='somar'?'+':'-')+') — '+motivo+(custo?' · custo R$'+custo.toFixed(2)+'/cx':''), function(){
+        registrarLoteSeNecessario(function(){
+          document.getElementById('ajuste-caixas').value=''; document.getElementById('ajuste-unid').value=''; document.getElementById('ajuste-custo').value=''; document.getElementById('ajuste-motivo').value='';
+          toast('🔧 Ajuste aplicado: '+(tipo==='somar'?'+':'-')+caixas+'cx / '+(tipo==='somar'?'+':'-')+unid+'un de '+tam);
+        });
       });
     });
 
@@ -4420,6 +4845,7 @@ document.addEventListener('DOMContentLoaded',function(){
     }
     if(btnNovoItem && !btnNovoItem._bound){
       btnNovoItem.addEventListener('click', function(){
+        INV_EDITANDO_ID = null;
         document.getElementById('inv-item-modal-title').textContent = 'Novo item de inventário';
         document.getElementById('inv-it-codigo').value='';
         document.getElementById('inv-it-nome').value='';
@@ -4478,11 +4904,13 @@ document.addEventListener('DOMContentLoaded',function(){
       var categoriaNome = item.inventario_categorias ? item.inventario_categorias.nome : '—';
       var custoTexto = item.preco_custo_atual ? 'R$ '+parseFloat(item.preco_custo_atual).toFixed(2) : '—';
       var acao = podeGerenciar
-        ? '<button class="btn btn-sm" onclick="invAbrirMovimento(\''+item.id+'\')"><i class="ti ti-arrows-exchange" style="font-size:11px;"></i> Movimentar</button>'
+        ? '<button class="btn btn-sm" onclick="invAbrirMovimento(\''+item.id+'\')"><i class="ti ti-arrows-exchange" style="font-size:11px;"></i> Movimentar</button> <button class="btn btn-sm" onclick="invAbrirEdicao(\''+item.id+'\')" title="Editar código/nome/categoria"><i class="ti ti-edit" style="font-size:11px;"></i></button>'
         : '';
       return '<tr'+(abaixoMinimo?' style="background:#FCEBEB;"':'')+'><td>'+esc(item.codigo)+'</td><td>'+esc(item.nome)+'</td><td>'+esc(categoriaNome)+'</td><td>'+qtdTexto+'</td><td>'+custoTexto+'</td><td>'+acao+'</td></tr>';
     }).join('');
   }
+
+  var INV_EDITANDO_ID = null; // null = criando novo; senão, é o id do item em edição
 
   function invSalvarItem(){
     if(dbEscritaBloqueadaSeDemo()){ closeModal('modal-inv-item'); return; }
@@ -4495,18 +4923,47 @@ document.addEventListener('DOMContentLoaded',function(){
     if(!codigo || !nome || !categoriaId){ toast('Preencha código, nome e categoria!'); return; }
     if(!sbClient){ toast('Sem conexão com o banco.'); return; }
 
-    sbClient.from('inventario_itens').insert({
+    var dados = {
       codigo: codigo, nome: nome, categoria_id: categoriaId,
       unidade_medida: unidade, quantidade_minima: minima, observacao: obs||null
-    }).then(function(res){
-      if(res.error){ toast('Erro ao criar item: '+res.error.message); return; }
-      invCarregarItens(function(){
-        renderInvItens();
-        closeModal('modal-inv-item');
-        toast('✅ Item cadastrado: '+nome);
+    };
+
+    if(INV_EDITANDO_ID){
+      sbClient.from('inventario_itens').update(dados).eq('id', INV_EDITANDO_ID).then(function(res){
+        if(res.error){ toast('Erro ao atualizar item: '+res.error.message); return; }
+        invCarregarItens(function(){
+          renderInvItens();
+          closeModal('modal-inv-item');
+          toast('✅ Item atualizado: '+nome);
+          INV_EDITANDO_ID = null;
+        });
       });
-    });
+    } else {
+      sbClient.from('inventario_itens').insert(dados).then(function(res){
+        if(res.error){ toast('Erro ao criar item: '+res.error.message); return; }
+        invCarregarItens(function(){
+          renderInvItens();
+          closeModal('modal-inv-item');
+          toast('✅ Item cadastrado: '+nome);
+        });
+      });
+    }
   }
+
+  function invAbrirEdicao(itemId){
+    var item = INV_ITENS.find(function(i){ return i.id===itemId; });
+    if(!item) return;
+    INV_EDITANDO_ID = itemId;
+    document.getElementById('inv-item-modal-title').textContent = 'Editar item de inventário';
+    document.getElementById('inv-it-codigo').value = item.codigo;
+    document.getElementById('inv-it-nome').value = item.nome;
+    document.getElementById('inv-it-categoria').value = item.categoria_id||'';
+    document.getElementById('inv-it-unidade').value = item.unidade_medida||'un';
+    document.getElementById('inv-it-minima').value = item.quantidade_minima||'';
+    document.getElementById('inv-it-obs').value = item.observacao||'';
+    openModal('modal-inv-item');
+  }
+  window.invAbrirEdicao = invAbrirEdicao;
 
   function invAbrirMovimento(itemId){
     var item = INV_ITENS.find(function(i){ return i.id===itemId; });
@@ -4595,9 +5052,12 @@ document.addEventListener('DOMContentLoaded',function(){
 
   function initCaixasProntas(){
     cpCarregar(function(){ renderCpTabela(); });
+    refugoCarregar(function(){ renderRefugoTabela(); });
     var podeGerenciar = estoquePodeGerenciar();
     var btnNova = document.getElementById('btn-cp-nova');
     if(btnNova) btnNova.style.display = podeGerenciar ? '' : 'none';
+    var btnRefugoNovo = document.getElementById('btn-refugo-novo');
+    if(btnRefugoNovo) btnRefugoNovo.style.display = podeGerenciar ? '' : 'none';
 
     var buscaEl = document.getElementById('cp-busca');
     if(buscaEl && !buscaEl._bound){
@@ -4606,7 +5066,7 @@ document.addEventListener('DOMContentLoaded',function(){
     }
     if(btnNova && !btnNova._bound){
       btnNova.addEventListener('click', function(){
-        document.getElementById('cp-tamanho').value='330';
+        document.getElementById('cp-tamanho').value='';
         document.getElementById('cp-qtd-inicial').value='';
         document.getElementById('cp-arte').value='';
         document.getElementById('cp-cor').value='';
@@ -4627,7 +5087,118 @@ document.addEventListener('DOMContentLoaded',function(){
       btnMovSalvar.addEventListener('click', cpSalvarMovimento);
       btnMovSalvar._bound = true;
     }
+    if(btnRefugoNovo && !btnRefugoNovo._bound){
+      btnRefugoNovo.addEventListener('click', function(){
+        document.getElementById('refugo-tamanho').value='';
+        document.getElementById('refugo-qtd').value='';
+        document.getElementById('refugo-arte').value='';
+        document.getElementById('refugo-motivo').value='';
+        document.getElementById('refugo-obs').value='';
+        openModal('modal-refugo-novo');
+      });
+      btnRefugoNovo._bound = true;
+    }
+    var btnRefugoSalvar = document.getElementById('btn-refugo-salvar');
+    if(btnRefugoSalvar && !btnRefugoSalvar._bound){
+      btnRefugoSalvar.addEventListener('click', refugoSalvarManual);
+      btnRefugoSalvar._bound = true;
+    }
   }
+
+  /* ============================================================
+     ESTOQUE DE REFUGO
+     ============================================================
+     Caixas já produzidas/personalizadas sem cliente definido — via
+     cancelamento pós-produção (gerado automaticamente em
+     pedAprovarCancelamento) ou lançamento manual (copos com defeito
+     acumulados durante a produção normal).
+     ============================================================ */
+  var ESTOQUE_REFUGO = [];
+
+  function refugoCarregar(callback){
+    if(!sbClient){ if(callback) callback(); return; }
+    sbClient.from('estoque_refugo').select('*').gt('quantidade_caixas', 0).order('criado_em', {ascending:false}).then(function(res){
+      if(!res.error && res.data) ESTOQUE_REFUGO = res.data;
+      if(callback) callback();
+    });
+  }
+
+  var REFUGO_ORIGEM_LABEL = {
+    cancelamento_pos_producao: 'Cancelamento pós-produção',
+    defeito_producao: 'Defeito de produção',
+    manual: 'Lançamento manual'
+  };
+
+  function renderRefugoTabela(){
+    var tbody = document.getElementById('refugo-tbody');
+    if(!tbody) return;
+    var podeGerenciar = estoquePodeGerenciar();
+    if(!ESTOQUE_REFUGO.length){
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px;">Nenhum item no estoque de refugo.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = ESTOQUE_REFUGO.map(function(r){
+      var acao = podeGerenciar
+        ? '<button class="btn btn-sm" onclick="refugoAbrirMovimento(\''+r.id+'\')"><i class="ti ti-arrows-exchange" style="font-size:11px;"></i> Movimentar</button>'
+        : '';
+      return '<tr><td>'+r.tamanho_ml+'ml</td><td>'+esc(r.arte||'—')+'</td><td>'+esc(REFUGO_ORIGEM_LABEL[r.origem]||r.origem)+'</td><td style="font-size:11px;color:var(--text2);">'+esc(r.motivo||'—')+'</td><td>'+r.quantidade_caixas+'</td><td>'+acao+'</td></tr>';
+    }).join('');
+  }
+
+  function refugoSalvarManual(){
+    if(dbEscritaBloqueadaSeDemo()){ closeModal('modal-refugo-novo'); return; }
+    var tamanho = parseInt(document.getElementById('refugo-tamanho').value);
+    var qtd = parseInt(document.getElementById('refugo-qtd').value)||0;
+    var arte = document.getElementById('refugo-arte').value||null;
+    var motivo = (document.getElementById('refugo-motivo').value||'').trim();
+    var obs = document.getElementById('refugo-obs').value||null;
+    if(!qtd || qtd<=0){ toast('Informe a quantidade de caixas.'); return; }
+    if(!motivo){ toast('Informe o motivo.'); return; }
+    if(!sbClient){ toast('Sem conexão com o banco.'); return; }
+
+    sbClient.from('estoque_refugo').insert({
+      tamanho_ml: tamanho, arte: arte, origem: 'defeito_producao',
+      motivo: motivo, quantidade_caixas: qtd, observacao: obs,
+      criado_por: currentUser._supabaseId
+    }).select().single().then(function(res){
+      if(res.error){ toast('Erro ao lançar refugo: '+res.error.message); return; }
+      sbClient.from('estoque_refugo_log').insert({
+        refugo_id: res.data.id, tipo:'entrada', quantidade: qtd,
+        motivo: motivo, lancado_por: currentUser._supabaseId
+      }).then(function(){
+        refugoCarregar(function(){
+          renderRefugoTabela();
+          closeModal('modal-refugo-novo');
+          toast('✅ Adicionado ao Estoque de Refugo!');
+        });
+      });
+    });
+  }
+
+  var REFUGO_MOV_ATUAL = null;
+  function refugoAbrirMovimento(refugoId){
+    var r = ESTOQUE_REFUGO.find(function(x){ return x.id===refugoId; });
+    if(!r) return;
+    REFUGO_MOV_ATUAL = r;
+    var nome = r.tamanho_ml+'ml — '+(r.arte||'genérico')+' (atual: '+r.quantidade_caixas+' cx)';
+    var qtdVenda = prompt('Quantas caixas de refugo você quer dar baixa? ('+nome+')\n(Use isso quando vender essas caixas com condição especial, ou para corrigir a contagem)');
+    var qtd = parseInt(qtdVenda);
+    if(!qtd || qtd<=0) return;
+    if(qtd > r.quantidade_caixas){ toast('Quantidade maior que o disponível ('+r.quantidade_caixas+' cx).'); return; }
+    var motivo = prompt('Motivo da baixa (ex: vendido para Cliente X por condição especial):')||'Baixa manual';
+    var novaQtd = r.quantidade_caixas - qtd;
+    sbClient.from('estoque_refugo').update({quantidade_caixas: novaQtd}).eq('id', r.id).then(function(res){
+      if(res.error){ toast('Erro: '+res.error.message); return; }
+      sbClient.from('estoque_refugo_log').insert({
+        refugo_id: r.id, tipo:'saida', quantidade: qtd, motivo: motivo, lancado_por: currentUser._supabaseId
+      }).then(function(){
+        r.quantidade_caixas = novaQtd;
+        refugoCarregar(function(){ renderRefugoTabela(); });
+        toast('✅ Baixa registrada no refugo.');
+      });
+    });
+  }
+  window.refugoAbrirMovimento = refugoAbrirMovimento;
 
   function renderCpTabela(){
     var tbody = document.getElementById('cp-tbody');
@@ -5215,6 +5786,35 @@ document.addEventListener('DOMContentLoaded',function(){
   };
   var PRECO_UNID = {'330ml': 1.40, '400ml': 1.40, '500ml': 1.40, '770ml': 1.40};
 
+  // Medidas "irmãs" têm o mesmo preço de venda — o copo é fisicamente um
+  // pouco diferente, mas comercialmente tratado igual. Cada tamanho no
+  // estoque continua totalmente separado (nunca se misturam as
+  // quantidades); isso aqui é só para achar o preço de venda certo.
+  var TAMANHO_EQUIVALENTE_PRECO = {
+    '300ml': '330ml', '330ml': '330ml',
+    '400ml': '400ml', '440ml': '400ml',
+    '500ml': '500ml', '550ml': '500ml',
+    '700ml': '770ml', '770ml': '770ml'
+  };
+
+  // Busca a linha de preço para um tamanho, usando o equivalente quando o
+  // tamanho exato não está cadastrado (ex: 440ml usa o preço do 400ml).
+  // Se nem o equivalente existir (tamanho realmente novo, fora do padrão
+  // conhecido), retorna null — quem chama decide o que fazer (pedir preço
+  // manual, avisar o vendedor, etc.), nunca cai silenciosamente em zero.
+  function buscarPrecoTabela(tam){
+    if(PRECO_TABLE[tam]) return PRECO_TABLE[tam];
+    var equivalente = TAMANHO_EQUIVALENTE_PRECO[tam];
+    if(equivalente && PRECO_TABLE[equivalente]) return PRECO_TABLE[equivalente];
+    return null;
+  }
+  function buscarPrecoUnidTabela(tam){
+    if(PRECO_UNID[tam]!=null) return PRECO_UNID[tam];
+    var equivalente = TAMANHO_EQUIVALENTE_PRECO[tam];
+    if(equivalente && PRECO_UNID[equivalente]!=null) return PRECO_UNID[equivalente];
+    return null;
+  }
+
   function setImpressao(val) {
     NP_IMPRESSAO = val;
     document.querySelectorAll('.imp-btn[data-imp]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-imp') === val); });
@@ -5233,13 +5833,26 @@ document.addEventListener('DOMContentLoaded',function(){
   }
 
   function calcItemPrice(tam, tipo, qtd, precoCustom) {
-    var p = PRECO_TABLE[tam]; if(!p) return {subtotal:0, unidades:0, preco:0};
     if(tipo === 'caixas') {
+      var p = buscarPrecoTabela(tam);
+      if(!p){
+        // Tamanho sem preço cadastrado nem equivalente conhecido — só
+        // funciona se o vendedor já tiver digitado um preço manual;
+        // sem isso, sinaliza precisaPrecoManual para o formulário travar
+        // a criação do pedido em vez de deixar sair de graça.
+        if(precoCustom!=null) return {subtotal: precoCustom*qtd, unidades: qtd*1000, preco: precoCustom, precisaPrecoManual:false};
+        return {subtotal:0, unidades:qtd*1000, preco:0, precisaPrecoManual:true};
+      }
       var ppu = precoCustom != null ? precoCustom : (qtd >= 3 ? p.cx3 : p.cx1);
-      return {subtotal: ppu * qtd, unidades: p.unid_por_cx * qtd, preco: ppu};
+      return {subtotal: ppu * qtd, unidades: p.unid_por_cx * qtd, preco: ppu, precisaPrecoManual:false};
     } else {
-      var ppu2 = precoCustom != null ? precoCustom : PRECO_UNID[tam];
-      return {subtotal: ppu2 * qtd, unidades: qtd, preco: ppu2};
+      var pUnid = buscarPrecoUnidTabela(tam);
+      if(pUnid==null){
+        if(precoCustom!=null) return {subtotal: precoCustom*qtd, unidades: qtd, preco: precoCustom, precisaPrecoManual:false};
+        return {subtotal:0, unidades:qtd, preco:0, precisaPrecoManual:true};
+      }
+      var ppu2 = precoCustom != null ? precoCustom : pUnid;
+      return {subtotal: ppu2 * qtd, unidades: qtd, preco: ppu2, precisaPrecoManual:false};
     }
   }
 
@@ -5261,17 +5874,16 @@ document.addEventListener('DOMContentLoaded',function(){
     NP_ITEMS.forEach(function(item) {
       var row = document.createElement('div');
       row.className = 'item-row';
+      var precisaPreco = item.preco===0 && item.precoCustom==null;
       row.innerHTML =
-        '<select class="fg input" style="border:1px solid var(--border);border-radius:7px;padding:7px 8px;font-size:12px;" data-field="tam" data-id="'+item.id+'">' +
-          ['330ml','400ml','500ml','770ml'].map(function(t){ return '<option'+(t===item.tam?' selected':'')+'>'+t+'</option>'; }).join('') +
-        '</select>' +
+        '<input type="number" min="1" class="fg input" style="border:1px solid var(--border);border-radius:7px;padding:7px 8px;font-size:12px;width:100%;" value="'+parseInt(item.tam)+'" placeholder="ml" data-field="tam" data-id="'+item.id+'" list="lista-tamanhos-conhecidos"/>' +
         '<select class="fg input" style="border:1px solid var(--border);border-radius:7px;padding:7px 8px;font-size:12px;" data-field="tipo" data-id="'+item.id+'">' +
           '<option value="caixas"'+(item.tipo==='caixas'?' selected':'')+'>Caixas</option>' +
           '<option value="unidades"'+(item.tipo==='unidades'?' selected':'')+'>Unidades</option>' +
         '</select>' +
         '<input type="number" min="1" value="'+item.qtd+'" style="border:1px solid var(--border);border-radius:7px;padding:7px 8px;font-size:12px;width:100%;" data-field="qtd" data-id="'+item.id+'"/>' +
-        '<div style="border:1px solid var(--border);border-radius:7px;padding:4px 6px;font-size:12px;background:var(--bg);display:flex;align-items:center;gap:4px;">' +
-          '<span style="color:var(--text2);flex:1;">R$'+item.preco.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</span>' +
+        '<div style="border:1px solid '+(precisaPreco?'#E87000':'var(--border)')+';border-radius:7px;padding:4px 6px;font-size:12px;background:'+(precisaPreco?'#FFF7ED':'var(--bg)')+';display:flex;align-items:center;gap:4px;">' +
+          '<span style="color:'+(precisaPreco?'#E87000':'var(--text2)')+';flex:1;">'+(precisaPreco?'Defina o preço →':'R$'+item.preco.toLocaleString('pt-BR',{minimumFractionDigits:2}))+'</span>' +
           '<button class="edit-preco-btn" data-itemid="'+item.id+'" style="border:none;background:none;color:var(--rosa);cursor:pointer;padding:0;font-size:14px;" title="Editar preco">&#9998;</button>' +
         '</div>' +
         '<div style="border:1px solid var(--border);border-radius:7px;padding:7px 8px;font-size:12px;font-weight:600;color:var(--rosa);">R$'+item.subtotal.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div>' +
@@ -5295,6 +5907,7 @@ document.addEventListener('DOMContentLoaded',function(){
     var item = NP_ITEMS.find(function(i){ return i.id === id; }); if(!item) return;
     if(field === 'qtd') { item.qtd = parseInt(val)||1; item.precoCustom = null; }
     else if(field === 'preco') { item.precoCustom = parseFloat(val)||null; }
+    else if(field === 'tam') { item.tam = estFormatarTamanho(val) || item.tam; item.precoCustom = null; }
     else { item[field] = val; item.precoCustom = null; }
     var calc = calcItemPrice(item.tam, item.tipo, item.qtd, item.precoCustom);
     item.subtotal = calc.subtotal; item.unidades = calc.unidades; item.preco = calc.preco;
@@ -5458,6 +6071,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 entradaPaga: true, cancelamento: null, estoqueBaixado: true, custoTotal: custoTotalPedido
               };
               ORDERS.unshift(newOrder);
+              capitalGiroCriarPendencia(pedidoUuid, custoTotalPedido);
               // Já nasce pronto — gera etiqueta direto, sem passar pela fila
               if(typeof etqGerarParaPedido==='function') etqGerarParaPedido(newOrder);
               if(typeof notifPedidoProntoDespacho==='function') notifPedidoProntoDespacho(newOrder);
@@ -5477,6 +6091,8 @@ document.addEventListener('DOMContentLoaded',function(){
     var nome = (document.getElementById('np-nome').value||'').trim();
     if(!nome) { toast('Informe o nome do cliente!'); return; }
     if(!NP_ITEMS.length) { toast('Adicione pelo menos um produto!'); return; }
+    var itemSemPreco = NP_ITEMS.find(function(i){ return i.preco===0 && i.precoCustom==null; });
+    if(itemSemPreco){ toast('⚠️ O tamanho '+itemSemPreco.tam+' não tem preço cadastrado — clique no lápis ✎ e defina o preço manualmente antes de confirmar.'); return; }
     if(!sbClient){ toast('Sem conexão com o banco.'); return; }
 
     var total = NP_ITEMS.reduce(function(s,i){ return s+i.subtotal; },0);
@@ -5597,6 +6213,7 @@ document.addEventListener('DOMContentLoaded',function(){
                       if(pendentes===0){
                         sbClient.from('pedidos').update({custo_total: custoTotalPedido}).eq('id', pedidoUuid).then(function(){
                           newOrder.custoTotal = custoTotalPedido;
+                          capitalGiroCriarPendencia(pedidoUuid, custoTotalPedido);
                           finalizarNaTela(tamanhosComFalta);
                         });
                       }
@@ -5646,7 +6263,10 @@ document.addEventListener('DOMContentLoaded',function(){
   if(btnPcdConfirmar) btnPcdConfirmar.addEventListener('click', function(){
     if(!pedDecisaoCtx) return;
     var obs = document.getElementById('pcd-observacao').value||'';
-    if(pedDecisaoCtx.acao==='aprovar') pedAprovarCancelamento(pedDecisaoCtx.orderId, obs);
+    if(pedDecisaoCtx.acao==='aprovar'){
+      var destinoEstoque = document.getElementById('pcd-destino-estoque') ? document.getElementById('pcd-destino-estoque').value : 'devolver';
+      pedAprovarCancelamento(pedDecisaoCtx.orderId, obs, destinoEstoque);
+    }
     else pedNegarCancelamento(pedDecisaoCtx.orderId, obs);
     closeModal('modal-pcd');
     pedDecisaoCtx = null;
@@ -5890,6 +6510,7 @@ document.addEventListener('DOMContentLoaded',function(){
             vendedor: vendedorObj ? vendedorObj.name : '',
             vendedorId: c.vendedor_id,
             indicado: '', preco_esp: false, obs: '',
+            indicadoPorId: c.indicado_por_id||null,
             cadastro: c.criado_em ? c.criado_em.split('T')[0] : '',
             ultimo_pedido: '', total_caixas: 0, total_pedidos: 0,
             status: 'ativo'
@@ -5897,6 +6518,508 @@ document.addEventListener('DOMContentLoaded',function(){
         });
       }
       if(callback) callback();
+    });
+  }
+
+  /* ============================================================
+     CONTATOS
+     ============================================================
+     Reaproveita CLIENTES (já carregado do banco) cruzado com ORDERS,
+     para mostrar o último pedido e status mais recente de cada um —
+     não é uma tabela própria, é uma visão combinada das duas já
+     existentes, evitando duplicar dado.
+     ============================================================ */
+  function renderContatos(){
+    var tbody = document.getElementById('contatos-tbody');
+    if(!tbody) return;
+    var termo = (document.getElementById('contact-search').value||'').trim().toLowerCase();
+    var statusFiltro = document.getElementById('contact-filter-status').value;
+    var vendedorFiltro = document.getElementById('contact-filter-vendedor').value;
+
+    var linhas = CLIENTES.map(function(cli){
+      var pedidosDoCliente = ORDERS.filter(function(o){ return o.client===cli.nome; })
+        .sort(function(a,b){ return (b._uuid||'').localeCompare(a._uuid||''); }); // aproximação: mais recente primeiro via ordenação já vinda do banco (ORDERS já vem ordenado desc)
+      var ultimoPedido = pedidosDoCliente[0];
+      return {
+        cli: cli,
+        ultimoPedido: ultimoPedido,
+        statusAtual: ultimoPedido ? ultimoPedido.status : null
+      };
+    });
+
+    var filtradas = linhas.filter(function(l){
+      if(termo && l.cli.nome.toLowerCase().indexOf(termo)<0 && (l.cli.wapp||'').indexOf(termo)<0 && (l.cli.cidade||'').toLowerCase().indexOf(termo)<0) return false;
+      if(statusFiltro && l.statusAtual!==statusFiltro) return false;
+      if(vendedorFiltro && l.cli.vendedor!==vendedorFiltro) return false;
+      return true;
+    });
+
+    if(!filtradas.length){
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px;">Nenhum contato encontrado.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = filtradas.map(function(l){
+      var pillClasse = l.ultimoPedido ? (STATUS_PILL_MAP[l.statusAtual]||'p-novo') : '';
+      var statusHtml = l.ultimoPedido ? '<span class="pill '+pillClasse+'">'+esc(l.statusAtual)+'</span>' : '<span style="color:var(--text3);font-size:11px;">Sem pedidos</span>';
+      var ultimoPedidoTexto = l.ultimoPedido ? esc(l.ultimoPedido.prod)+'·'+esc(l.ultimoPedido.data) : '—';
+      return '<tr><td><b>'+esc(l.cli.nome)+'</b></td><td>'+esc(l.cli.wapp||'—')+'</td><td>'+esc(l.cli.cidade||'—')+'</td><td>'+ultimoPedidoTexto+'</td><td>'+esc(l.cli.vendedor||'—')+'</td><td>'+statusHtml+'</td><td>'+(l.ultimoPedido?'<button class="btn btn-sm" onclick="goPage(\'clientes\',\'Clientes\')">Ver cliente</button>':'')+'</td></tr>';
+    }).join('');
+  }
+
+  function popularFiltroVendedorContatos(){
+    var sel = document.getElementById('contact-filter-vendedor');
+    if(!sel) return;
+    var vendedoresUnicos = Array.from(new Set(CLIENTES.map(function(c){ return c.vendedor; }).filter(Boolean)));
+    var valorAtual = sel.value;
+    sel.innerHTML = '<option value="">Todos vendedores</option>' + vendedoresUnicos.map(function(v){ return '<option value="'+esc(v)+'">'+esc(v)+'</option>'; }).join('');
+    sel.value = valorAtual;
+  }
+
+  function initContatos(){
+    carregarClientesDoBanco(function(){
+      carregarPedidosDoBanco(function(){
+        popularFiltroVendedorContatos();
+        renderContatos();
+      });
+    });
+
+    ['contact-search','contact-filter-status','contact-filter-vendedor'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el && !el._bound){
+        el.addEventListener(id==='contact-search'?'input':'change', renderContatos);
+        el._bound = true;
+      }
+    });
+  }
+
+  /* ============================================================
+     RELATÓRIOS
+     ============================================================ */
+  var MESES_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+  function relPopularSeletorMes(){
+    var sel = document.getElementById('rel-mes-select');
+    if(!sel) return;
+    var opcoes = [];
+    var hoje = new Date();
+    for(var i=0;i<12;i++){
+      var d = new Date(hoje.getFullYear(), hoje.getMonth()-i, 1);
+      var chave = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+      opcoes.push({chave: chave, label: MESES_PT[d.getMonth()]+' '+d.getFullYear()});
+    }
+    var valorAtual = sel.value || opcoes[0].chave;
+    sel.innerHTML = opcoes.map(function(o){ return '<option value="'+o.chave+'">'+o.label+'</option>'; }).join('');
+    sel.value = valorAtual;
+  }
+
+  function relParseDataPedidoParaChaveMes(dataBR){
+    if(!dataBR) return null;
+    var partes = dataBR.split('/');
+    if(partes.length!==3) return null;
+    return partes[2]+'-'+partes[1];
+  }
+
+  function renderRelatorios(){
+    var sel = document.getElementById('rel-mes-select');
+    if(!sel) return;
+    var mesChave = sel.value;
+
+    var pedidosDoMes = ORDERS.filter(function(o){ return relParseDataPedidoParaChaveMes(o.data)===mesChave; });
+    var cancelados = pedidosDoMes.filter(function(o){ return o.status==='Cancelado'; });
+    var entregues = pedidosDoMes.filter(function(o){ return o.status==='Entregue'; });
+    var validos = pedidosDoMes.filter(function(o){ return o.status!=='Cancelado'; });
+    var faturamentoTotal = validos.reduce(function(s,o){ return s+(o.valor||0); },0);
+    var taxaEntrega = pedidosDoMes.length ? Math.round((entregues.length/pedidosDoMes.length)*100) : 0;
+
+    document.getElementById('rel-total-leads').textContent = pedidosDoMes.length;
+    document.getElementById('rel-conversao').textContent = taxaEntrega+'%';
+    document.getElementById('rel-cancelados').textContent = cancelados.length;
+    document.getElementById('rel-faturamento').textContent = 'R$'+faturamentoTotal.toLocaleString('pt-BR');
+
+    var porVendedor = {};
+    validos.forEach(function(o){
+      var v = o.vendedor||'Sem vendedor';
+      if(!porVendedor[v]) porVendedor[v] = {pedidos:0, entregues:0, faturamento:0};
+      porVendedor[v].pedidos++;
+      if(o.status==='Entregue') porVendedor[v].entregues++;
+      porVendedor[v].faturamento += (o.valor||0);
+    });
+
+    var listaVendedores = Object.keys(porVendedor).map(function(v){
+      return Object.assign({nome:v}, porVendedor[v]);
+    }).sort(function(a,b){ return b.faturamento - a.faturamento; });
+
+    var maxFaturamento = listaVendedores.length ? listaVendedores[0].faturamento : 1;
+    var wrap = document.getElementById('rel-vendedores-lista');
+    if(!listaVendedores.length){
+      wrap.innerHTML = '<div style="text-align:center;color:var(--text3);font-style:italic;padding:30px;font-size:12px;">Nenhum pedido neste mês.</div>';
+      return;
+    }
+    wrap.innerHTML = listaVendedores.map(function(v, idx){
+      var conversao = v.pedidos ? Math.round((v.entregues/v.pedidos)*100) : 0;
+      var iniciais = v.nome.substring(0,2).toUpperCase();
+      var cor = CLI_CORES[idx % CLI_CORES.length];
+      var largura = maxFaturamento>0 ? Math.round((v.faturamento/maxFaturamento)*100) : 0;
+      var topBadge = idx===0 ? '<span class="pill p-entregue" style="margin-left:auto;">Top vendedor</span>' : '';
+      return '<div class="report-card"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;"><div class="report-av" style="background:'+cor+';">'+iniciais+'</div><div><div style="font-size:14px;font-weight:600;">'+esc(v.nome)+'</div><div style="font-size:11px;color:#666;">Vendedor</div></div>'+topBadge+'</div>'+
+        '<div class="report-stats"><div class="report-stat"><div class="report-stat-val">'+v.pedidos+'</div><div class="report-stat-lbl">Pedidos</div></div>'+
+        '<div class="report-stat"><div class="report-stat-val" style="color:#E31787;">'+conversao+'%</div><div class="report-stat-lbl">Entregues</div></div>'+
+        '<div class="report-stat"><div class="report-stat-val" style="color:#E31787;">R$'+v.faturamento.toLocaleString('pt-BR')+'</div><div class="report-stat-lbl">Faturamento</div></div></div>'+
+        '<div class="progress-bar"><div class="progress-fill" style="width:'+largura+'%;"></div></div></div>';
+    }).join('');
+  }
+
+  function initRelatorios(){
+    carregarPedidosDoBanco(function(){
+      relPopularSeletorMes();
+      renderRelatorios();
+    });
+    var sel = document.getElementById('rel-mes-select');
+    if(sel && !sel._bound){
+      sel.addEventListener('change', renderRelatorios);
+      sel._bound = true;
+    }
+  }
+
+  /* ============================================================
+     AÇÕES DE VENDAS — 6 regras de benefício automático
+     ============================================================
+     Cada regra é CALCULADA em cima de ORDERS/CLIENTES (não depende de
+     nenhuma tabela nova para saber QUEM se qualifica), mas o benefício
+     GERADO é persistido em beneficios_clientes — assim conseguimos
+     marcar "já apliquei", sem recalcular do zero e sem duplicar.
+     ============================================================ */
+  var BENEFICIOS_CACHE = []; // carregado do banco a cada abertura da tela
+
+  function acvCarregarBeneficios(callback){
+    if(!sbClient){ if(callback) callback(); return; }
+    sbClient.from('beneficios_clientes').select('*').then(function(res){
+      if(!res.error && res.data) BENEFICIOS_CACHE = res.data;
+      if(callback) callback();
+    });
+  }
+
+  function acvJaExisteBeneficioAberto(clienteId, tipo, pedidoGeradorId){
+    return BENEFICIOS_CACHE.some(function(b){
+      return b.cliente_id===clienteId && b.tipo===tipo && b.status==='pendente' &&
+        (pedidoGeradorId ? b.pedido_gerador_id===pedidoGeradorId : true);
+    });
+  }
+
+  function acvCriarBeneficio(dados, callback){
+    if(!sbClient){ if(callback) callback(); return; }
+    sbClient.from('beneficios_clientes').insert(dados).then(function(res){
+      if(res.error){ console.error('Erro ao criar benefício:', res.error.message); }
+      if(callback) callback();
+    });
+  }
+
+  function acvParseDataPtParaDate(dataBR){
+    if(!dataBR) return null;
+    var partes = dataBR.split('/');
+    if(partes.length!==3) return null;
+    return new Date(parseInt(partes[2]), parseInt(partes[1])-1, parseInt(partes[0]));
+  }
+
+  function acvDiasEntre(dataA, dataB){
+    return Math.floor((dataB - dataA) / 86400000);
+  }
+
+  // ── Regra 1: Brinde 11ª caixa (10 caixas em 45 dias, ciclo se repete) ──
+  function acvCalcularBrindes(){
+    var resultado = [];
+    var hoje = new Date();
+    var porCliente = {};
+    ORDERS.forEach(function(o){
+      if(o.status==='Cancelado') return;
+      if(!porCliente[o.client]) porCliente[o.client] = [];
+      porCliente[o.client].push(o);
+    });
+    Object.keys(porCliente).forEach(function(clienteNome){
+      var pedidos = porCliente[clienteNome].sort(function(a,b){ return acvParseDataPtParaDate(a.data) - acvParseDataPtParaDate(b.data); });
+      var acumulado = 0;
+      var janelaInicio = null;
+      pedidos.forEach(function(o){
+        var dataPedido = acvParseDataPtParaDate(o.data);
+        if(!dataPedido) return;
+        if(!janelaInicio) janelaInicio = dataPedido;
+        if(acvDiasEntre(janelaInicio, dataPedido) > 45){
+          // Janela estourou sem atingir 10 — reinicia a contagem a partir deste pedido
+          acumulado = 0;
+          janelaInicio = dataPedido;
+        }
+        acumulado += (o.qtd||0);
+        if(acumulado >= 10){
+          var cli = CLIENTES.find(function(c){ return c.nome===clienteNome; });
+          if(cli && !acvJaExisteBeneficioAberto(cli._uuid, 'brinde_11caixa', o._uuid)){
+            resultado.push({cliente: cli, pedido: o, detalhe: acumulado+' caixas em '+acvDiasEntre(janelaInicio,dataPedido)+' dias', vendedor: o.vendedor});
+          }
+          acumulado = 0; // ciclo reinicia após atingir o brinde
+          janelaInicio = null;
+        }
+      });
+    });
+    return resultado;
+  }
+
+  // ── Regra 2: Desconto por volume (10 caixas numa única compra) ──
+  // Desconto por volume precisa existir DE FATO no banco assim que a regra
+  // dispara (não só na hora de "marcar aplicado") — é o que permite saber,
+  // depois, se já se passaram 30/60 dias sem uso, para notificar. Os outros
+  // 5 benefícios continuam calculados só na hora, porque não têm essa
+  // necessidade de aviso por tempo decorrido.
+  function acvCalcularDescontosVolume(){
+    var resultado = [];
+    ORDERS.forEach(function(o){
+      if(o.status==='Cancelado') return;
+      if((o.qtd||0) < 10) return;
+      var cli = CLIENTES.find(function(c){ return c.nome===o.client; });
+      if(!cli) return;
+      var jaExistePendente = BENEFICIOS_CACHE.some(function(b){
+        return b.cliente_id===cli._uuid && b.tipo==='desconto_volume' && b.pedido_gerador_id===o._uuid;
+      });
+      if(jaExistePendente){
+        var registroExistente = BENEFICIOS_CACHE.find(function(b){
+          return b.cliente_id===cli._uuid && b.tipo==='desconto_volume' && b.pedido_gerador_id===o._uuid && b.status==='pendente';
+        });
+        if(registroExistente){
+          resultado.push({cliente: cli, pedido: o, detalhe: o.qtd+' caixas em uma única compra', vendedor: o.vendedor, beneficioId: registroExistente.id, dataExpiracao: registroExistente.data_expiracao});
+        }
+        return;
+      }
+      // Ainda não existe registro — cria agora, já com a data de expiração
+      // (90 dias, confirmado), para o aviso de 30/60 dias funcionar depois.
+      var dataExpiracao = new Date(); dataExpiracao.setDate(dataExpiracao.getDate()+90);
+      var dataExpISO = dataExpiracao.toISOString().split('T')[0];
+      acvCriarBeneficio({
+        cliente_id: cli._uuid, tipo: 'desconto_volume', status: 'pendente',
+        valor_percentual: 10, pedido_gerador_id: o._uuid,
+        detalhe: o.qtd+' caixas em uma única compra',
+        data_expiracao: dataExpISO
+      }, function(){});
+      resultado.push({cliente: cli, pedido: o, detalhe: o.qtd+' caixas em uma única compra', vendedor: o.vendedor, dataExpiracao: dataExpISO});
+    });
+    return resultado;
+  }
+
+  // Verifica, entre os descontos de volume já pendentes no banco, quais
+  // cruzaram o marco de 30 ou 60 dias desde a criação sem terem sido
+  // usados — e ainda não foram notificados nesse marco. Dispara toast +
+  // registra na auditoria (vendedor e gestores acompanham pela auditoria
+  // e pela contagem de dias visível na própria tela).
+  function acvVerificarNotificacoesDesconto(){
+    var hoje = new Date();
+    BENEFICIOS_CACHE.filter(function(b){ return b.tipo==='desconto_volume' && b.status==='pendente'; }).forEach(function(b){
+      var criado = new Date(b.criado_em);
+      var diasDecorridos = Math.floor((hoje-criado)/86400000);
+      var marco = diasDecorridos>=60 ? 60 : (diasDecorridos>=30 ? 30 : null);
+      if(!marco) return;
+      var chaveAviso = 'acv_aviso_'+b.id+'_'+marco;
+      if(sessionStorage.getItem(chaveAviso)) return; // já avisou nesta sessão, evita repetir toda hora
+      sessionStorage.setItem(chaveAviso, '1');
+      var clienteObj = CLIENTES.find(function(c){ return c._uuid===b.cliente_id; });
+      var nomeCliente = clienteObj ? clienteObj.name : 'Cliente';
+      toast('⏰ Desconto pendente há '+diasDecorridos+' dias: '+(clienteObj?clienteObj.nome:'cliente')+' ainda não usou o desconto de 10%.');
+      if(typeof horAuditar==='function') horAuditar('Aviso de desconto pendente', (clienteObj?clienteObj.nome:'Cliente')+' — desconto de volume pendente há '+diasDecorridos+' dias (marco de '+marco+'d)');
+    });
+  }
+
+  // ── Regra 3: Fidelidade (1+ pedido/mês, 3 meses seguidos) ──
+  function acvCalcularFidelidade(){
+    var resultado = [];
+    var porCliente = {};
+    ORDERS.forEach(function(o){
+      if(o.status==='Cancelado') return;
+      if(!porCliente[o.client]) porCliente[o.client] = new Set();
+      var chaveMes = relParseDataPedidoParaChaveMes(o.data);
+      if(chaveMes) porCliente[o.client].add(chaveMes);
+    });
+    Object.keys(porCliente).forEach(function(clienteNome){
+      var mesesUnicos = Array.from(porCliente[clienteNome]).sort();
+      // Verifica se existem 3 meses consecutivos entre os meses com pedido
+      for(var i=0;i+2<mesesUnicos.length;i++){
+        var m1 = mesesUnicos[i], m2 = mesesUnicos[i+1], m3 = mesesUnicos[i+2];
+        var d1 = new Date(m1+'-01'), d2 = new Date(m2+'-01'), d3 = new Date(m3+'-01');
+        var mesesDiff1 = (d2.getFullYear()-d1.getFullYear())*12 + (d2.getMonth()-d1.getMonth());
+        var mesesDiff2 = (d3.getFullYear()-d2.getFullYear())*12 + (d3.getMonth()-d2.getMonth());
+        if(mesesDiff1===1 && mesesDiff2===1){
+          var cli = CLIENTES.find(function(c){ return c.nome===clienteNome; });
+          if(cli && !acvJaExisteBeneficioAberto(cli._uuid, 'fidelidade_3meses', null)){
+            var ultimoPedidoDoCliente = ORDERS.filter(function(o){ return o.client===clienteNome; }).sort(function(a,b){ return acvParseDataPtParaDate(b.data)-acvParseDataPtParaDate(a.data); })[0];
+            resultado.push({cliente: cli, pedido: ultimoPedidoDoCliente, detalhe: MESES_PT[d1.getMonth()]+', '+MESES_PT[d2.getMonth()]+' e '+MESES_PT[d3.getMonth()], vendedor: ultimoPedidoDoCliente?ultimoPedidoDoCliente.vendedor:''});
+          }
+          break; // já achou os 3 meses consecutivos, não precisa continuar procurando pra este cliente
+        }
+      }
+    });
+    return resultado;
+  }
+
+  // ── Regra 4: Aniversário (1 ano desde o 1º pedido) ──
+  function acvCalcularAniversarios(){
+    var resultado = [];
+    var hoje = new Date();
+    var porCliente = {};
+    ORDERS.forEach(function(o){
+      if(!porCliente[o.client]) porCliente[o.client] = [];
+      porCliente[o.client].push(o);
+    });
+    Object.keys(porCliente).forEach(function(clienteNome){
+      var pedidos = porCliente[clienteNome].sort(function(a,b){ return acvParseDataPtParaDate(a.data)-acvParseDataPtParaDate(b.data); });
+      var primeiro = pedidos[0];
+      var dataPrimeiro = acvParseDataPtParaDate(primeiro.data);
+      if(!dataPrimeiro) return;
+      var aniversarioEsteAno = new Date(hoje.getFullYear(), dataPrimeiro.getMonth(), dataPrimeiro.getDate());
+      var diasAteAniversario = acvDiasEntre(hoje, aniversarioEsteAno);
+      // Considera "em breve" numa janela de -3 a +7 dias do aniversário
+      if(diasAteAniversario>=-3 && diasAteAniversario<=7 && hoje.getFullYear()>dataPrimeiro.getFullYear()){
+        var cli = CLIENTES.find(function(c){ return c.nome===clienteNome; });
+        if(cli && !acvJaExisteBeneficioAberto(cli._uuid, 'aniversario', null)){
+          var anos = hoje.getFullYear()-dataPrimeiro.getFullYear();
+          resultado.push({cliente: cli, pedido: primeiro, detalhe: anos+' ano(s) de cadastro · '+(diasAteAniversario>=0?'em '+diasAteAniversario+' dias':'há '+Math.abs(diasAteAniversario)+' dias'), vendedor: primeiro.vendedor});
+        }
+      }
+    });
+    return resultado;
+  }
+
+  // ── Regra 5: Indicação (cliente indicado fecha a 1ª compra) ──
+  function acvCalcularIndicacoes(){
+    var resultado = [];
+    CLIENTES.forEach(function(cli){
+      if(!cli.indicadoPorId) return;
+      var pedidosDoIndicado = ORDERS.filter(function(o){ return o.client===cli.nome && o.status!=='Cancelado'; });
+      if(pedidosDoIndicado.length!==1) return; // só dispara exatamente na primeira compra confirmada
+      var quemIndicou = CLIENTES.find(function(c){ return c._uuid===cli.indicadoPorId; });
+      if(!quemIndicou) return;
+      if(acvJaExisteBeneficioAberto(quemIndicou._uuid, 'indicacao', pedidosDoIndicado[0]._uuid)) return;
+      resultado.push({cliente: quemIndicou, pedido: pedidosDoIndicado[0], detalhe: 'Indicou '+cli.nome+' · Primeiro pedido fechado', vendedor: pedidosDoIndicado[0].vendedor});
+    });
+    return resultado;
+  }
+
+  // ── Regra 6: Reativação (60+ dias sem comprar) ──
+  function acvCalcularReativacao(){
+    var resultado = [];
+    var hoje = new Date();
+    var porCliente = {};
+    ORDERS.forEach(function(o){
+      if(o.status==='Cancelado') return;
+      if(!porCliente[o.client]) porCliente[o.client] = [];
+      porCliente[o.client].push(o);
+    });
+    Object.keys(porCliente).forEach(function(clienteNome){
+      var pedidos = porCliente[clienteNome].sort(function(a,b){ return acvParseDataPtParaDate(b.data)-acvParseDataPtParaDate(a.data); });
+      var ultimo = pedidos[0];
+      var dataUltimo = acvParseDataPtParaDate(ultimo.data);
+      if(!dataUltimo) return;
+      var dias = acvDiasEntre(dataUltimo, hoje);
+      if(dias>=60){
+        var cli = CLIENTES.find(function(c){ return c.nome===clienteNome; });
+        if(cli){
+          resultado.push({cliente: cli, pedido: ultimo, detalhe: 'Sem compras há '+dias+' dias · Último pedido: '+ultimo.data, vendedor: ultimo.vendedor, dias: dias});
+        }
+      }
+    });
+    return resultado.sort(function(a,b){ return b.dias-a.dias; });
+  }
+
+  function acvRenderItem(item, tipo, textoBotao){
+    var vendCor = '#5A1E7A', vendBg = '#EDE3F5';
+    var prazoTxt = '';
+    if(item.dataExpiracao){
+      var diasRestantes = Math.ceil((new Date(item.dataExpiracao)-new Date())/86400000);
+      prazoTxt = ' · <span style="color:'+(diasRestantes<=15?'#791F1F':'#666')+';">'+(diasRestantes>0?'expira em '+diasRestantes+'d':'expirado')+'</span>';
+    }
+    return '<div class="alerta-item">'+
+      '<div class="alerta-item-info">'+
+        '<div class="alerta-item-nome">'+esc(item.cliente.nome)+'</div>'+
+        '<div class="alerta-item-desc">'+esc(item.detalhe)+' · <span style="background:'+vendBg+';color:'+vendCor+';font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;">'+esc(item.vendedor||'—')+'</span>'+prazoTxt+'</div>'+
+      '</div>'+
+      '<span class="alerta-status st-pendente">Pendente</span>'+
+      '<button class="btn btn-rosa btn-sm" onclick="acvMarcarAplicado(\''+item.cliente._uuid+'\',\''+tipo+'\',\''+(item.pedido?item.pedido._uuid:'')+'\',\''+(item.beneficioId||'')+'\')">'+textoBotao+'</button>'+
+    '</div>';
+  }
+
+  function acvMarcarAplicado(clienteId, tipo, pedidoGeradorId, beneficioId){
+    if(dbEscritaBloqueadaSeDemo()) return;
+    if(!sbClient) return;
+    if(beneficioId){
+      // Já existe um registro pendente (caso do desconto por volume) —
+      // atualiza em vez de criar um novo, para não duplicar.
+      sbClient.from('beneficios_clientes').update({
+        status: 'aplicado', pedido_aplicado_id: pedidoGeradorId||null,
+        data_aplicacao: new Date().toISOString(), aplicado_por: currentUser._supabaseId
+      }).eq('id', beneficioId).then(function(res){
+        if(res.error){ toast('Erro ao marcar aplicado: '+res.error.message); return; }
+        toast('✅ Marcado como aplicado!');
+        acvCarregarBeneficios(function(){ renderAcoesVendas(); });
+      });
+      return;
+    }
+    acvCriarBeneficio({
+      cliente_id: clienteId, tipo: tipo, status: 'aplicado',
+      pedido_gerador_id: pedidoGeradorId||null,
+      data_aplicacao: new Date().toISOString(), aplicado_por: currentUser._supabaseId
+    }, function(){
+      toast('✅ Marcado como aplicado!');
+      renderAcoesVendas();
+    });
+  }
+  window.acvMarcarAplicado = acvMarcarAplicado;
+
+  function renderAcoesVendas(){
+    var brindes = acvCalcularBrindes();
+    var descontos = acvCalcularDescontosVolume();
+    var fidelidade = acvCalcularFidelidade();
+    var aniversarios = acvCalcularAniversarios();
+    var indicacoes = acvCalcularIndicacoes();
+    var reativacao = acvCalcularReativacao();
+    acvVerificarNotificacoesDesconto();
+
+    document.getElementById('alerta-count-brinde').textContent = brindes.length;
+    document.getElementById('alerta-count-desc').textContent = descontos.length;
+    document.getElementById('alerta-count-aniv').textContent = aniversarios.length + indicacoes.length;
+
+    document.getElementById('acv-brinde-badge').textContent = brindes.length+' pendentes';
+    document.getElementById('acv-brinde-lista').innerHTML = brindes.length
+      ? brindes.map(function(i){ return acvRenderItem(i, 'brinde_11caixa', 'Marcar aplicado'); }).join('')
+      : '<div style="text-align:center;color:var(--text3);font-size:11px;padding:10px;">Nenhum brinde pendente.</div>';
+
+    document.getElementById('acv-desconto-badge').textContent = descontos.length+' pendentes';
+    document.getElementById('acv-desconto-lista').innerHTML = descontos.length
+      ? descontos.map(function(i){ return acvRenderItem(i, 'desconto_volume', 'Marcar aplicado'); }).join('')
+      : '<div style="text-align:center;color:var(--text3);font-size:11px;padding:10px;">Nenhum desconto pendente.</div>';
+
+    document.getElementById('acv-fidelidade-badge').textContent = fidelidade.length;
+    document.getElementById('acv-fidelidade-lista').innerHTML = fidelidade.length
+      ? fidelidade.map(function(i){ return acvRenderItem(i, 'fidelidade_3meses', 'Marcar aplicado'); }).join('')
+      : '<div style="text-align:center;color:var(--text3);font-size:11px;padding:10px;">Nenhum cliente com fidelidade pendente.</div>';
+
+    document.getElementById('acv-aniversario-badge').textContent = aniversarios.length;
+    document.getElementById('acv-aniversario-lista').innerHTML = aniversarios.length
+      ? aniversarios.map(function(i){ return acvRenderItem(i, 'aniversario', 'Marcar enviado'); }).join('')
+      : '<div style="text-align:center;color:var(--text3);font-size:11px;padding:10px;">Nenhum aniversário em breve.</div>';
+
+    document.getElementById('acv-indicacao-badge').textContent = indicacoes.length+' pendente'+(indicacoes.length!==1?'s':'');
+    document.getElementById('acv-indicacao-lista').innerHTML = indicacoes.length
+      ? indicacoes.map(function(i){ return acvRenderItem(i, 'indicacao', 'Marcar aplicado'); }).join('')
+      : '<div style="text-align:center;color:var(--text3);font-size:11px;padding:10px;">Nenhuma indicação pendente.</div>';
+
+    document.getElementById('acv-reativacao-badge').textContent = reativacao.length+' inativos';
+    document.getElementById('acv-reativacao-lista').innerHTML = reativacao.length
+      ? reativacao.map(function(i){ return acvRenderItem(i, 'reativacao', 'Marcar contatado'); }).join('')
+      : '<div style="text-align:center;color:var(--text3);font-size:11px;padding:10px;">Nenhum cliente inativo.</div>';
+  }
+
+  function initAcoesVendas(){
+    carregarClientesDoBanco(function(){
+      carregarPedidosDoBanco(function(){
+        acvCarregarBeneficios(function(){
+          renderAcoesVendas();
+        });
+      });
     });
   }
 
@@ -5998,7 +7121,8 @@ document.addEventListener('DOMContentLoaded',function(){
     document.getElementById('cli-cidade').value = cli.cidade;
     document.getElementById('cli-estado').value = cli.estado;
     document.getElementById('cli-vendedor').value = cli.vendedor;
-    document.getElementById('cli-indicado').value = cli.indicado || '';
+    clientePopularSelectIndicacao(cli._uuid);
+    document.getElementById('cli-indicado').value = cli.indicadoPorId || '';
     document.getElementById('cli-obs').value = cli.obs;
     var radios = document.querySelectorAll('input[name="preco-esp"]');
     radios.forEach(function(r) { r.checked = r.value === (cli.preco_esp ? 'sim' : 'nao'); });
@@ -6092,6 +7216,9 @@ document.addEventListener('DOMContentLoaded',function(){
     if(id === 'notasfiscais') { renderNF('','',''); initNF(); }
     if(id === 'equipe') { renderEquipeAdmin ? renderEquipeAdmin() : renderEquipe(); }
     if(id === 'followup') { renderFollowup(); }
+    if(id === 'contatos') { initContatos(); }
+    if(id === 'relatorio') { initRelatorios(); }
+    if(id === 'acoes') { initAcoesVendas(); }
   };
 
 
@@ -6113,7 +7240,9 @@ document.addEventListener('DOMContentLoaded',function(){
             desc: c.descricao, forn: c.fornecedor||'',
             valor: c.valor, venc: c.vencimento,
             cat: c.categoria||'', recorr: c.recorrencia||'unica',
-            obs: c.observacao||'', status: c.status
+            obs: c.observacao||'', status: c.status,
+            dataPagamento: c.data_pagamento||null,
+            classificacaoDre: c.classificacao_dre||null
           });
         });
       }
@@ -6194,11 +7323,13 @@ document.addEventListener('DOMContentLoaded',function(){
         var idx=parseInt(this.getAttribute('data-pagar-idx'));
         var conta = CONTAS[idx];
         if(!conta._uuid || !sbClient){ toast('Não foi possível localizar esta conta no banco.'); return; }
-        sbClient.from('contas_a_pagar').update({status:'pago'}).eq('id', conta._uuid).then(function(res){
+        var hojeISO = new Date().toISOString().split('T')[0];
+        sbClient.from('contas_a_pagar').update({status:'pago', data_pagamento: hojeISO}).eq('id', conta._uuid).then(function(res){
           if(res.error){ toast('Erro ao atualizar: '+res.error.message); return; }
           conta.status='pago';
+          conta.dataPagamento = hojeISO;
           renderFinanceiro(document.getElementById('fin-search').value, document.getElementById('fin-filter-status').value, document.getElementById('fin-filter-cat').value);
-          toast('Conta marcada como paga!');
+          toast('Conta marcada como paga! Já entra no DRE deste mês.');
         });
       });
     });
@@ -6207,9 +7338,10 @@ document.addEventListener('DOMContentLoaded',function(){
         var idx=parseInt(this.getAttribute('data-unpagar-idx'));
         var conta = CONTAS[idx];
         if(!conta._uuid || !sbClient){ toast('Não foi possível localizar esta conta no banco.'); return; }
-        sbClient.from('contas_a_pagar').update({status:'pendente'}).eq('id', conta._uuid).then(function(res){
+        sbClient.from('contas_a_pagar').update({status:'pendente', data_pagamento: null}).eq('id', conta._uuid).then(function(res){
           if(res.error){ toast('Erro ao atualizar: '+res.error.message); return; }
           conta.status='pendente';
+          conta.dataPagamento = null;
           renderFinanceiro(document.getElementById('fin-search').value, document.getElementById('fin-filter-status').value, document.getElementById('fin-filter-cat').value);
           toast('Pagamento desfeito.');
         });
@@ -6223,6 +7355,241 @@ document.addEventListener('DOMContentLoaded',function(){
       rows.push([c.id,c.desc,c.forn,c.valor,c.venc,c.cat,c.recorr,getContaStatus(c),c.obs]);
     });
     exportCSVGenerico(rows, 'contas_pagar_mekmix.csv');
+  }
+
+  /* ============================================================
+     ABAS INTERNAS DO FINANCEIRO
+     ============================================================ */
+  function finMudarAba(aba){
+    document.querySelectorAll('.fin-tab').forEach(function(btn){
+      btn.classList.toggle('active', btn.getAttribute('data-fin-tab')===aba);
+    });
+    document.querySelectorAll('.fin-tab-content').forEach(function(el){ el.style.display='none'; });
+    var content = document.getElementById('fin-tab-'+aba);
+    if(content) content.style.display='';
+    if(aba==='dre') initDRE();
+    if(aba==='capitalgiro') initCapitalGiro();
+  }
+  window.finMudarAba = finMudarAba;
+
+  /* ============================================================
+     DRE MENSAL
+     ============================================================
+     Receita e custo: pedidos CRIADOS no mês (regime de competência).
+     Despesas: contas PAGAS no mês (regime de caixa), classificadas por
+     classificacao_dre quando disponível.
+     Imposto: percentual sobre a receita, editável por mês, salvo em
+     dre_impostos_mensais.
+     ============================================================ */
+  function dreParseDataISOParaChaveMes(dataISO){
+    if(!dataISO) return null;
+    return dataISO.slice(0,7); // "2026-08-14" -> "2026-08"
+  }
+
+  function drePopularSeletorMes(){
+    var sel = document.getElementById('dre-mes-select');
+    if(!sel) return;
+    var opcoes = [];
+    var hoje = new Date();
+    for(var i=0;i<12;i++){
+      var d = new Date(hoje.getFullYear(), hoje.getMonth()-i, 1);
+      var chave = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+      opcoes.push({chave: chave, label: MESES_PT[d.getMonth()]+' '+d.getFullYear()});
+    }
+    var valorAtual = sel.value || opcoes[0].chave;
+    sel.innerHTML = opcoes.map(function(o){ return '<option value="'+o.chave+'">'+o.label+'</option>'; }).join('');
+    sel.value = valorAtual;
+  }
+
+  function dreCarregarImposto(mesChave, callback){
+    if(!sbClient){ callback(0); return; }
+    sbClient.from('dre_impostos_mensais').select('*').eq('mes_referencia', mesChave).maybeSingle().then(function(res){
+      callback(res.data ? res.data.percentual : 0);
+    });
+  }
+
+  function dreSalvarImposto(mesChave, percentual, callback){
+    if(!sbClient) return;
+    sbClient.from('dre_impostos_mensais').upsert({
+      mes_referencia: mesChave, percentual: percentual, atualizado_por: currentUser._supabaseId
+    }, {onConflict:'mes_referencia'}).then(function(res){
+      if(res.error){ toast('Erro ao salvar imposto: '+res.error.message); return; }
+      if(callback) callback();
+    });
+  }
+
+  function renderDRE(){
+    var sel = document.getElementById('dre-mes-select');
+    if(!sel) return;
+    var mesChave = sel.value;
+
+    var pedidosDoMes = ORDERS.filter(function(o){ return relParseDataPedidoParaChaveMes(o.data)===mesChave && o.status!=='Cancelado'; });
+    var receita = pedidosDoMes.reduce(function(s,o){ return s+(o.valor||0); },0);
+    var custoTotal = pedidosDoMes.reduce(function(s,o){ return s+(o.custoTotal||0); },0);
+    var lucroBruto = receita - custoTotal;
+
+    var contasPagasDoMes = CONTAS.filter(function(c){ return c.status==='pago' && dreParseDataISOParaChaveMes(c.dataPagamento)===mesChave; });
+    var despesasFixas = contasPagasDoMes.filter(function(c){ return c.classificacaoDre==='despesa_fixa'; }).reduce(function(s,c){ return s+c.valor; },0);
+    var despesasVariaveis = contasPagasDoMes.filter(function(c){ return c.classificacaoDre==='despesa_variavel'; }).reduce(function(s,c){ return s+c.valor; },0);
+    var despesasAdmin = contasPagasDoMes.filter(function(c){ return c.classificacaoDre==='despesa_administrativa'; }).reduce(function(s,c){ return s+c.valor; },0);
+    var despesasFinanceiras = contasPagasDoMes.filter(function(c){ return c.classificacaoDre==='despesa_financeira'; }).reduce(function(s,c){ return s+c.valor; },0);
+    var despesasSemClassificacao = contasPagasDoMes.filter(function(c){ return !c.classificacaoDre; }).reduce(function(s,c){ return s+c.valor; },0);
+    var despesasTotal = despesasFixas+despesasVariaveis+despesasAdmin+despesasFinanceiras+despesasSemClassificacao;
+
+    dreCarregarImposto(mesChave, function(percentualImposto){
+      var valorImposto = receita * (percentualImposto/100);
+      var lucroLiquido = lucroBruto - despesasTotal - valorImposto;
+      var fmt = function(v){ return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2}); };
+
+      var wrap = document.getElementById('dre-linhas');
+      wrap.innerHTML =
+        '<div class="dre-linha"><span class="dre-linha-label">Receita <div class="dre-linha-sub">'+pedidosDoMes.length+' pedido(s) criado(s) no mês</div></span><span class="dre-linha-valor" style="color:#085041;">'+fmt(receita)+'</span></div>'+
+        '<div class="dre-linha"><span class="dre-linha-label">(–) Custo dos copos vendidos</span><span class="dre-linha-valor" style="color:#791F1F;">'+fmt(custoTotal)+'</span></div>'+
+        '<div class="dre-linha dre-subtotal"><span class="dre-linha-label">= Lucro Bruto</span><span class="dre-linha-valor">'+fmt(lucroBruto)+'</span></div>'+
+        (despesasFixas>0?'<div class="dre-linha"><span class="dre-linha-label">(–) Despesas fixas</span><span class="dre-linha-valor" style="color:#791F1F;">'+fmt(despesasFixas)+'</span></div>':'')+
+        (despesasVariaveis>0?'<div class="dre-linha"><span class="dre-linha-label">(–) Despesas variáveis (frete, comissão...)</span><span class="dre-linha-valor" style="color:#791F1F;">'+fmt(despesasVariaveis)+'</span></div>':'')+
+        (despesasAdmin>0?'<div class="dre-linha"><span class="dre-linha-label">(–) Despesas administrativas</span><span class="dre-linha-valor" style="color:#791F1F;">'+fmt(despesasAdmin)+'</span></div>':'')+
+        (despesasFinanceiras>0?'<div class="dre-linha"><span class="dre-linha-label">(–) Despesas financeiras</span><span class="dre-linha-valor" style="color:#791F1F;">'+fmt(despesasFinanceiras)+'</span></div>':'')+
+        (despesasSemClassificacao>0?'<div class="dre-linha"><span class="dre-linha-label">(–) Outras despesas (sem categoria)</span><span class="dre-linha-valor" style="color:#791F1F;">'+fmt(despesasSemClassificacao)+'</span></div>':'')+
+        '<div class="dre-linha"><span class="dre-linha-label">(–) Impostos <div class="dre-linha-sub">'+
+          '<input type="number" id="dre-imposto-pct" min="0" max="100" step="0.1" value="'+percentualImposto+'" style="width:55px;padding:2px 4px;border:1px solid var(--border);border-radius:4px;font-size:11px;"/> % sobre a receita '+
+          '<button class="btn btn-sm" id="dre-salvar-imposto" style="padding:1px 8px;font-size:10px;margin-left:6px;">Salvar</button>'+
+        '</div></span><span class="dre-linha-valor" style="color:#791F1F;">'+fmt(valorImposto)+'</span></div>'+
+        '<div class="dre-linha dre-total"><span class="dre-linha-label">= Lucro Líquido</span><span class="dre-linha-valor" style="color:'+(lucroLiquido>=0?'#085041':'#791F1F')+';">'+fmt(lucroLiquido)+'</span></div>';
+
+      var btnSalvarImposto = document.getElementById('dre-salvar-imposto');
+      if(btnSalvarImposto) btnSalvarImposto.addEventListener('click', function(){
+        var novoPct = parseFloat(document.getElementById('dre-imposto-pct').value)||0;
+        dreSalvarImposto(mesChave, novoPct, function(){
+          toast('Percentual de imposto salvo para '+mesChave+'!');
+          renderDRE();
+        });
+      });
+    });
+  }
+
+  function initDRE(){
+    carregarPedidosDoBanco(function(){
+      carregarContasDoBanco(function(){
+        drePopularSeletorMes();
+        renderDRE();
+      });
+    });
+    var sel = document.getElementById('dre-mes-select');
+    if(sel && !sel._bound){
+      sel.addEventListener('change', renderDRE);
+      sel._bound = true;
+    }
+  }
+
+  /* ============================================================
+     CAPITAL DE GIRO
+     ============================================================
+     Toda venda com custo_total calculado gera uma pendência aqui — o
+     valor de custo que precisa "voltar" para a conta de reposição.
+     O Admin Geral registra as transferências reais periodicamente, e
+     escolhe quais pendências aquela transferência está quitando.
+     ============================================================ */
+  var CG_PENDENCIAS = [];
+  var CG_TRANSFERENCIAS = [];
+
+  function cgCarregarDados(callback){
+    if(!sbClient){ if(callback) callback(); return; }
+    sbClient.from('capital_giro_pendencias').select('*').then(function(res1){
+      if(!res1.error && res1.data) CG_PENDENCIAS = res1.data;
+      sbClient.from('capital_giro_transferencias').select('*').order('data_transferencia', {ascending:false}).then(function(res2){
+        if(!res2.error && res2.data) CG_TRANSFERENCIAS = res2.data;
+        if(callback) callback();
+      });
+    });
+  }
+
+  function renderCapitalGiro(){
+    var totalPendente = CG_PENDENCIAS.filter(function(p){ return p.status==='pendente'; }).reduce(function(s,p){ return s+p.valor_custo; },0);
+    var totalTransferido = CG_TRANSFERENCIAS.reduce(function(s,t){ return s+t.valor; },0);
+    var fmt = function(v){ return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2}); };
+
+    document.getElementById('cg-total-pendente').textContent = fmt(totalPendente);
+    document.getElementById('cg-total-transferido').textContent = fmt(totalTransferido);
+
+    var wrap = document.getElementById('cg-transferencias-lista');
+    if(!CG_TRANSFERENCIAS.length){
+      wrap.innerHTML = '<div style="text-align:center;color:var(--text3);font-style:italic;padding:20px;font-size:12px;">Nenhuma transferência registrada ainda.</div>';
+      return;
+    }
+    wrap.innerHTML = CG_TRANSFERENCIAS.map(function(t){
+      var dataBR = t.data_transferencia.split('-').reverse().join('/');
+      return '<div class="conta-row" style="grid-template-columns:1fr auto auto;">'+
+        '<div><div style="font-weight:500;font-size:12px;">'+esc(t.banco_origem||'—')+' → '+esc(t.banco_destino||'—')+'</div>'+
+        '<div style="font-size:11px;color:var(--text2);">Conta '+esc(t.conta_origem||'—')+' (Ag. '+esc(t.agencia_origem||'—')+') → Conta '+esc(t.conta_destino||'—')+' (Ag. '+esc(t.agencia_destino||'—')+')'+(t.observacao?' · '+esc(t.observacao):'')+'</div></div>'+
+        '<span style="font-size:12px;color:var(--text2);">'+dataBR+'</span>'+
+        '<span style="font-weight:700;color:#085041;">'+fmt(t.valor)+'</span>'+
+      '</div>';
+    }).join('');
+  }
+
+  function initCapitalGiro(){
+    cgCarregarDados(function(){ renderCapitalGiro(); });
+    var btnNovaTransf = document.getElementById('btn-nova-transferencia');
+    if(btnNovaTransf && !btnNovaTransf._bound){
+      btnNovaTransf.addEventListener('click', function(){
+        if(dbEscritaBloqueadaSeDemo()) return;
+        openModal('modal-nova-transferencia');
+      });
+      btnNovaTransf._bound = true;
+    }
+  }
+
+  function cgSalvarTransferencia(){
+    if(dbEscritaBloqueadaSeDemo()){ closeModal('modal-nova-transferencia'); return; }
+    var valor = parseFloat(document.getElementById('cg-valor').value)||0;
+    var data = document.getElementById('cg-data').value;
+    var bancoOrigem = document.getElementById('cg-banco-origem').value||'';
+    var bancoDestino = document.getElementById('cg-banco-destino').value||'';
+    var contaOrigem = document.getElementById('cg-conta-origem').value||'';
+    var contaDestino = document.getElementById('cg-conta-destino').value||'';
+    var agenciaOrigem = document.getElementById('cg-agencia-origem').value||'';
+    var agenciaDestino = document.getElementById('cg-agencia-destino').value||'';
+    var obs = document.getElementById('cg-obs').value||'';
+    if(!valor || valor<=0){ toast('Informe um valor válido.'); return; }
+    if(!data){ toast('Informe a data da transferência.'); return; }
+    if(!sbClient){ toast('Sem conexão com o banco.'); return; }
+
+    sbClient.from('capital_giro_transferencias').insert({
+      valor: valor, data_transferencia: data,
+      banco_origem: bancoOrigem||null, banco_destino: bancoDestino||null,
+      conta_origem: contaOrigem||null, conta_destino: contaDestino||null,
+      agencia_origem: agenciaOrigem||null, agencia_destino: agenciaDestino||null,
+      observacao: obs||null, lancado_por: currentUser._supabaseId
+    }).select().single().then(function(res){
+      if(res.error){ toast('Erro ao salvar transferência: '+res.error.message); return; }
+      var transferenciaId = res.data.id;
+
+      // Marca como "transferido" as pendências que ainda estão em aberto,
+      // até o limite do valor transferido — mais antigas primeiro (FIFO).
+      var pendentesOrdenadas = CG_PENDENCIAS.filter(function(p){ return p.status==='pendente'; })
+        .sort(function(a,b){ return new Date(a.criado_em)-new Date(b.criado_em); });
+      var restante = valor;
+      var idsParaQuitar = [];
+      for(var i=0;i<pendentesOrdenadas.length && restante>0;i++){
+        idsParaQuitar.push(pendentesOrdenadas[i].id);
+        restante -= pendentesOrdenadas[i].valor_custo;
+      }
+      function quitarProxima(idx){
+        if(idx>=idsParaQuitar.length){
+          ['cg-valor','cg-data','cg-banco-origem','cg-banco-destino','cg-conta-origem','cg-conta-destino','cg-agencia-origem','cg-agencia-destino','cg-obs'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+          closeModal('modal-nova-transferencia');
+          cgCarregarDados(function(){ renderCapitalGiro(); });
+          toast('✅ Transferência registrada: '+fmt2(valor));
+          return;
+        }
+        sbClient.from('capital_giro_pendencias').update({status:'transferido', transferencia_id: transferenciaId}).eq('id', idsParaQuitar[idx]).then(function(){
+          quitarProxima(idx+1);
+        });
+      }
+      function fmt2(v){ return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2}); }
+      quitarProxima(0);
+    });
   }
 
   function exportCSVGenerico(rows, filename) {
@@ -7130,6 +8497,28 @@ function ciUrlAssinada(bucket, path, callback){
   });
 }
 
+// Força o download de verdade (em vez de só abrir numa aba nova) — busca
+// o arquivo via fetch e cria um link temporário com o atributo "download".
+// Necessário porque a URL assinada do Supabase Storage é de outro domínio,
+// e o navegador nem sempre respeita o atributo "download" nesse caso sem
+// passar primeiro pelo blob local.
+function ciBaixarAnexo(url, nomeArquivo){
+  toast('Baixando...');
+  fetch(url).then(function(res){ return res.blob(); }).then(function(blob){
+    var blobUrl = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = nomeArquivo || 'arquivo';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(blobUrl); }, 5000);
+  }).catch(function(){
+    toast('Não foi possível baixar o arquivo.');
+  });
+}
+window.ciBaixarAnexo = ciBaixarAnexo;
+
 function renderCiMensagens(){
   var body = document.getElementById('ci-chat-body');
   if(!body || !ciConversaAtual) return;
@@ -7145,20 +8534,20 @@ function renderCiMensagens(){
       var srcImg = m.urlLocal || ''; // preenchido depois via URL assinada, se vier do banco
       conteudo = '<div class="msg-anexo-imagem" data-msg-idx="'+idx+'" data-storage-path="'+esc(m.storagePath||'')+'">'+
         (srcImg ? '<img src="'+srcImg+'" style="max-width:220px;border-radius:8px;display:block;'+(m.enviando?'opacity:.6;':'')+'"/>' : '<div style="width:220px;height:120px;background:#eee;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#999;font-size:11px;">Carregando imagem...</div>')+
-        (m.enviando ? '<div style="font-size:10px;color:var(--text3);margin-top:3px;">Enviando...</div>' : '')+
+        (m.enviando ? '<div style="font-size:10px;color:var(--text3);margin-top:3px;">Enviando...</div>' : (srcImg ? '<button class="msg-download-btn" onclick="ciBaixarAnexo(\''+esc(srcImg)+'\', \''+esc(m.texto||'imagem.jpg')+'\')" title="Baixar imagem"><i class="ti ti-download" style="font-size:12px;"></i> Baixar</button>' : ''))+
       '</div>';
     } else if(m.tipo==='audio'){
       var srcAudio = m.urlLocal || '';
       conteudo = '<div class="msg-anexo-audio" data-msg-idx="'+idx+'" data-storage-path="'+esc(m.storagePath||'')+'">'+
         (srcAudio ? '<audio controls src="'+srcAudio+'" style="max-width:220px;height:36px;"></audio>' : '<div style="font-size:11px;color:var(--text3);">🎤 Carregando áudio...</div>')+
-        (m.enviando ? '<div style="font-size:10px;color:var(--text3);margin-top:3px;">Enviando...</div>' : '')+
+        (m.enviando ? '<div style="font-size:10px;color:var(--text3);margin-top:3px;">Enviando...</div>' : (srcAudio ? '<button class="msg-download-btn" onclick="ciBaixarAnexo(\''+esc(srcAudio)+'\', \'audio.webm\')" title="Baixar áudio"><i class="ti ti-download" style="font-size:12px;"></i> Baixar</button>' : ''))+
       '</div>';
     } else if(m.tipo==='arquivo'){
       var srcArq = m.urlLocal || '';
-      conteudo = '<div class="msg-anexo-arquivo" data-msg-idx="'+idx+'" data-storage-path="'+esc(m.storagePath||'')+'" style="display:flex;align-items:center;gap:8px;">'+
+      conteudo = '<div class="msg-anexo-arquivo" data-msg-idx="'+idx+'" data-storage-path="'+esc(m.storagePath||'')+'" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+
         '<i class="ti ti-file-text" style="font-size:20px;"></i>'+
         (srcArq ? '<a href="'+srcArq+'" target="_blank" style="color:inherit;text-decoration:underline;">'+esc(m.texto)+'</a>' : '<span>'+esc(m.texto)+'</span>')+
-        (m.enviando ? '<span style="font-size:10px;color:var(--text3);">(enviando...)</span>' : '')+
+        (m.enviando ? '<span style="font-size:10px;color:var(--text3);">(enviando...)</span>' : (srcArq ? '<button class="msg-download-btn" onclick="ciBaixarAnexo(\''+esc(srcArq)+'\', \''+esc(m.texto||'arquivo')+'\')" title="Baixar arquivo"><i class="ti ti-download" style="font-size:12px;"></i></button>' : ''))+
       '</div>';
     } else {
       conteudo = esc(m.texto).replace(/\n/g,'<br>');
@@ -7182,9 +8571,9 @@ function renderCiMensagens(){
       m.urlLocal = url; // cache para não re-assinar toda hora
       var el = body.querySelector('[data-msg-idx="'+idx+'"]');
       if(!el) return;
-      if(m.tipo==='imagem'){ el.innerHTML = '<img src="'+url+'" style="max-width:220px;border-radius:8px;display:block;"/>'; }
-      else if(m.tipo==='audio'){ el.innerHTML = '<audio controls src="'+url+'" style="max-width:220px;height:36px;"></audio>'; }
-      else if(m.tipo==='arquivo'){ el.innerHTML = '<i class="ti ti-file-text" style="font-size:20px;"></i><a href="'+url+'" target="_blank" style="color:inherit;text-decoration:underline;">'+esc(m.texto)+'</a>'; }
+      if(m.tipo==='imagem'){ el.innerHTML = '<img src="'+url+'" style="max-width:220px;border-radius:8px;display:block;"/><button class="msg-download-btn" onclick="ciBaixarAnexo(\''+esc(url)+'\', \''+esc(m.texto||'imagem.jpg')+'\')" title="Baixar imagem"><i class="ti ti-download" style="font-size:12px;"></i> Baixar</button>'; }
+      else if(m.tipo==='audio'){ el.innerHTML = '<audio controls src="'+url+'" style="max-width:220px;height:36px;"></audio><button class="msg-download-btn" onclick="ciBaixarAnexo(\''+esc(url)+'\', \'audio.webm\')" title="Baixar áudio"><i class="ti ti-download" style="font-size:12px;"></i> Baixar</button>'; }
+      else if(m.tipo==='arquivo'){ el.innerHTML = '<i class="ti ti-file-text" style="font-size:20px;"></i><a href="'+url+'" target="_blank" style="color:inherit;text-decoration:underline;">'+esc(m.texto)+'</a><button class="msg-download-btn" onclick="ciBaixarAnexo(\''+esc(url)+'\', \''+esc(m.texto||'arquivo')+'\')" title="Baixar arquivo"><i class="ti ti-download" style="font-size:12px;"></i></button>'; }
     });
   });
 }
@@ -8466,6 +9855,14 @@ function renderHorAuditoria(){
 <div class="modal-overlay" id="modal-pcd"><div class="modal"><div class="modal-head"><span class="modal-title" id="pcd-modal-title">Decidir cancelamento</span><button class="modal-close" data-close="modal-pcd">×</button></div><div class="modal-body">
   <div class="form-group"><label class="form-label">Pedido</label><div style="font-size:13px;font-weight:500;" id="pcd-resumo">—</div></div>
   <div class="form-group"><label class="form-label">Motivo informado pelo vendedor</label><div style="font-size:12px;color:var(--text2);font-style:italic;" id="pcd-motivo-original">—</div></div>
+  <div class="form-group" id="pcd-destino-estoque-wrap" style="display:none;">
+    <label class="form-label">O que fazer com o estoque deste pedido?</label>
+    <select class="form-input" id="pcd-destino-estoque">
+      <option value="devolver">Devolver ao estoque normal (ainda não foi personalizado)</option>
+      <option value="refugo">Já foi produzido/personalizado → Estoque de Refugo (não estorna custo)</option>
+    </select>
+    <div style="font-size:10px;color:var(--text3);margin-top:4px;"><i class="ti ti-info-circle" style="font-size:11px;"></i> "Refugo" mantém a caixa disponível para venda futura com condição negociada, mas não devolve o custo ao capital de giro (o produto já foi feito).</div>
+  </div>
   <div class="form-group"><label class="form-label">Observação (opcional)</label><textarea class="form-textarea" id="pcd-observacao" rows="2" placeholder="Alguma observação sobre esta decisão..."></textarea></div>
 </div><div class="modal-footer"><button class="btn" data-close="modal-pcd">Cancelar</button><button class="btn btn-sm btn-rosa" id="btn-pcd-confirmar">Confirmar</button></div></div></div>
 
@@ -8557,7 +9954,7 @@ function renderHorAuditoria(){
         </div>
         <div class="form-group">
           <label class="form-label">Indicado por</label>
-          <input class="form-input" id="cli-indicado" placeholder="Nome de quem indicou (opcional)"/>
+          <select class="form-input" id="cli-indicado"><option value="">Nenhum (não veio de indicação)</option></select>
         </div>
         <div class="form-group" style="grid-column:1/-1;">
           <label class="form-label">Preço especial negociado?</label>
