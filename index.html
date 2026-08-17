@@ -3316,6 +3316,7 @@ document.addEventListener('DOMContentLoaded',function(){
             unid: unidTotal,
             valor: p.valor_estimado || 0,
             status: statusCrm,
+            isRascunho: !!p.is_rascunho,
             vendedor: '', // vendedor_id ainda não resolvido para nome aqui — ver observação abaixo
             vendedorId: p.vendedor_id,
             data: p.created_at ? new Date(p.created_at).toLocaleDateString('pt-BR') : '',
@@ -3341,6 +3342,19 @@ document.addEventListener('DOMContentLoaded',function(){
             var v = Object.keys(USERS).map(function(k){return USERS[k];}).find(function(u){ return u._supabaseId===o.vendedorId; });
             if(v) o.vendedor = v.name;
           }
+        });
+
+        // Reconstrói a Fila de Produção a partir dos pedidos que já estão
+        // "Em produção" no banco — sem isso, a fila ficava vazia toda vez
+        // que a página recarregava (F5), só se populando de novo quando
+        // alguém mudava o status manualmente durante aquela sessão.
+        PROD_QUEUE.length = 0;
+        ORDERS.filter(function(o){ return o.status==='Em produção'; }).forEach(function(o){
+          PROD_QUEUE.push({
+            id: o.id, pos: PROD_QUEUE.length+1, priority: false,
+            client: o.client, prod: o.prodDesc || o.prod,
+            tinta: '—', vendedor: o.vendedor, data: o.data, prazo: '—'
+          });
         });
       }
       if(callback) callback();
@@ -3410,6 +3424,19 @@ document.addEventListener('DOMContentLoaded',function(){
       var btnCancelar = (!emFluxoCancelamento)
         ? '<button class="btn btn-sm" style="font-size:10px;padding:3px 7px;" onclick="pedAbrirSolicitarCancelamento(\''+o.id+'\')" title="Solicitar cancelamento"><i class="ti ti-x" style="font-size:10px;"></i></button>'
         : '';
+      // Rascunho: badge visual claro, para não confundir com pedido já
+      // enviado de verdade ao cliente.
+      var badgeRascunho = o.isRascunho
+        ? '<span class="pill" style="background:#FEF3C7;color:#7B5800;font-size:9px;margin-left:4px;">📝 Rascunho</span>'
+        : '';
+      // Edição de pedido: liberada enquanto o pedido ainda não avançou
+      // para "Pronto para despacho" — depois disso, mudar quantidade/
+      // valor exigiria refazer baixa de estoque e cálculo financeiro já
+      // consolidados, então a edição livre para por aqui.
+      var statusEditaveis = ['Novo lead','Orçamento enviado','Arte pendente','Em produção'];
+      var btnEditar = (statusEditaveis.indexOf(o.status)>=0 && !emFluxoCancelamento)
+        ? '<button class="btn btn-sm" style="font-size:10px;padding:3px 7px;" onclick="abrirEdicaoPedido(\''+o.id+'\')" title="Editar pedido"><i class="ti ti-edit" style="font-size:10px;"></i></button>'
+        : '';
       // Etiqueta de alerta de estoque: dinâmica, recalculada a cada render —
       // some sozinha assim que o estoque daquele tamanho for reposto. Só faz
       // sentido em pedidos ainda ativos (não cancelados/entregues).
@@ -3420,12 +3447,12 @@ document.addEventListener('DOMContentLoaded',function(){
       return '<div class="order-row">' +
         '<div class="order-num">' + o.id + '<div style="font-size:10px;color:var(--text3);">' + o.data + '</div></div>' +
         '<div class="order-client" style="min-width:0;">' +
-          '<div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + o.client + ' ' + alertaEstoque + '</div>' +
+          '<div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + o.client + ' ' + alertaEstoque + badgeRascunho + '</div>' +
           '<div style="font-size:10px;color:var(--text2);">' + o.prod + ' · ' + o.qtd + 'cx · ' + o.unid.toLocaleString('pt-BR') + 'un</div>' +
         '</div>' +
         (currentUser.isAdmin ? '<div style="font-size:11px;color:var(--text2);width:50px;flex-shrink:0;">' + o.vendedor + '</div>' : '') +
         '<div style="width:76px;flex-shrink:0;font-weight:500;color:var(--rosa);">R$' + o.valor.toLocaleString('pt-BR') + '</div>' +
-        statusCel + btnCancelar +
+        statusCel + btnEditar + btnCancelar +
       '</div>';
     }).join('');
   }
@@ -6185,11 +6212,14 @@ document.addEventListener('DOMContentLoaded',function(){
   }
 
   var NP_ORIGEM = 'virgem'; // 'virgem' | 'pronta'
+  var EDITANDO_PEDIDO_ID = null; // null = criando novo; senão, é o o.id do pedido em edição
 
   function openNovoPedido() {
+    EDITANDO_PEDIDO_ID = null;
     NP_ITEMS = [];
     NP_ORIGEM = 'virgem';
     NP_IMPRESSAO = 'Frente'; NP_TINTA = 'Preta'; NP_ARTE = 'Equipe MekMix cria';
+    document.getElementById('np-modal-title').textContent = 'Novo pedido';
     document.getElementById('np-id-label').textContent = 'PED-' + String(NP_COUNTER).padStart(3,'0');
     document.getElementById('np-nome').value = '';
     document.getElementById('np-doc').value = '';
@@ -6218,6 +6248,124 @@ document.addEventListener('DOMContentLoaded',function(){
     document.getElementById('np-itens-normais-label').style.display = '';
     npCarregarCaixasProntasParaSelect();
     openModal('modal-novo-pedido');
+  }
+
+  // Reabre o mesmo formulário de "Novo pedido", mas em modo de edição:
+  // preenche com os dados já salvos, e ao confirmar faz UPDATE em vez de
+  // INSERT. Só chamada para pedidos ainda em status editável (checado em
+  // renderOrders antes de mostrar o botão).
+  function abrirEdicaoPedido(orderId){
+    var order = ORDERS.find(function(o){ return o.id===orderId; });
+    if(!order){ toast('Pedido não encontrado.'); return; }
+    if(!order._uuid){ toast('Não foi possível localizar este pedido no banco.'); return; }
+
+    // Parte do mesmo reset que openNovoPedido já faz, depois sobrescreve
+    // com os dados reais do pedido.
+    openNovoPedido();
+    EDITANDO_PEDIDO_ID = orderId;
+    document.getElementById('np-modal-title').textContent = 'Editar pedido';
+    document.getElementById('np-id-label').textContent = order.id;
+    document.getElementById('np-nome').value = order.client||'';
+    document.getElementById('np-doc').value = order.doc||'';
+    document.getElementById('np-wapp').value = order.wapp||'';
+    document.getElementById('np-cidade').value = order.cidade||'';
+    var vendedorSel = document.getElementById('np-vendedor');
+    if(vendedorSel && order.vendedor) vendedorSel.value = order.vendedor;
+
+    // Reconstrói os itens a partir do pedido já salvo.
+    NP_ITEMS = (order.itens||[]).map(function(item, idx){
+      var calc = calcItemPrice(item.tam, item.tipo||'caixas', item.qtd, null);
+      return {id:'item_edit_'+idx, tam:item.tam, tipo:item.tipo||'caixas', qtd:item.qtd, subtotal:item.subtotal||calc.subtotal, unidades:calc.unidades, preco:(item.subtotal&&item.qtd)?item.subtotal/item.qtd:calc.preco, precoCustom:null};
+    });
+    if(!NP_ITEMS.length) addItem();
+    renderItems();
+    updateTotals();
+
+    openModal('modal-novo-pedido');
+  }
+  window.abrirEdicaoPedido = abrirEdicaoPedido;
+
+  // Salva as alterações de um pedido já existente — dados básicos e
+  // itens (quantidade/tamanho podem mudar, o cliente pode pedir mais ou
+  // menos caixas enquanto ainda está em produção). NÃO repete a baixa de
+  // estoque PEPS nem o cálculo de custo — isso já aconteceu na criação
+  // original; editar quantidade aqui só atualiza o registro do pedido em
+  // si, sem re-processar o estoque automaticamente (evita duplicar baixa
+  // ou criar inconsistência sem controle manual).
+  function salvarEdicaoPedido(){
+    ['np-nome','np-doc'].forEach(function(id){ marcarCampoInvalido(id, false); });
+    var nome = (document.getElementById('np-nome').value||'').trim();
+    var documento = (document.getElementById('np-doc').value||'').trim();
+    var camposFaltando = [];
+    if(!nome) camposFaltando.push('Nome completo / Razão social');
+    if(!documento) camposFaltando.push('CPF / CNPJ');
+    if(camposFaltando.length){
+      if(!nome) marcarCampoInvalido('np-nome', true);
+      if(!documento) marcarCampoInvalido('np-doc', true);
+      toast('⚠️ Preencha: ' + camposFaltando.join(', '));
+      return;
+    }
+    if(!NP_ITEMS.length){ toast('Adicione pelo menos um produto!'); return; }
+    var itemSemPreco = NP_ITEMS.find(function(i){ return i.preco===0 && i.precoCustom==null; });
+    if(itemSemPreco){ toast('⚠️ O tamanho '+itemSemPreco.tam+' não tem preço cadastrado — clique no lápis ✎ e defina o preço manualmente antes de confirmar.'); return; }
+    if(!sbClient){ toast('Sem conexão com o banco.'); return; }
+
+    var order = ORDERS.find(function(o){ return o.id===EDITANDO_PEDIDO_ID; });
+    if(!order || !order._uuid){ toast('Não foi possível localizar este pedido no banco.'); return; }
+
+    var total = NP_ITEMS.reduce(function(s,i){ return s+i.subtotal; },0);
+    var vendedorNome = document.getElementById('np-vendedor').value;
+    var vendedorObj = Object.keys(USERS).map(function(k){return USERS[k];}).find(function(u){ return u.name===vendedorNome; });
+
+    var btnConfirmar = document.getElementById('btn-confirmar-pedido');
+    if(btnConfirmar){ btnConfirmar.disabled = true; }
+
+    var dadosAtualizados = {
+      nome: nome, documento: documento,
+      whatsapp: document.getElementById('np-wapp').value||null,
+      cidade: document.getElementById('np-cidade').value||null,
+      vendedor_id: vendedorObj ? vendedorObj._supabaseId : null,
+      valor_estimado: total
+    };
+
+    sbClient.from('pedidos').update(dadosAtualizados).eq('id', order._uuid).then(function(resUpd){
+      if(resUpd.error){ toast(traduzirErroBanco(resUpd.error.message)); if(btnConfirmar) btnConfirmar.disabled=false; return; }
+
+      // Substitui os itens: apaga os antigos e insere os novos — mais
+      // simples e confiável do que tentar casar item por item quando a
+      // quantidade de linhas pode ter mudado (item removido/adicionado).
+      sbClient.from('itens_pedido').delete().eq('pedido_id', order._uuid).then(function(){
+        var itensParaInserir = NP_ITEMS.map(function(item){
+          return {
+            pedido_id: order._uuid,
+            produto_ml: parseInt(item.tam),
+            quantidade_caixas: item.tipo==='caixas' ? item.qtd : 0,
+            preco_unitario_cx: item.tipo==='caixas' ? (item.subtotal/(item.qtd||1)) : 0
+          };
+        });
+        sbClient.from('itens_pedido').insert(itensParaInserir).then(function(resItens){
+          if(resItens.error){ toast('Dados salvos, mas houve erro ao atualizar os itens: '+resItens.error.message); }
+
+          // Atualiza o cache local (ORDERS) sem precisar recarregar tudo do banco
+          order.client = nome; order.doc = documento;
+          order.wapp = document.getElementById('np-wapp').value||'';
+          order.cidade = document.getElementById('np-cidade').value||'';
+          order.vendedor = vendedorNome;
+          order.valor = total;
+          order.itens = NP_ITEMS.map(function(i){ return {tam:i.tam, tipo:i.tipo, qtd:i.qtd, subtotal:i.subtotal}; });
+          order.qtd = NP_ITEMS.reduce(function(s,i){ return s+(i.tipo==='caixas'?i.qtd:0); },0);
+          order.unid = NP_ITEMS.reduce(function(s,i){ return s+i.unidades; },0);
+          order.prod = NP_ITEMS[0] ? NP_ITEMS[0].tam : '';
+          order.prodDesc = NP_ITEMS.map(function(i){ return (i.tipo==='caixas'?i.qtd+'cx':i.qtd+'un')+' '+i.tam; }).join(' + ');
+
+          EDITANDO_PEDIDO_ID = null;
+          closeModal('modal-novo-pedido');
+          renderOrders();
+          if(btnConfirmar) btnConfirmar.disabled = false;
+          toast('✅ Pedido '+order.id+' atualizado!');
+        });
+      });
+    });
   }
 
   // Popula o select de combinações de caixa pronta disponíveis (com
@@ -6345,9 +6493,64 @@ document.addEventListener('DOMContentLoaded',function(){
     });
   }
 
+  // Marca um campo com borda vermelha (erro de validação) ou remove a
+  // marcação — usado em vários formulários para destacar visualmente o
+  // que falta preencher, além da mensagem em texto.
+  function marcarCampoInvalido(id, invalido){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.style.borderColor = invalido ? '#791F1F' : '';
+    el.style.borderWidth = invalido ? '2px' : '';
+    if(invalido){
+      el.addEventListener('input', function limpar(){ marcarCampoInvalido(id, false); el.removeEventListener('input', limpar); }, {once:true});
+    }
+  }
+
+  // Traduz mensagens técnicas de erro do Postgres/Supabase em texto que
+  // a pessoa realmente entende — em vez de "null value in column X
+  // violates not-null constraint", mostra "Preencha o campo X".
+  var TRADUCAO_CAMPOS_ERRO = {
+    whatsapp: 'WhatsApp', nome: 'Nome', numero: 'Número do pedido',
+    documento: 'CPF/CNPJ', cidade: 'Cidade', vendedor_id: 'Vendedor',
+    cpf_cnpj: 'CPF/CNPJ', descricao: 'Descrição', valor: 'Valor',
+    vencimento: 'Vencimento', email: 'E-mail', tamanho: 'Tamanho'
+  };
+  function traduzirErroBanco(mensagemTecnica){
+    if(!mensagemTecnica) return 'Erro desconhecido ao salvar.';
+    var matchNotNull = mensagemTecnica.match(/null value in column "(\w+)"/);
+    if(matchNotNull){
+      var campo = matchNotNull[1];
+      var nomeAmigavel = TRADUCAO_CAMPOS_ERRO[campo] || campo;
+      return '⚠️ Preencha o campo: ' + nomeAmigavel;
+    }
+    var matchDuplicado = mensagemTecnica.match(/duplicate key value violates unique constraint/);
+    if(matchDuplicado) return '⚠️ Esse registro já existe (dado duplicado). Tente novamente.';
+    var matchFK = mensagemTecnica.match(/violates foreign key constraint/);
+    if(matchFK) return '⚠️ Referência inválida — verifique se o item relacionado (cliente, vendedor, etc.) ainda existe.';
+    // Sem tradução conhecida: mostra a mensagem original, mas de forma mais discreta
+    return '⚠️ Erro ao salvar: ' + mensagemTecnica;
+  }
+
   function confirmarPedido(rascunho) {
+    // Se está em modo de edição, usa o fluxo separado de UPDATE — não
+    // passa pela criação de pedido novo (número, baixa de estoque, etc.)
+    if(EDITANDO_PEDIDO_ID){ salvarEdicaoPedido(); return; }
+
+    // Limpa marcações de erro anteriores antes de validar de novo
+    ['np-nome','np-doc'].forEach(function(id){ marcarCampoInvalido(id, false); });
+
     var nome = (document.getElementById('np-nome').value||'').trim();
-    if(!nome) { toast('Informe o nome do cliente!'); return; }
+    var documento = (document.getElementById('np-doc').value||'').trim();
+    var camposFaltando = [];
+    if(!nome) camposFaltando.push('Nome completo / Razão social');
+    if(!documento) camposFaltando.push('CPF / CNPJ');
+
+    if(camposFaltando.length){
+      if(!nome) marcarCampoInvalido('np-nome', true);
+      if(!documento) marcarCampoInvalido('np-doc', true);
+      toast('⚠️ Preencha: ' + camposFaltando.join(', '));
+      return;
+    }
     if(!NP_ITEMS.length) { toast('Adicione pelo menos um produto!'); return; }
     var itemSemPreco = NP_ITEMS.find(function(i){ return i.preco===0 && i.precoCustom==null; });
     if(itemSemPreco){ toast('⚠️ O tamanho '+itemSemPreco.tam+' não tem preço cadastrado — clique no lápis ✎ e defina o preço manualmente antes de confirmar.'); return; }
@@ -6358,7 +6561,10 @@ document.addEventListener('DOMContentLoaded',function(){
     var vendedorNome = document.getElementById('np-vendedor').value;
     var vendedorObj = Object.keys(USERS).map(function(k){return USERS[k];}).find(function(u){ return u.name===vendedorNome; });
 
-    var statusInicial = rascunho ? 'Orçamento enviado' : 'Em produção';
+    // Rascunho fica marcado de verdade via is_rascunho, sem "disfarçar"
+    // como se fosse um status normal de pedido — evita confundir rascunho
+    // com pedido já enviado ao cliente.
+    var statusInicial = rascunho ? 'Novo lead' : 'Em produção';
     var prodDesc = NP_ITEMS.map(function(i){
       return (i.tipo==='caixas' ? i.qtd+'cx' : i.qtd+'un') + ' ' + i.tam;
     }).join(' + ');
@@ -6377,8 +6583,9 @@ document.addEventListener('DOMContentLoaded',function(){
       var registroPedido = {
         numero: pid,
         status: statusParaBanco(statusInicial),
+        is_rascunho: !!rascunho,
         nome: nome,
-        empresa: document.getElementById('np-doc').value||null,
+        documento: documento,
         whatsapp: document.getElementById('np-wapp').value||null,
         cidade: document.getElementById('np-cidade').value||null,
         vendedor_id: vendedorObj ? vendedorObj._supabaseId : null,
@@ -6391,7 +6598,7 @@ document.addEventListener('DOMContentLoaded',function(){
       };
 
       sbClient.from('pedidos').insert(registroPedido).select().single().then(function(resPed){
-        if(resPed.error){ toast('Erro ao criar pedido: '+resPed.error.message); if(btnConfirmar) btnConfirmar.disabled=false; return; }
+        if(resPed.error){ toast(traduzirErroBanco(resPed.error.message)); if(btnConfirmar) btnConfirmar.disabled=false; return; }
         var pedidoUuid = resPed.data.id;
 
         // 3) Insere os itens do pedido (um por tamanho/quantidade).
@@ -9975,7 +10182,7 @@ function renderHorAuditoria(){
   <div class="modal" style="max-width:720px;border-radius:0;min-height:100vh;margin:0;">
     <div class="modal-head" style="position:sticky;top:0;z-index:10;background:#fff;">
       <div>
-        <div class="modal-title">Novo pedido</div>
+        <div class="modal-title" id="np-modal-title">Novo pedido</div>
         <div style="font-size:11px;color:var(--text2);" id="np-id-label">PED-009</div>
       </div>
       <button class="modal-close" data-close="modal-novo-pedido">×</button>
@@ -9991,11 +10198,11 @@ function renderHorAuditoria(){
             <input type="text" id="np-nome" placeholder="Nome do cliente ou empresa"/>
           </div>
           <div class="fg">
-            <label>CPF / CNPJ</label>
-            <input type="text" id="np-doc" placeholder="000.000.000-00 ou 00.000.000/0001-00" id="np-doc"/>
+            <label>CPF / CNPJ *</label>
+            <input type="text" id="np-doc" placeholder="000.000.000-00 ou 00.000.000/0001-00"/>
           </div>
           <div class="fg">
-            <label>WhatsApp</label>
+            <label>WhatsApp (opcional)</label>
             <input type="tel" id="np-wapp" placeholder="(99) 99999-9999"/>
           </div>
           <div class="fg">
