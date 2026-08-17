@@ -741,7 +741,7 @@ input, textarea { cursor: text; }
             <div class="info-row"><span class="info-lbl">Status</span><span class="pill p-novo" id="c3-status">Novo lead</span></div>
           </div>
           <div class="col3-sec" id="wrap-atribuir-vendedor"><div class="col3-lbl">Atribuir vendedor</div>
-            <select class="sel" id="sel-vendedor" style="margin-bottom:8px;"><option>João</option><option>Maria</option><option>Pedro</option><option>— Sem atribuição</option></select>
+            <select class="sel" id="sel-vendedor" style="margin-bottom:8px;"><option>— Sem atribuição</option></select>
           </div>
           <div class="col3-sec"><div class="col3-lbl">Status do pedido</div>
             <select class="sel" id="sel-status"><option>Novo lead</option><option>Orçamento enviado</option><option>Arte pendente</option><option>Em produção</option><option>Entregue</option><option>Follow-up 30d</option></select>
@@ -1128,13 +1128,14 @@ input, textarea { cursor: text; }
       <div id="page-config" class="page">
         <div class="page-title">Configurações</div>
         <div class="panel"><div class="panel-head"><span class="panel-title">Geral</span></div><div style="display:flex;flex-direction:column;gap:14px;max-width:400px;">
-          <div><label class="form-label">Nome da empresa</label><input class="form-input" type="text" value="MekMix Serigrafia"/></div>
-          <div><label class="form-label">WhatsApp principal</label><input class="form-input" type="tel" placeholder="Ainda não configurado"/></div>
-          <div><label class="form-label">Dias para follow-up</label><input class="form-input" type="number" value="30" style="width:100px;"/></div>
-          <div><label class="form-label">Horário de atendimento humano</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><input class="form-input" type="time" value="08:00" style="width:110px;"/> até <input class="form-input" type="time" value="18:00" style="width:110px;"/></div><div style="font-size:11px;color:#666;margin-top:4px;">Fora deste horário a Lara responde automaticamente</div></div>
-          <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;cursor:pointer;"><input type="checkbox" checked style="width:16px;height:16px;cursor:pointer;"/> Notificações push ativas</label>
-          <button class="btn btn-rosa" style="width:fit-content;"><i class="ti ti-device-floppy" style="font-size:12px;"></i> Salvar</button>
+          <div><label class="form-label">Nome da empresa</label><input class="form-input" type="text" id="cfg-nome-empresa" value="MekMix Serigrafia"/></div>
+          <div><label class="form-label">WhatsApp principal</label><input class="form-input" type="tel" id="cfg-whatsapp" placeholder="Ainda não configurado"/></div>
+          <div><label class="form-label">Dias para follow-up</label><input class="form-input" type="number" id="cfg-dias-followup" value="30" style="width:100px;"/></div>
+          <div><label class="form-label">Horário de atendimento humano</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><input class="form-input" type="time" id="cfg-horario-inicio" value="08:00" style="width:110px;"/> até <input class="form-input" type="time" id="cfg-horario-fim" value="18:00" style="width:110px;"/></div><div style="font-size:11px;color:#666;margin-top:4px;">Fora deste horário a Lara responde automaticamente</div></div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;cursor:pointer;"><input type="checkbox" id="cfg-notif-push" checked style="width:16px;height:16px;cursor:pointer;"/> Notificações push ativas</label>
+          <button class="btn btn-rosa" style="width:fit-content;" id="btn-salvar-config"><i class="ti ti-device-floppy" style="font-size:12px;"></i> Salvar</button>
         </div></div>
+        <div style="font-size:10px;color:var(--text3);margin-top:6px;" id="cfg-salvo-info"></div>
       </div>
     </div>
 
@@ -1147,7 +1148,7 @@ input, textarea { cursor: text; }
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
             <button class="btn btn-rosa btn-sm" id="btn-novo-pedido"><i class="ti ti-plus" style="font-size:12px;"></i> Novo pedido</button>
             <select class="sel" style="width:120px;" id="filter-ped-status"><option value="">Todos status</option><option>Novo lead</option><option>Orçamento enviado</option><option>Arte pendente</option><option>Em produção</option><option>Pronto para despacho</option><option>Entregue</option><option>Cancelamento solicitado</option><option>Cancelado</option></select>
-            <select class="sel" style="width:110px;" id="filter-ped-vend"><option value="">Todos vendedores</option><option>João</option><option>Maria</option><option>Pedro</option></select>
+            <select class="sel" style="width:110px;" id="filter-ped-vend"><option value="">Todos vendedores</option></select>
             <select class="sel" style="width:110px;" id="filter-ped-sort"><option value="data">↓ Data entrada</option><option value="valor">↓ Valor</option><option value="nome">A-Z Nome</option></select>
           </div>
         </div>
@@ -1359,7 +1360,7 @@ input, textarea { cursor: text; }
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
             <div class="search-wrap" style="flex:1;max-width:300px;"><i class="ti ti-search" style="font-size:14px;color:#aaa;"></i><input type="search" id="cliente-search" placeholder="Nome, CNPJ/CPF ou cidade..."/></div>
             <select class="sel" style="width:120px;" id="filter-cli-status"><option value="">Todos</option><option value="ativo">Ativos</option><option value="inativo">Inativos</option><option value="vip">VIP</option></select>
-            <select class="sel" style="width:130px;" id="filter-cli-vend"><option value="">Todos vendedores</option><option>João</option><option>Maria</option><option>Pedro</option></select>
+            <select class="sel" style="width:130px;" id="filter-cli-vend"><option value="">Todos vendedores</option></select>
           </div>
         </div>
         <div id="clientes-list"></div>
@@ -1545,7 +1546,11 @@ input, textarea { cursor: text; }
       <div id="page-script" class="page">
         <div class="page-title">Script de vendas
           <span style="font-size:12px;color:var(--text2);font-weight:400;">Guia de atendimento para o vendedor</span>
+          <button class="btn btn-sm" id="btn-script-propor" style="margin-left:auto;display:none;"><i class="ti ti-pencil" style="font-size:11px;"></i> Sugerir alteração</button>
+          <button class="btn btn-sm" id="btn-script-editar" style="margin-left:auto;display:none;background:#772583;color:#fff;border-color:#772583;"><i class="ti ti-edit" style="font-size:11px;"></i> Editar diretamente</button>
         </div>
+
+        <div id="script-propostas-pendentes" style="display:none;margin-bottom:16px;"></div>
 
         <!-- Filtro de situação -->
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
@@ -1988,6 +1993,12 @@ input, textarea { cursor: text; }
   <div class="form-group"><label class="form-label">Observação</label><input class="form-input" id="refugo-obs" placeholder="Opcional"/></div>
 </div><div class="modal-footer"><button class="btn" data-close="modal-refugo-novo">Cancelar</button><button class="btn btn-rosa" id="btn-refugo-salvar">Adicionar ao refugo</button></div></div></div>
 
+<!-- MODAL: SUGERIR ALTERAÇÃO DO SCRIPT DE VENDAS -->
+<div class="modal-overlay" id="modal-script-propor"><div class="modal"><div class="modal-head"><span class="modal-title">Sugerir alteração no Script de Vendas</span><button class="modal-close" data-close="modal-script-propor">×</button></div><div class="modal-body">
+  <div style="font-size:11px;color:var(--text2);margin-bottom:10px;background:#FAF6FB;border:1px solid #EEDFF3;border-radius:8px;padding:8px 12px;">Sua sugestão fica pendente até um Admin ou Admin Geral/Master aprovar. Descreva a mudança com o máximo de detalhe possível.</div>
+  <div class="form-group"><label class="form-label">Sua sugestão *</label><textarea class="form-textarea" id="script-proposta-texto" rows="8" placeholder="Ex: No script de 'Lead novo', trocar a frase X pela frase Y porque..."></textarea></div>
+</div><div class="modal-footer"><button class="btn" data-close="modal-script-propor">Cancelar</button><button class="btn btn-rosa" id="btn-script-propor-enviar">Enviar sugestão</button></div></div></div>
+
 <!-- MODAL: CONFIG CNPJ -->
 <div class="modal-overlay" id="modal-config-cnpj">
   <div class="modal" style="max-width:400px;">
@@ -2073,9 +2084,20 @@ function perfilParaUser(perfil){
     color: perfil.cor || '#772D83',
     isAdmin: !!perfil.is_admin,
     isAdminGeral: !!perfil.is_admin_geral,
+    isAdminMaster: !!perfil.is_admin_master,
+    cargoTecnico: perfil.cargo_tecnico || null,
     podeVerTodosClientes: !!perfil.pode_ver_todos_clientes,
     podeReatribuirVendedor: !!perfil.pode_reatribuir_vendedor,
     podeGerenciarEstoque: !!perfil.pode_gerenciar_estoque,
+    podeExcluirCliente: !!perfil.pode_excluir_cliente,
+    podeExportarClientes: !!perfil.pode_exportar_clientes,
+    podeEditarScriptVendas: !!perfil.pode_editar_script_vendas,
+    podeProporEdicaoScript: !!perfil.pode_propor_edicao_script,
+    podeVerFinanceiro: !!perfil.pode_ver_financeiro,
+    podeExportarFinanceiro: !!perfil.pode_exportar_financeiro,
+    podeVerNotasFiscais: !!perfil.pode_ver_notas_fiscais,
+    podeImportarNotasFiscais: !!perfil.pode_importar_notas_fiscais,
+    podeGerenciarPermissoes: !!perfil.pode_gerenciar_permissoes,
     modulos: perfil.modulos || [],
     terceirizado: !!perfil.terceirizado,
     valorHora: perfil.valor_hora || 0,
@@ -2093,14 +2115,109 @@ function perfilParaUser(perfil){
 var USERS={};
 var currentUser=null,currentPage='chats',mobState='list',resolveOn=false,recOn=false,currentKey='AC',editTplIdx=-1;
 
-var TEMPLATES=[
-  {key:'/orcamento',text:'Olá {nome}! 😊 Segue seu orçamento MekMix:\n📦 {qtd}x caixas de {tamanho}ml transparente\n🎨 Tinta {tinta} · Frente e verso\n🖼️ Arte inclusa pela nossa equipe\n💰 R${valor} total (30% entrada + 70% antes despacho)\n📅 Prazo: 12 dias úteis\n\nVamos fechar? 🎉'},
-  {key:'/prazo',text:'Oi {nome}! O prazo é de 12 dias úteis após aprovação da arte e confirmação do pagamento de entrada. Quer me passar sua data do evento para eu verificar? 😊'},
-  {key:'/arte',text:'Pode enviar a arte aqui mesmo, {nome}! Aceitamos PNG, JPG, PDF, AI, CDR ou SVG (qualidade alta). Se precisar de ajuda para criar, nossa equipe de design faz por você sem custo adicional! 🎨'},
-  {key:'/pagamento',text:'O pagamento é feito em 2 etapas, {nome}: 30% de entrada para iniciar a produção e 70% quando ficar pronto, antes do despacho. Aceitamos PIX, depósito bancário e cartão de crédito (com taxa). 💳'},
-  {key:'/frete',text:'O frete é por conta do cliente, {nome}, pago diretamente à transportadora. O valor varia conforme sua cidade — me diz onde você está que eu verifico o estimado! 📦'},
-  {key:'/followup',text:'Oi {nome}! 👋 Já faz um tempinho desde o seu pedido. Tudo certo com os copos? Estamos com novidades e condições especiais este mês. Posso te ajudar com um novo pedido? 😊'}
-];
+var TEMPLATES=[];
+
+function tplCarregarDoBanco(callback){
+  if(!sbClient){ if(callback) callback(); return; }
+  sbClient.from('templates_mensagem').select('*').order('atalho').then(function(res){
+    if(!res.error && res.data){
+      TEMPLATES = res.data.map(function(t){ return {id: t.id, key: t.atalho, text: t.texto}; });
+    }
+    if(callback) callback();
+  });
+}
+
+/* ============================================================
+   SCRIPT DE VENDAS — fluxo de sugestão/aprovação
+   ============================================================
+   O conteúdo do script em si continua sendo o guia rico já escrito no
+   HTML (não convertido para edição livre nesta etapa — seria um projeto
+   à parte). O que existe aqui é o FLUXO: quem tem permissão de propor
+   manda uma sugestão em texto livre, que fica pendente até um Admin (ou
+   Admin Geral/Master, que editam direto) decidir.
+   ============================================================ */
+var SCRIPT_PROPOSTAS_PENDENTES = [];
+
+function scriptCarregarPropostasPendentes(callback){
+  if(!sbClient){ if(callback) callback(); return; }
+  sbClient.from('script_vendas_propostas').select('*').eq('status','pendente').order('criado_em', {ascending:false}).then(function(res){
+    if(!res.error && res.data) SCRIPT_PROPOSTAS_PENDENTES = res.data;
+    if(callback) callback();
+  });
+}
+
+function renderScriptPropostas(){
+  var wrap = document.getElementById('script-propostas-pendentes');
+  if(!wrap) return;
+  var podeAprovar = currentUser && (currentUser.isAdmin || currentUser.isAdminGeral || currentUser.isAdminMaster || currentUser.podeEditarScriptVendas);
+  if(!podeAprovar || !SCRIPT_PROPOSTAS_PENDENTES.length){
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = '';
+  wrap.innerHTML = '<div class="panel" style="border-left:4px solid #E87000;"><div style="font-weight:600;font-size:12px;margin-bottom:8px;color:#E87000;">📝 '+SCRIPT_PROPOSTAS_PENDENTES.length+' sugestão(ões) pendente(s) de aprovação</div>' +
+    SCRIPT_PROPOSTAS_PENDENTES.map(function(p){
+      var autor = Object.keys(USERS).map(function(k){return USERS[k];}).find(function(u){ return u._supabaseId===p.proposto_por; });
+      return '<div style="background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:8px;">' +
+        '<div style="font-size:11px;color:var(--text2);margin-bottom:4px;">Sugerido por '+esc(autor?autor.name:'—')+'</div>' +
+        '<div style="font-size:12px;white-space:pre-wrap;margin-bottom:8px;">'+esc(p.conteudo_proposto)+'</div>' +
+        '<div style="display:flex;gap:6px;">' +
+          '<button class="btn btn-sm btn-rosa" onclick="scriptDecidirProposta(\''+p.id+'\',\'aprovada\')">Aprovar</button>' +
+          '<button class="btn btn-sm btn-danger" onclick="scriptDecidirProposta(\''+p.id+'\',\'rejeitada\')">Rejeitar</button>' +
+        '</div>' +
+      '</div>';
+    }).join('') + '</div>';
+}
+
+function scriptDecidirProposta(propostaId, novoStatus){
+  if(!sbClient) return;
+  sbClient.from('script_vendas_propostas').update({
+    status: novoStatus, decidido_por: currentUser._supabaseId, decidido_em: new Date().toISOString()
+  }).eq('id', propostaId).then(function(res){
+    if(res.error){ toast('Erro ao decidir: '+res.error.message); return; }
+    toast(novoStatus==='aprovada' ? '✅ Sugestão aprovada!' : 'Sugestão rejeitada.');
+    scriptCarregarPropostasPendentes(function(){ renderScriptPropostas(); });
+  });
+}
+window.scriptDecidirProposta = scriptDecidirProposta;
+
+function initScriptVendas(){
+  var btnPropor = document.getElementById('btn-script-propor');
+  var btnEditar = document.getElementById('btn-script-editar');
+  var podeEditarDireto = currentUser && (currentUser.isAdmin || currentUser.isAdminGeral || currentUser.isAdminMaster || currentUser.podeEditarScriptVendas);
+  var podePropor = currentUser && (currentUser.podeProporEdicaoScript && !podeEditarDireto);
+
+  if(btnPropor) btnPropor.style.display = podePropor ? '' : 'none';
+  if(btnEditar) btnEditar.style.display = podeEditarDireto ? '' : 'none';
+
+  if(btnPropor && !btnPropor._bound){
+    btnPropor.addEventListener('click', function(){
+      document.getElementById('script-proposta-texto').value = '';
+      openModal('modal-script-propor');
+    });
+    btnPropor._bound = true;
+  }
+  var btnEnviar = document.getElementById('btn-script-propor-enviar');
+  if(btnEnviar && !btnEnviar._bound){
+    btnEnviar.addEventListener('click', function(){
+      var texto = (document.getElementById('script-proposta-texto').value||'').trim();
+      if(!texto){ toast('Descreva sua sugestão.'); return; }
+      if(!sbClient){ toast('Sem conexão com o banco.'); return; }
+      sbClient.from('script_vendas_propostas').insert({
+        conteudo_proposto: texto, proposto_por: currentUser._supabaseId
+      }).then(function(res){
+        if(res.error){ toast('Erro ao enviar sugestão: '+res.error.message); return; }
+        closeModal('modal-script-propor');
+        toast('✅ Sugestão enviada! Fica pendente até um Admin decidir.');
+      });
+    });
+    btnEnviar._bound = true;
+  }
+
+  if(podeEditarDireto){
+    scriptCarregarPropostasPendentes(function(){ renderScriptPropostas(); });
+  }
+}
 
 // O Chat ao vivo (integração com WhatsApp/Instagram/Facebook) ainda não
 // está conectado a nenhum serviço real — depende da verificação da
@@ -2219,7 +2336,12 @@ function entrarComPerfil(userId, telefoneFallback, callback){
     // .chat-layout definidas no arquivo) pode aparecer sobreposto por um
     // instante, ou permanecer assim se algo abaixo travar.
     goPage('dashboard','Início');
-    applyRole();renderConvList();renderTemplates();renderQR();openConv('AC');
+    applyRole();renderConvList();openConv('AC');
+    tplCarregarDoBanco(function(){ renderTemplates(); renderQR(); });
+    // Carrega todos os colaboradores para popular os selects de vendedor
+    // (filtros e formulários) logo no login — sem esperar a pessoa abrir
+    // a aba Equipe ou Chat Interno primeiro.
+    if(typeof equipeCarregarTodos==='function') equipeCarregarTodos(function(){});
     // Carrega os dados reais do banco (pedidos, estoque, histórico de
     // movimentações) antes de montar o dashboard — sem isso, o painel
     // ficaria vazio ou mostrando dados desatualizados do cache.
@@ -2292,7 +2414,14 @@ function applyRole(){
   var mods = currentUser.modulos || [];
   document.querySelectorAll('.sb-btn[data-page]').forEach(function(btn){
     var page = btn.getAttribute('data-page');
-    btn.style.display = (currentUser.isAdmin || mods.indexOf(page)>=0) ? '' : 'none';
+    var visivel = currentUser.isAdmin || mods.indexOf(page)>=0;
+    // Financeiro e Notas Fiscais também abrem para quem tem a permissão
+    // granular específica, mesmo sem ser Admin nem ter o módulo genérico
+    // marcado — reflete a nova granularidade (ex: alguém pode ver
+    // Financeiro sem ser Admin de nada mais).
+    if(page==='financeiro' && (currentUser.podeVerFinanceiro || currentUser.isAdminGeral || currentUser.isAdminMaster)) visivel = true;
+    if(page==='notasfiscais' && (currentUser.podeVerNotasFiscais || currentUser.isAdminGeral || currentUser.isAdminMaster)) visivel = true;
+    btn.style.display = visivel ? '' : 'none';
   });
   // Separação Mobile x Desktop: módulos de gestão pesada (Fila de produção,
   // Relatórios, Broadcast, Conexões WA, Financeiro, Notas Fiscais, Equipe,
@@ -2406,8 +2535,14 @@ function togglePlay(btn){var ic=btn.querySelector('i');if(!ic)return;ic.classNam
 // ── TEMPLATES ──
 function renderTemplates(){
   var list=document.getElementById('templates-list');if(!list)return;
+  // Criar/editar/deletar template agora é restrito a Admin Geral no banco
+  // — esconde os botões de escrita para os demais, que só visualizam.
+  var souAdminGeral = currentUser && (currentUser.isAdminGeral || currentUser.isAdminMaster);
   list.innerHTML=TEMPLATES.map(function(t,i){
-    return '<div class="panel" style="margin-bottom:10px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span style="font-size:13px;font-weight:600;color:#E31787;">'+esc(t.key)+'</span><div style="display:flex;gap:6px;"><button class="btn btn-sm" data-edit-tpl="'+i+'"><i class="ti ti-edit" style="font-size:11px;"></i> Editar</button><button class="btn btn-sm btn-danger" data-del-tpl="'+i+'"><i class="ti ti-trash" style="font-size:11px;"></i></button></div></div><div style="font-size:12px;color:#666;background:#f8f8fa;padding:8px 10px;border-radius:6px;white-space:pre-wrap;">'+esc(t.text)+'</div></div>';
+    var acoes = souAdminGeral
+      ? '<div style="display:flex;gap:6px;"><button class="btn btn-sm" data-edit-tpl="'+i+'"><i class="ti ti-edit" style="font-size:11px;"></i> Editar</button><button class="btn btn-sm btn-danger" data-del-tpl="'+i+'"><i class="ti ti-trash" style="font-size:11px;"></i></button></div>'
+      : '';
+    return '<div class="panel" style="margin-bottom:10px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span style="font-size:13px;font-weight:600;color:#E31787;">'+esc(t.key)+'</span>'+acoes+'</div><div style="font-size:12px;color:#666;background:#f8f8fa;padding:8px 10px;border-radius:6px;white-space:pre-wrap;">'+esc(t.text)+'</div></div>';
   }).join('');
   // bind template buttons
   document.querySelectorAll('[data-edit-tpl]').forEach(function(btn){
@@ -2416,6 +2551,8 @@ function renderTemplates(){
   document.querySelectorAll('[data-del-tpl]').forEach(function(btn){
     btn.addEventListener('click',function(){delTpl(parseInt(this.getAttribute('data-del-tpl')));});
   });
+  var btnNovo = document.getElementById('btn-new-template');
+  if(btnNovo) btnNovo.style.display = souAdminGeral ? '' : 'none';
 }
 
 function renderQR(){
@@ -2433,7 +2570,17 @@ function renderQR(){
 }
 
 function editTpl(i){editTplIdx=i;document.getElementById('tpl-modal-title').textContent='Editar template';document.getElementById('tpl-key').value=TEMPLATES[i].key;document.getElementById('tpl-text').value=TEMPLATES[i].text;openModal('modal-template');}
-function delTpl(i){if(confirm('Deletar o template '+TEMPLATES[i].key+'?')){TEMPLATES.splice(i,1);renderTemplates();renderQR();}}
+function delTpl(i){
+  var tpl = TEMPLATES[i];
+  if(!confirm('Deletar o template '+tpl.key+'?')) return;
+  if(!sbClient || !tpl.id){ toast('Não foi possível localizar este template no banco.'); return; }
+  sbClient.from('templates_mensagem').delete().eq('id', tpl.id).then(function(res){
+    if(res.error){ toast('Erro ao deletar: '+res.error.message); return; }
+    TEMPLATES.splice(i,1);
+    renderTemplates();renderQR();
+    toast('Template removido.');
+  });
+}
 
 // ── PDF ──
 function updatePDF(){
@@ -2718,14 +2865,20 @@ document.addEventListener('DOMContentLoaded',function(){
   var btnSalvarTransferencia = document.getElementById('btn-salvar-transferencia');
   if(btnSalvarTransferencia) btnSalvarTransferencia.addEventListener('click', function(){ cgSalvarTransferencia(); });
 
+  var btnSalvarConfigGeral = document.getElementById('btn-salvar-config');
+  if(btnSalvarConfigGeral) btnSalvarConfigGeral.addEventListener('click', configSalvar);
+
   var btnSalvarCNPJ = document.getElementById('btn-salvar-cnpj');
   if(btnSalvarCNPJ) btnSalvarCNPJ.addEventListener('click', function(){
     var v=(document.getElementById('input-cnpj-empresa').value||'').trim();
-    CNPJ_EMPRESA=v;
-    try{localStorage.setItem('mekmix_cnpj',v);}catch(e){}
-    var el=document.getElementById('cnpj-empresa'); if(el) el.textContent=v||'nao configurado';
-    closeModal('modal-config-cnpj');
-    toast('CNPJ salvo!');
+    if(!sbClient){ toast('Sem conexão com o banco.'); return; }
+    sbClient.from('config_empresa').update({cnpj_empresa: v, atualizado_por: currentUser._supabaseId}).eq('id',1).then(function(res){
+      if(res.error){ toast('Erro ao salvar CNPJ: '+res.error.message); return; }
+      CNPJ_EMPRESA=v;
+      var el=document.getElementById('cnpj-empresa'); if(el) el.textContent=v||'nao configurado';
+      closeModal('modal-config-cnpj');
+      toast('CNPJ salvo!');
+    });
   });
 
   // NF: drag & drop e input file
@@ -2895,8 +3048,15 @@ document.addEventListener('DOMContentLoaded',function(){
     var text=(document.getElementById('tpl-text').value||'').trim();
     if(!key||!text)return;
     if(!key.startsWith('/'))key='/'+key;
-    if(editTplIdx>=0)TEMPLATES[editTplIdx]={key:key,text:text};else TEMPLATES.push({key:key,text:text});
-    renderTemplates();renderQR();closeModal('modal-template');toast('Template salvo!');
+    if(!sbClient){ toast('Sem conexão com o banco.'); return; }
+    sbClient.from('templates_mensagem').upsert({
+      atalho: key, texto: text, atualizado_por: currentUser._supabaseId
+    }, {onConflict:'atalho'}).then(function(res){
+      if(res.error){ toast('Erro ao salvar template: '+res.error.message); return; }
+      tplCarregarDoBanco(function(){
+        renderTemplates();renderQR();closeModal('modal-template');toast('Template salvo!');
+      });
+    });
   });
 
   // Novo contato
@@ -5461,9 +5621,39 @@ document.addEventListener('DOMContentLoaded',function(){
         });
       }
       callback();
+      popularTodosSelectsDeVendedor();
     });
   }
   window.equipeCarregarTodos = equipeCarregarTodos;
+
+  // Popula, de forma centralizada, todos os selects de vendedor do
+  // sistema (filtros e formulários) com os colaboradores reais já
+  // carregados em USERS — evita repetir a lista fixa João/Maria/Pedro em
+  // vários lugares, e garante que um colaborador novo apareça em todos
+  // assim que cadastrado.
+  function popularTodosSelectsDeVendedor(){
+    var nomes = Object.keys(USERS).map(function(k){ return USERS[k].name; }).filter(Boolean);
+    nomes = Array.from(new Set(nomes)).sort();
+
+    // Filtros (com opção "Todos vendedores" no topo)
+    ['filter-ped-vend','filter-cli-vend'].forEach(function(id){
+      var sel = document.getElementById(id);
+      if(!sel) return;
+      var valorAtual = sel.value;
+      sel.innerHTML = '<option value="">Todos vendedores</option>' + nomes.map(function(n){ return '<option value="'+esc(n)+'">'+esc(n)+'</option>'; }).join('');
+      sel.value = valorAtual;
+    });
+
+    // Formulários de atribuição (sem opção "Todos" — precisa de 1 escolhido)
+    ['np-vendedor','cli-vendedor'].forEach(function(id){
+      var sel = document.getElementById(id);
+      if(!sel) return;
+      var valorAtual = sel.value;
+      sel.innerHTML = nomes.map(function(n){ return '<option value="'+esc(n)+'">'+esc(n)+'</option>'; }).join('');
+      if(valorAtual && nomes.indexOf(valorAtual)>=0) sel.value = valorAtual;
+    });
+  }
+  window.popularTodosSelectsDeVendedor = popularTodosSelectsDeVendedor;
 
   function renderEquipeAdmin() {
     var list = document.getElementById('equipe-list');
@@ -5481,9 +5671,11 @@ document.addEventListener('DOMContentLoaded',function(){
       var col = (typeof COLABORADORES!=='undefined' && COLABORADORES[key]) || {};
       var ini = u.av || u.name.substring(0,2).toUpperCase();
       var isMe = currentUser && currentUser.key === key;
-      var adminBadge = u.isAdmin
-        ? '<span style="background:#FBEAF0;color:#A0184E;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600;">Admin</span>'
-        : '<span style="background:#EDE3F5;color:#5A1E7A;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600;">' + (u.role||'Usuário') + '</span>';
+      var adminBadge;
+      if(u.isAdminMaster) adminBadge = '<span style="background:#1A1A2E;color:#fff;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600;">👑 Admin Master</span>';
+      else if(u.isAdminGeral) adminBadge = '<span style="background:#FBEAF0;color:#A0184E;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600;">Admin Geral</span>';
+      else if(u.isAdmin) adminBadge = '<span style="background:#FEF3C7;color:#7B5800;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600;">Admin</span>';
+      else adminBadge = '<span style="background:#EDE3F5;color:#5A1E7A;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600;">' + (u.role||'Usuário') + '</span>';
       var modCount = u.isAdmin ? 'Acesso total' : (u.modulos||[]).length + ' módulos';
       var contratacaoLabel = {clt:'CLT', mei:'MEI', pj:'Terceirizado/PJ'}[u.tipoContratacao] || (u.terceirizado?'Terceirizado/PJ':'CLT');
       return '<div class="usuario-card">' +
@@ -5544,11 +5736,34 @@ document.addEventListener('DOMContentLoaded',function(){
     document.getElementById('usr-senha').value  = '';
     document.getElementById('usr-senha').placeholder = u ? 'Deixe em branco para manter' : 'Mínimo 6 caracteres';
     document.getElementById('usr-cor').value    = u ? u.color : '#772D83';
-    adminSel.value = (u && u.isAdmin) ? '1' : '0';
+
+    // Nível de acesso: 0=Usuário, 1=Admin, 2=Admin Geral, 3=Admin Master
+    var nivelAtual = '0';
+    if(u){
+      if(u.isAdminMaster) nivelAtual = '3';
+      else if(u.isAdminGeral) nivelAtual = '2';
+      else if(u.isAdmin) nivelAtual = '1';
+    }
+    adminSel.value = nivelAtual;
+
+    document.getElementById('usr-cargo-tecnico').value = u ? (u.cargoTecnico||'') : '';
+
+    var isMe = currentUser && currentUser.key === key;
+
+    // Só Admin Master pode promover/rebaixar para Admin Geral ou Admin
+    // Master — Admin Geral só mexe em níveis abaixo disso (Usuário/Admin).
+    // Trava também no front-end, além do trigger que já protege no banco.
+    var souAdminMaster = currentUser && currentUser.isAdminMaster;
+    var souAdminGeral = currentUser && currentUser.isAdminGeral;
+    var optAdminGeral = adminSel.querySelector('option[value="2"]');
+    var optAdminMaster = adminSel.querySelector('option[value="3"]');
+    if(optAdminGeral) optAdminGeral.disabled = !souAdminMaster;
+    if(optAdminMaster) optAdminMaster.disabled = !souAdminMaster;
+    var avisoMaster = document.getElementById('usr-admin-master-aviso');
+    if(avisoMaster) avisoMaster.textContent = souAdminMaster ? '' : 'Só um Admin Master pode promover alguém a Admin Geral ou Admin Master.';
 
     // Não pode excluir a si mesmo nem o único admin
     var excluirBtn = document.getElementById('usr-btn-excluir');
-    var isMe = currentUser && currentUser.key === key;
     excluirBtn.style.display = (key && !isMe) ? '' : 'none';
 
     // Checkboxes de módulos — cada um vira um "card" clicável com fundo destacado
@@ -5579,19 +5794,18 @@ document.addEventListener('DOMContentLoaded',function(){
 
     // Mostrar/esconder módulos conforme admin
     adminSel.onchange = function(){
-      document.getElementById('usr-modulos-wrap').style.display = this.value==='1' ? 'none' : '';
+      document.getElementById('usr-modulos-wrap').style.display = (this.value==='1'||this.value==='2'||this.value==='3') ? 'none' : '';
     };
-    document.getElementById('usr-modulos-wrap').style.display = adminSel.value==='1' ? 'none' : '';
+    document.getElementById('usr-modulos-wrap').style.display = (adminSel.value==='1'||adminSel.value==='2'||adminSel.value==='3') ? 'none' : '';
 
-    // Permissões de chat comercial (ver todos os clientes / reatribuir vendedor)
-    // e operacionais (gestor de estoque): só o Admin Geral define, e só para
-    // outras pessoas — nunca para si mesmo, já que o Admin Geral já tem tudo
-    // por definição.
-    var permChatWrap = document.getElementById('usr-permissoes-chat-wrap');
-    var permOpWrap = document.getElementById('usr-permissoes-op-wrap');
-    var podeEditarPermChat = currentUser && currentUser.isAdminGeral && !isMe;
-    permChatWrap.style.display = podeEditarPermChat ? '' : 'none';
-    permOpWrap.style.display = podeEditarPermChat ? '' : 'none';
+    // As permissões granulares (Clientes/Vendas, Estoque, Financeiro,
+    // Script) só podem ser editadas por Admin Geral ou Admin Master, e
+    // nunca para si mesmo (a própria pessoa não se autopromove).
+    var podeEditarPermissoes = (souAdminGeral || souAdminMaster) && !isMe;
+    ['usr-permissoes-chat-wrap','usr-permissoes-op-wrap','usr-permissoes-fin-wrap','usr-permissoes-script-wrap'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.style.display = podeEditarPermissoes ? '' : 'none';
+    });
 
     function aplicarEstadoVisualPerm(cbId, itemId){
       var cb = document.getElementById(cbId);
@@ -5603,18 +5817,29 @@ document.addEventListener('DOMContentLoaded',function(){
       span.style.fontWeight = cb.checked ? '500' : 'normal';
       icon.style.display = cb.checked ? '' : 'none';
     }
-    var cbVerTodos = document.getElementById('usr-ver-todos-clientes');
-    var cbReatribuir = document.getElementById('usr-reatribuir-vendedor');
-    var cbEstoque = document.getElementById('usr-gerenciar-estoque');
-    cbVerTodos.checked = u ? !!u.podeVerTodosClientes : false;
-    cbReatribuir.checked = u ? !!u.podeReatribuirVendedor : false;
-    cbEstoque.checked = u ? !!u.podeGerenciarEstoque : false;
-    aplicarEstadoVisualPerm('usr-ver-todos-clientes','usr-perm-item-vertodos');
-    aplicarEstadoVisualPerm('usr-reatribuir-vendedor','usr-perm-item-reatribuir');
-    aplicarEstadoVisualPerm('usr-gerenciar-estoque','usr-perm-item-estoque');
-    cbVerTodos.onchange = function(){ aplicarEstadoVisualPerm('usr-ver-todos-clientes','usr-perm-item-vertodos'); };
-    cbReatribuir.onchange = function(){ aplicarEstadoVisualPerm('usr-reatribuir-vendedor','usr-perm-item-reatribuir'); };
-    cbEstoque.onchange = function(){ aplicarEstadoVisualPerm('usr-gerenciar-estoque','usr-perm-item-estoque'); };
+
+    // Mapa de todos os checkboxes de permissão granular, para inicializar
+    // e ligar o listener visual de forma compacta (evita repetir 12x o
+    // mesmo bloco de código).
+    var mapaPermissoes = [
+      ['usr-ver-todos-clientes','usr-perm-item-vertodos','podeVerTodosClientes'],
+      ['usr-reatribuir-vendedor','usr-perm-item-reatribuir','podeReatribuirVendedor'],
+      ['usr-excluir-cliente','usr-perm-item-excluircliente','podeExcluirCliente'],
+      ['usr-exportar-clientes','usr-perm-item-exportarclientes','podeExportarClientes'],
+      ['usr-gerenciar-estoque','usr-perm-item-estoque','podeGerenciarEstoque'],
+      ['usr-ver-financeiro','usr-perm-item-verfinanceiro','podeVerFinanceiro'],
+      ['usr-exportar-financeiro','usr-perm-item-exportarfinanceiro','podeExportarFinanceiro'],
+      ['usr-ver-notas-fiscais','usr-perm-item-vernf','podeVerNotasFiscais'],
+      ['usr-editar-script','usr-perm-item-editarscript','podeEditarScriptVendas'],
+      ['usr-propor-script','usr-perm-item-proporscript','podeProporEdicaoScript']
+    ];
+    mapaPermissoes.forEach(function(p){
+      var cb = document.getElementById(p[0]);
+      if(!cb) return;
+      cb.checked = u ? !!u[p[2]] : false;
+      aplicarEstadoVisualPerm(p[0], p[1]);
+      cb.onchange = function(){ aplicarEstadoVisualPerm(p[0], p[1]); };
+    });
 
     openModal('modal-usuario');
   }
@@ -5625,7 +5850,7 @@ document.addEventListener('DOMContentLoaded',function(){
     var senha = document.getElementById('usr-senha').value;
     var cargo = document.getElementById('usr-cargo').value.trim();
     var cor   = document.getElementById('usr-cor').value;
-    var isAdm = document.getElementById('usr-admin').value === '1';
+    var nivelAcesso = document.getElementById('usr-admin').value; // '0'..'3'
     var valorHora = parseFloat(document.getElementById('usr-valorhora').value)||0;
     var terceirizado = document.getElementById('usr-terceirizado').checked;
 
@@ -5633,33 +5858,55 @@ document.addEventListener('DOMContentLoaded',function(){
     if(!editingUserKey && !senha){ toast('Informe a senha!'); return; }
     if(senha && senha.length < 6){ toast('Senha precisa ter ao menos 6 caracteres!'); return; }
 
+    var existing = editingUserKey ? USERS[editingUserKey] : {};
+    var isMe = currentUser && currentUser.key === editingUserKey;
+    var souAdminMaster = currentUser && currentUser.isAdminMaster;
+    var souAdminGeral = currentUser && currentUser.isAdminGeral;
+
+    // Trava de hierarquia também no front-end (o trigger no banco já
+    // protege de qualquer forma, isso só evita mandar uma requisição que
+    // vai ser recusada, com uma mensagem mais clara para quem está usando).
+    if((nivelAcesso==='2' || nivelAcesso==='3') && !souAdminMaster){
+      toast('⚠️ Só um Admin Master pode definir alguém como Admin Geral ou Admin Master.');
+      return;
+    }
+
+    var isAdm = nivelAcesso!=='0';
+    var isAdminGeralNovo = nivelAcesso==='2' || nivelAcesso==='3';
+    var isAdminMasterNovo = nivelAcesso==='3';
+
     var mods = isAdm ? Object.keys(ALL_MODULES_MAP) :
       Array.from(document.querySelectorAll('.usr-mod-cb:checked')).map(function(cb){ return cb.value; });
 
-    var existing = editingUserKey ? USERS[editingUserKey] : {};
-
-    var podeEditarPermChat = currentUser && currentUser.isAdminGeral && currentUser.key!==editingUserKey;
-    var podeVerTodosClientes = podeEditarPermChat
-      ? document.getElementById('usr-ver-todos-clientes').checked
-      : !!existing.podeVerTodosClientes;
-    var podeReatribuirVendedor = podeEditarPermChat
-      ? document.getElementById('usr-reatribuir-vendedor').checked
-      : !!existing.podeReatribuirVendedor;
-    var podeGerenciarEstoque = podeEditarPermChat
-      ? document.getElementById('usr-gerenciar-estoque').checked
-      : !!existing.podeGerenciarEstoque;
+    // As permissões granulares só são lidas da tela se quem está salvando
+    // tem autorização para editá-las (Admin Geral/Master, e não para si
+    // mesmo) — senão, mantém o valor que já existia, sem alteração.
+    var podeEditarPermissoes = (souAdminGeral || souAdminMaster) && !isMe;
+    function lerPermissao(checkboxId, campoExistente){
+      return podeEditarPermissoes ? document.getElementById(checkboxId).checked : !!existing[campoExistente];
+    }
 
     var dadosPerfil = {
       nome: nome,
       cargo: cargo || null,
+      cargo_tecnico: document.getElementById('usr-cargo-tecnico').value || null,
       cor: cor,
       is_admin: isAdm,
+      is_admin_geral: isAdminGeralNovo,
+      is_admin_master: isAdminMasterNovo,
       modulos: mods,
       terceirizado: terceirizado,
       valor_hora: valorHora,
-      pode_ver_todos_clientes: podeVerTodosClientes,
-      pode_reatribuir_vendedor: podeReatribuirVendedor,
-      pode_gerenciar_estoque: podeGerenciarEstoque,
+      pode_ver_todos_clientes: lerPermissao('usr-ver-todos-clientes','podeVerTodosClientes'),
+      pode_reatribuir_vendedor: lerPermissao('usr-reatribuir-vendedor','podeReatribuirVendedor'),
+      pode_excluir_cliente: lerPermissao('usr-excluir-cliente','podeExcluirCliente'),
+      pode_exportar_clientes: lerPermissao('usr-exportar-clientes','podeExportarClientes'),
+      pode_gerenciar_estoque: lerPermissao('usr-gerenciar-estoque','podeGerenciarEstoque'),
+      pode_ver_financeiro: lerPermissao('usr-ver-financeiro','podeVerFinanceiro'),
+      pode_exportar_financeiro: lerPermissao('usr-exportar-financeiro','podeExportarFinanceiro'),
+      pode_ver_notas_fiscais: lerPermissao('usr-ver-notas-fiscais','podeVerNotasFiscais'),
+      pode_editar_script_vendas: lerPermissao('usr-editar-script','podeEditarScriptVendas'),
+      pode_propor_edicao_script: lerPermissao('usr-propor-script','podeProporEdicaoScript'),
       cpf: document.getElementById('usr-cpf').value||null,
       rg: document.getElementById('usr-rg').value||null,
       data_nascimento: document.getElementById('usr-nascimento').value||null,
@@ -5672,17 +5919,28 @@ document.addEventListener('DOMContentLoaded',function(){
     };
 
     if(editingUserKey){
-      // Edição de colaborador já existente: isso a chave "anon" já resolve,
-      // protegido pela política de RLS "perfis_update_proprio_ou_admin_geral".
+      // Edição de colaborador já existente: protegido pela policy de RLS
+      // já existente, e pelo trigger de proteção de campos sensíveis
+      // (que vai recusar a alteração se quem está salvando não tiver
+      // autorização — mesmo que a trava do front-end acima já tenha
+      // barrado a maioria dos casos antes de chegar aqui).
       var uuid = existing._supabaseId;
       if(!uuid || !sbClient){ toast('Não foi possível identificar este colaborador no banco.'); return; }
       sbClient.from('perfis').update(dadosPerfil).eq('id', uuid).then(function(res){
-        if(res.error){ toast('Erro ao salvar: '+res.error.message); return; }
+        if(res.error){
+          if(res.error.message && res.error.message.indexOf('Apenas')>=0){
+            toast('⚠️ '+res.error.message);
+          } else {
+            toast('Erro ao salvar: '+res.error.message);
+          }
+          return;
+        }
         USERS[login] = Object.assign({}, existing, perfilParaUser(Object.assign({id:uuid, login:login}, dadosPerfil)));
         closeModal('modal-usuario');
         renderEquipeAdmin();
         if(typeof renderHorAdminColabSelect==='function') renderHorAdminColabSelect();
         if(typeof renderHorDashboard==='function') renderHorDashboard();
+        if(typeof popularTodosSelectsDeVendedor==='function') popularTodosSelectsDeVendedor();
         toast('✅ Colaborador atualizado: ' + nome);
       });
     } else {
@@ -7211,14 +7469,30 @@ document.addEventListener('DOMContentLoaded',function(){
   var _goPageOrig = goPage;
   goPage = function(id, title) {
     _goPageOrig(id, title);
-    if(id === 'clientes') { carregarClientesDoBanco(function(){ renderClientes('','',''); }); }
-    if(id === 'financeiro') { carregarContasDoBanco(function(){ renderFinanceiro('','',''); }); }
+    if(id === 'clientes') {
+      carregarClientesDoBanco(function(){ renderClientes('','',''); });
+      var btnExportCli = document.getElementById('btn-export-clientes');
+      if(btnExportCli){
+        var podeExportar = currentUser && (currentUser.isAdminGeral || currentUser.isAdminMaster || currentUser.podeExportarClientes);
+        btnExportCli.style.display = podeExportar ? '' : 'none';
+      }
+    }
+    if(id === 'financeiro') {
+      carregarContasDoBanco(function(){ renderFinanceiro('','',''); });
+      var btnExportFin = document.getElementById('btn-export-fin');
+      if(btnExportFin){
+        var podeExportarFin = currentUser && (currentUser.isAdminGeral || currentUser.isAdminMaster || currentUser.podeExportarFinanceiro);
+        btnExportFin.style.display = podeExportarFin ? '' : 'none';
+      }
+    }
     if(id === 'notasfiscais') { renderNF('','',''); initNF(); }
     if(id === 'equipe') { renderEquipeAdmin ? renderEquipeAdmin() : renderEquipe(); }
     if(id === 'followup') { renderFollowup(); }
     if(id === 'contatos') { initContatos(); }
     if(id === 'relatorio') { initRelatorios(); }
     if(id === 'acoes') { initAcoesVendas(); }
+    if(id === 'config') { configCarregar(); }
+    if(id === 'script') { initScriptVendas(); }
   };
 
 
@@ -7610,16 +7884,103 @@ document.addEventListener('DOMContentLoaded',function(){
   // ══════════════════════════════════════
   // NOTAS FISCAIS
   // ══════════════════════════════════════
-  var NOTAS = [
-    {id:'NF-001',tipo:'entrada',numero:'000008821',emitente:'Plastipak Industria Ltda',cnpj_emit:'12.345.678/0001-90',dest:'MekMix Serigrafia',cnpj_dest:'XX.XXX.XXX/0001-XX',emissao:'2025-06-15',valor:4800,chave:'35250612345678000190550010000088211000000001',status:'autorizada',obs:'Compra copos 330ml'},
-    {id:'NF-002',tipo:'entrada',numero:'000003344',emitente:'Colorink Suprimentos Eireli',cnpj_emit:'98.765.432/0001-10',dest:'MekMix Serigrafia',cnpj_dest:'XX.XXX.XXX/0001-XX',emissao:'2025-06-02',valor:1250,chave:'35250698765432000110550010000033441000000002',status:'autorizada',obs:'Tintas serigrafia'},
-    {id:'NF-003',tipo:'saida',numero:'000000045',emitente:'MekMix Serigrafia',cnpj_emit:'XX.XXX.XXX/0001-XX',dest:'Thiago Costa Adega',cnpj_dest:'11.222.333/0001-44',emissao:'2025-06-15',valor:2245,chave:'35250600000000000000550010000000451000000003',status:'autorizada',obs:'Copos personalizados 500ml'},
-  ];
-  var CNPJ_EMPRESA = localStorage.getItem('mekmix_cnpj') || '';
+  var NOTAS = [];
+  var CNPJ_EMPRESA = '';
+
+  function nfCarregarDoBanco(callback){
+    if(!sbClient){ if(callback) callback(); return; }
+    sbClient.from('notas_fiscais').select('*').order('emissao', {ascending:false}).then(function(res){
+      if(!res.error && res.data){
+        NOTAS = res.data.map(function(n){
+          return {
+            id: n.id, tipo: n.tipo, numero: n.numero,
+            emitente: n.emitente||'', cnpj_emit: n.cnpj_emitente||'',
+            dest: n.destinatario||'', cnpj_dest: n.cnpj_destinatario||'',
+            emissao: n.emissao, valor: n.valor, chave: n.chave_acesso||'',
+            status: n.status, obs: n.observacao||''
+          };
+        });
+      }
+      if(callback) callback();
+    });
+  }
+
+  function nfCarregarConfig(callback){
+    if(!sbClient){ if(callback) callback(); return; }
+    sbClient.from('config_empresa').select('*').eq('id',1).maybeSingle().then(function(res){
+      if(res.data){
+        // Reaproveita o campo whatsapp_principal como referência da
+        // empresa; o CNPJ fica salvo em observação simples dentro da
+        // própria config (evita criar coluna nova só para isso).
+        CNPJ_EMPRESA = res.data.cnpj_empresa || '';
+      }
+      if(callback) callback();
+    });
+  }
+
+  // ══════════════════════════════════════
+  // CONFIGURAÇÕES GERAIS DA EMPRESA
+  // ══════════════════════════════════════
+  function configCarregar(callback){
+    if(!sbClient){ if(callback) callback(); return; }
+    sbClient.from('config_empresa').select('*').eq('id',1).maybeSingle().then(function(res){
+      if(res.data){
+        var c = res.data;
+        var setVal = function(id,v){ var el=document.getElementById(id); if(el) el.value=v; };
+        setVal('cfg-nome-empresa', c.nome_empresa||'');
+        setVal('cfg-whatsapp', c.whatsapp_principal||'');
+        setVal('cfg-dias-followup', c.dias_followup||30);
+        setVal('cfg-horario-inicio', (c.horario_atendimento_inicio||'08:00').slice(0,5));
+        setVal('cfg-horario-fim', (c.horario_atendimento_fim||'18:00').slice(0,5));
+        var chk = document.getElementById('cfg-notif-push'); if(chk) chk.checked = !!c.notificacoes_push_ativas;
+      }
+      // Só Admin Geral pode alterar — os demais visualizam, mas os campos
+      // ficam desabilitados (a edição é recusada pelo Supabase de
+      // qualquer forma, isso só evita a frustração de tentar e falhar).
+      var souAdminGeral = currentUser && (currentUser.isAdminGeral || currentUser.isAdminMaster);
+      ['cfg-nome-empresa','cfg-whatsapp','cfg-dias-followup','cfg-horario-inicio','cfg-horario-fim','cfg-notif-push'].forEach(function(id){
+        var el = document.getElementById(id); if(el) el.disabled = !souAdminGeral;
+      });
+      var btnSalvar = document.getElementById('btn-salvar-config');
+      if(btnSalvar) btnSalvar.style.display = souAdminGeral ? '' : 'none';
+      if(callback) callback();
+    });
+  }
+
+  function configSalvar(){
+    if(!sbClient){ toast('Sem conexão com o banco.'); return; }
+    var dados = {
+      nome_empresa: document.getElementById('cfg-nome-empresa').value||'MekMix Serigrafia',
+      whatsapp_principal: document.getElementById('cfg-whatsapp').value||null,
+      dias_followup: parseInt(document.getElementById('cfg-dias-followup').value)||30,
+      horario_atendimento_inicio: document.getElementById('cfg-horario-inicio').value||'08:00',
+      horario_atendimento_fim: document.getElementById('cfg-horario-fim').value||'18:00',
+      notificacoes_push_ativas: document.getElementById('cfg-notif-push').checked,
+      atualizado_por: currentUser._supabaseId
+    };
+    sbClient.from('config_empresa').update(dados).eq('id',1).then(function(res){
+      if(res.error){ toast('Erro ao salvar configurações: '+res.error.message); return; }
+      toast('✅ Configurações salvas!');
+      var info = document.getElementById('cfg-salvo-info');
+      if(info) info.textContent = 'Última atualização: agora, por '+currentUser.name;
+    });
+  }
 
   function initNF() {
-    var cnpjEl = document.getElementById('cnpj-empresa');
-    if(cnpjEl) cnpjEl.textContent = CNPJ_EMPRESA || 'nao configurado';
+    nfCarregarConfig(function(){
+      var cnpjEl = document.getElementById('cnpj-empresa');
+      if(cnpjEl) cnpjEl.textContent = CNPJ_EMPRESA || 'nao configurado';
+    });
+    nfCarregarDoBanco(function(){ renderNF('','',''); });
+
+    // Cadastrar/editar NF e configurar CNPJ agora são restritos a Admin
+    // Geral no banco — esconde as ações aqui para não deixar o vendedor
+    // clicar em algo que o Supabase vai recusar silenciosamente.
+    var souAdminGeral = currentUser && (currentUser.isAdminGeral || currentUser.isAdminMaster);
+    var dropArea = document.getElementById('nf-drop-area');
+    var btnCnpj = document.getElementById('btn-config-cnpj');
+    if(dropArea) dropArea.style.display = souAdminGeral ? '' : 'none';
+    if(btnCnpj) btnCnpj.style.display = souAdminGeral ? '' : 'none';
   }
 
   function renderNF(search, tipoF, statusF) {
@@ -7697,20 +8058,23 @@ document.addEventListener('DOMContentLoaded',function(){
       destCNPJ = fmtCNPJ(destCNPJ);
 
       var nova = {
-        id:'NF-'+String(NOTAS.length+1).padStart(3,'0'),
         tipo: tipo,
         numero: numero.padStart(9,'0'),
-        emitente: emitNome, cnpj_emit: emitCNPJ,
-        dest: destNome, cnpj_dest: destCNPJ,
+        emitente: emitNome, cnpj_emitente: emitCNPJ,
+        destinatario: destNome, cnpj_destinatario: destCNPJ,
         emissao: emissao,
         valor: valorTotal,
-        chave: chave,
+        chave_acesso: chave,
         status: 'autorizada',
-        obs: filename
+        observacao: filename,
+        criado_por: currentUser._supabaseId
       };
-      NOTAS.unshift(nova);
-      renderNF('','','');
-      toast('NF-e importada: ' + emitNome + ' — R$ ' + valorTotal.toLocaleString('pt-BR',{minimumFractionDigits:2}));
+      if(!sbClient){ toast('Sem conexão com o banco.'); return; }
+      sbClient.from('notas_fiscais').insert(nova).then(function(res){
+        if(res.error){ toast('Erro ao salvar NF: '+res.error.message); return; }
+        nfCarregarDoBanco(function(){ renderNF('','',''); });
+        toast('NF-e importada: ' + emitNome + ' — R$ ' + valorTotal.toLocaleString('pt-BR',{minimumFractionDigits:2}));
+      });
     } catch(e) {
       toast('Erro ao processar XML: ' + e.message);
     }
@@ -9641,7 +10005,6 @@ function renderHorAuditoria(){
           <div class="fg">
             <label>Vendedor responsável</label>
             <select id="np-vendedor">
-              <option>João</option><option>Maria</option><option>Pedro</option>
             </select>
           </div>
         </div>
@@ -9947,9 +10310,6 @@ function renderHorAuditoria(){
         <div class="form-group">
           <label class="form-label">Vendedor responsável</label>
           <select class="form-input" id="cli-vendedor">
-            <option>João</option>
-            <option>Maria</option>
-            <option>Pedro</option>
           </select>
         </div>
         <div class="form-group">
@@ -10119,9 +10479,31 @@ function renderHorAuditoria(){
         <div class="form-group">
           <label class="form-label">Nível de acesso</label>
           <select class="form-input" id="usr-admin">
-            <option value="0">Usuário — acesso por módulo</option>
-            <option value="1">Admin — acesso total</option>
+            <option value="0">Usuário — acesso por módulo e permissões abaixo</option>
+            <option value="1">Admin — acesso amplo</option>
+            <option value="2">Admin Geral — gerencia permissões de outros (exceto Admin Geral/Master)</option>
+            <option value="3">Admin Master — acesso total, único que gerencia outros Admin Geral/Master</option>
           </select>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px;" id="usr-admin-master-aviso"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cargo (etiqueta de identificação)</label>
+          <select class="form-input" id="usr-cargo-tecnico">
+            <option value="">— Não definido —</option>
+            <option value="admin_master">Admin Master</option>
+            <option value="admin_geral">Admin Geral</option>
+            <option value="gerente_comercial">Gerente Comercial</option>
+            <option value="supervisor_comercial">Supervisor Comercial</option>
+            <option value="representante_comercial">Representante Comercial de Vendas</option>
+            <option value="vendedor">Vendedor</option>
+            <option value="estoquista">Estoquista</option>
+            <option value="serigrafista">Serigrafista</option>
+            <option value="auxiliar_producao">Auxiliar de Produção</option>
+            <option value="designer_grafico">Designer Gráfico</option>
+            <option value="financeiro">Financeiro</option>
+            <option value="estagiario">Estagiário</option>
+          </select>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px;">Só identifica a função da pessoa na empresa — não define sozinho nenhuma permissão. As permissões abaixo são marcadas uma a uma.</div>
         </div>
       </div>
 
@@ -10131,30 +10513,79 @@ function renderHorAuditoria(){
       </div>
 
       <div id="usr-permissoes-chat-wrap" style="margin-top:16px;display:none;">
-        <div style="font-weight:600;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Permissões de chat comercial</div>
+        <div style="font-weight:600;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Clientes e vendas</div>
         <div style="font-size:11px;color:var(--text2);margin-bottom:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
-          <i class="ti ti-lock" style="font-size:12px;"></i> Definidas apenas pelo Admin Geral. Controlam o quanto essa pessoa acompanha as conversas dos vendedores — independentes uma da outra.
+          <i class="ti ti-lock" style="font-size:12px;"></i> Definidas apenas por Admin Geral ou Admin Master.
         </div>
         <label class="usr-perm-item" id="usr-perm-item-vertodos" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 8px;border-radius:6px;border:1px solid var(--border);margin-bottom:6px;transition:background .15s,border-color .15s;">
           <input type="checkbox" id="usr-ver-todos-clientes" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#E31787;"/>
-          <span style="flex:1;">Ver as conversas de todos os vendedores (não só as próprias)</span>
+          <span style="flex:1;">Ver os contatos/clientes de todos os vendedores (não só os próprios)</span>
           <i class="ti ti-check" style="font-size:14px;color:#E31787;display:none;"></i>
         </label>
-        <label class="usr-perm-item" id="usr-perm-item-reatribuir" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 8px;border-radius:6px;border:1px solid var(--border);transition:background .15s,border-color .15s;">
+        <label class="usr-perm-item" id="usr-perm-item-reatribuir" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 8px;border-radius:6px;border:1px solid var(--border);margin-bottom:6px;transition:background .15s,border-color .15s;">
           <input type="checkbox" id="usr-reatribuir-vendedor" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#E31787;"/>
           <span style="flex:1;">Pode atribuir/trocar o vendedor responsável por um lead</span>
+          <i class="ti ti-check" style="font-size:14px;color:#E31787;display:none;"></i>
+        </label>
+        <label class="usr-perm-item" id="usr-perm-item-excluircliente" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 8px;border-radius:6px;border:1px solid var(--border);margin-bottom:6px;transition:background .15s,border-color .15s;">
+          <input type="checkbox" id="usr-excluir-cliente" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#E31787;"/>
+          <span style="flex:1;">Pode excluir cliente/contato</span>
+          <i class="ti ti-check" style="font-size:14px;color:#E31787;display:none;"></i>
+        </label>
+        <label class="usr-perm-item" id="usr-perm-item-exportarclientes" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 8px;border-radius:6px;border:1px solid var(--border);transition:background .15s,border-color .15s;">
+          <input type="checkbox" id="usr-exportar-clientes" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#E31787;"/>
+          <span style="flex:1;">Pode exportar clientes em Excel</span>
           <i class="ti ti-check" style="font-size:14px;color:#E31787;display:none;"></i>
         </label>
       </div>
 
       <div id="usr-permissoes-op-wrap" style="margin-top:16px;display:none;">
-        <div style="font-weight:600;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Permissões operacionais</div>
+        <div style="font-weight:600;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Estoque</div>
         <div style="font-size:11px;color:var(--text2);margin-bottom:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
-          <i class="ti ti-lock" style="font-size:12px;"></i> Também definidas apenas pelo Admin Geral.
+          <i class="ti ti-lock" style="font-size:12px;"></i> Também definidas apenas por Admin Geral ou Admin Master. A visualização do estoque já é liberada para todos automaticamente.
         </div>
         <label class="usr-perm-item" id="usr-perm-item-estoque" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 8px;border-radius:6px;border:1px solid var(--border);transition:background .15s,border-color .15s;">
           <input type="checkbox" id="usr-gerenciar-estoque" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#E31787;"/>
-          <span style="flex:1;">Gestor de estoque — pode registrar entradas, baixas, abertura de caixa e ajustes/correções manuais</span>
+          <span style="flex:1;">Gestor de estoque — pode registrar entradas, baixas, abertura de caixa, ajustes, caixas prontas e refugo</span>
+          <i class="ti ti-check" style="font-size:14px;color:#E31787;display:none;"></i>
+        </label>
+      </div>
+
+      <div id="usr-permissoes-fin-wrap" style="margin-top:16px;display:none;">
+        <div style="font-weight:600;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Financeiro e Notas Fiscais</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
+          <i class="ti ti-lock" style="font-size:12px;"></i> Também definidas apenas por Admin Geral ou Admin Master. Importar/baixar Notas Fiscais é restrito só a Admin Geral/Master, não é liberável aqui.
+        </div>
+        <label class="usr-perm-item" id="usr-perm-item-verfinanceiro" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 8px;border-radius:6px;border:1px solid var(--border);margin-bottom:6px;transition:background .15s,border-color .15s;">
+          <input type="checkbox" id="usr-ver-financeiro" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#E31787;"/>
+          <span style="flex:1;">Ver Financeiro (contas a pagar, DRE, capital de giro)</span>
+          <i class="ti ti-check" style="font-size:14px;color:#E31787;display:none;"></i>
+        </label>
+        <label class="usr-perm-item" id="usr-perm-item-exportarfinanceiro" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 8px;border-radius:6px;border:1px solid var(--border);margin-bottom:6px;transition:background .15s,border-color .15s;">
+          <input type="checkbox" id="usr-exportar-financeiro" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#E31787;"/>
+          <span style="flex:1;">Exportar dados financeiros</span>
+          <i class="ti ti-check" style="font-size:14px;color:#E31787;display:none;"></i>
+        </label>
+        <label class="usr-perm-item" id="usr-perm-item-vernf" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 8px;border-radius:6px;border:1px solid var(--border);transition:background .15s,border-color .15s;">
+          <input type="checkbox" id="usr-ver-notas-fiscais" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#E31787;"/>
+          <span style="flex:1;">Ver Notas Fiscais</span>
+          <i class="ti ti-check" style="font-size:14px;color:#E31787;display:none;"></i>
+        </label>
+      </div>
+
+      <div id="usr-permissoes-script-wrap" style="margin-top:16px;display:none;">
+        <div style="font-weight:600;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Script de Vendas</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
+          <i class="ti ti-lock" style="font-size:12px;"></i> Também definidas apenas por Admin Geral ou Admin Master.
+        </div>
+        <label class="usr-perm-item" id="usr-perm-item-editarscript" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 8px;border-radius:6px;border:1px solid var(--border);margin-bottom:6px;transition:background .15s,border-color .15s;">
+          <input type="checkbox" id="usr-editar-script" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#E31787;"/>
+          <span style="flex:1;">Editar Script de Vendas diretamente</span>
+          <i class="ti ti-check" style="font-size:14px;color:#E31787;display:none;"></i>
+        </label>
+        <label class="usr-perm-item" id="usr-perm-item-proporscript" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 8px;border-radius:6px;border:1px solid var(--border);transition:background .15s,border-color .15s;">
+          <input type="checkbox" id="usr-propor-script" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#E31787;"/>
+          <span style="flex:1;">Propor edição do Script de Vendas (fica pendente até um Admin aprovar)</span>
           <i class="ti ti-check" style="font-size:14px;color:#E31787;display:none;"></i>
         </label>
       </div>
