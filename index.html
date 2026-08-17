@@ -6302,6 +6302,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if(camposFaltando.length){
       if(!nome) marcarCampoInvalido('np-nome', true);
       if(!documento) marcarCampoInvalido('np-doc', true);
+      rolarAteCampo(!nome ? 'np-nome' : 'np-doc');
       toast('⚠️ Preencha: ' + camposFaltando.join(', '));
       return;
     }
@@ -6506,6 +6507,15 @@ document.addEventListener('DOMContentLoaded',function(){
     }
   }
 
+  // Rola a tela/modal até o primeiro campo inválido ficar visível — sem
+  // isso, num formulário longo como o de Novo Pedido, a pessoa pode
+  // clicar em "Confirmar" vendo só a parte de baixo da tela, e nunca
+  // perceber que o campo com erro (lá em cima) nem apareceu na tela.
+  function rolarAteCampo(id){
+    var el = document.getElementById(id);
+    if(el && el.scrollIntoView) el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
   // Traduz mensagens técnicas de erro do Postgres/Supabase em texto que
   // a pessoa realmente entende — em vez de "null value in column X
   // violates not-null constraint", mostra "Preencha o campo X".
@@ -6548,6 +6558,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if(camposFaltando.length){
       if(!nome) marcarCampoInvalido('np-nome', true);
       if(!documento) marcarCampoInvalido('np-doc', true);
+      rolarAteCampo(!nome ? 'np-nome' : 'np-doc');
       toast('⚠️ Preencha: ' + camposFaltando.join(', '));
       return;
     }
