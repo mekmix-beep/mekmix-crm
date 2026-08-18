@@ -647,6 +647,7 @@ input, textarea { cursor: text; }
       <button class="sb-btn" data-page="acoes"><i class="ti ti-trophy"></i><span class="sb-btn-lbl">Ações de vendas</span></button>
       <button class="sb-btn" data-page="estoque"><i class="ti ti-package"></i><span class="sb-btn-lbl">Estoque</span><span class="sb-badge" id="sb-estoque-badge" style="display:none;">0</span></button>
       <button class="sb-btn" data-page="caixasprontas"><i class="ti ti-box-seam"></i><span class="sb-btn-lbl">Caixas Prontas</span></button>
+      <button class="sb-btn" data-page="historicopedidos"><i class="ti ti-history"></i><span class="sb-btn-lbl">Histórico de Pedidos</span></button>
       <button class="sb-btn admin-only desktop-only" data-page="relatorio"><i class="ti ti-chart-bar"></i><span class="sb-btn-lbl">Relatórios</span></button>
       <button class="sb-btn admin-only desktop-only" data-page="broadcast"><i class="ti ti-send"></i><span class="sb-btn-lbl">Broadcast</span></button>
       <button class="sb-btn" data-page="templates"><i class="ti ti-template"></i><span class="sb-btn-lbl">Templates</span></button>
@@ -1330,6 +1331,37 @@ input, textarea { cursor: text; }
         </div>
       </div>
 
+      <!-- HISTÓRICO DE PEDIDOS -->
+      <div id="page-historicopedidos" class="page">
+        <div class="page-title">Histórico de Pedidos
+          <button class="btn btn-sm" id="btn-export-historico" style="margin-left:auto;background:#217346;color:#fff;border-color:#217346;"><i class="ti ti-file-spreadsheet" style="font-size:12px;"></i> Exportar Excel</button>
+        </div>
+
+        <div class="fin-resumo-grid" style="grid-template-columns:repeat(3,1fr);">
+          <div class="fin-resumo-card"><div class="fin-resumo-val" id="hist-total-pedidos" style="color:var(--rosa);">0</div><div class="fin-resumo-lbl">Pedidos entregues</div></div>
+          <div class="fin-resumo-card"><div class="fin-resumo-val" id="hist-valor-total" style="color:#085041;">R$ 0</div><div class="fin-resumo-lbl">Valor total</div></div>
+          <div class="fin-resumo-card"><div class="fin-resumo-val" id="hist-ticket-medio" style="color:#3C3489;">R$ 0</div><div class="fin-resumo-lbl">Ticket médio</div></div>
+        </div>
+
+        <div class="panel" style="margin-bottom:12px;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <div class="search-wrap" style="flex:1;max-width:280px;"><i class="ti ti-search" style="font-size:14px;color:#aaa;"></i><input type="search" id="hist-busca" placeholder="Nome, razão social, CPF ou CNPJ..."/></div>
+            <select class="sel" id="hist-filtro-vendedor" style="width:140px;"><option value="">Todos vendedores</option></select>
+            <input type="date" id="hist-data-de" style="border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;" title="Entregue de"/>
+            <input type="date" id="hist-data-ate" style="border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;" title="Entregue até"/>
+            <input type="number" id="hist-valor-min" placeholder="Valor mín." style="width:100px;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;"/>
+            <input type="number" id="hist-valor-max" placeholder="Valor máx." style="width:100px;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;"/>
+            <button class="btn btn-sm" id="btn-hist-limpar-filtros">Limpar filtros</button>
+          </div>
+        </div>
+
+        <div class="panel" style="padding:0;overflow:hidden;">
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Pedido</th><th>Cliente</th><th>CPF/CNPJ</th><th>Vendedor</th><th>Valor</th><th>Entregue em</th><th>Transportadora</th><th></th></tr></thead><tbody id="hist-tbody">
+            <tr><td colspan="8" style="text-align:center;color:var(--text3);padding:20px;">Carregando...</td></tr>
+          </tbody></table></div>
+        </div>
+      </div>
+
       <!-- ETIQUETAS DE ENTREGA -->
       <div id="page-etiquetas" class="page">
         <div class="page-title">Etiquetas de entrega</div>
@@ -1998,6 +2030,24 @@ input, textarea { cursor: text; }
   <div style="font-size:11px;color:var(--text2);margin-bottom:10px;background:#FAF6FB;border:1px solid #EEDFF3;border-radius:8px;padding:8px 12px;">Sua sugestão fica pendente até um Admin ou Admin Geral/Master aprovar. Descreva a mudança com o máximo de detalhe possível.</div>
   <div class="form-group"><label class="form-label">Sua sugestão *</label><textarea class="form-textarea" id="script-proposta-texto" rows="8" placeholder="Ex: No script de 'Lead novo', trocar a frase X pela frase Y porque..."></textarea></div>
 </div><div class="modal-footer"><button class="btn" data-close="modal-script-propor">Cancelar</button><button class="btn btn-rosa" id="btn-script-propor-enviar">Enviar sugestão</button></div></div></div>
+
+<!-- MODAL: PEDIDO DESPACHADO -->
+<div class="modal-overlay" id="modal-despacho"><div class="modal"><div class="modal-head"><span class="modal-title">Despachar pedido</span><button class="modal-close" data-close="modal-despacho">×</button></div><div class="modal-body">
+  <div class="form-group"><label class="form-label">Pedido</label><div style="font-size:13px;font-weight:600;" id="desp-numero-label">—</div></div>
+  <div class="form-group"><label class="form-label">Data do despacho</label><input class="form-input" type="date" id="desp-data"/></div>
+  <div class="form-grid-2">
+    <div class="form-group"><label class="form-label">Nome do motorista *</label><input class="form-input" id="desp-motorista" placeholder="Ex: José da Silva"/></div>
+    <div class="form-group"><label class="form-label">Transportadora *</label><input class="form-input" id="desp-transportadora" placeholder="Ex: Braspress"/></div>
+  </div>
+  <div class="form-group"><label class="form-label">Destino</label><div style="font-size:12px;color:var(--text2);background:var(--bg);border-radius:8px;padding:8px 12px;" id="desp-destino-label">—</div></div>
+  <div class="form-group"><label class="form-label">Observações do pedido</label><div style="font-size:12px;color:var(--text2);background:var(--bg);border-radius:8px;padding:8px 12px;" id="desp-obs-label">—</div></div>
+</div><div class="modal-footer"><button class="btn" data-close="modal-despacho">Cancelar</button><button class="btn btn-rosa" id="btn-desp-confirmar">Confirmar despacho</button></div></div></div>
+
+<!-- MODAL: CONFIRMAR ENTREGA -->
+<div class="modal-overlay" id="modal-entrega"><div class="modal" style="max-width:420px;"><div class="modal-head"><span class="modal-title">Confirmar entrega</span><button class="modal-close" data-close="modal-entrega">×</button></div><div class="modal-body">
+  <div style="font-size:11px;color:var(--text2);margin-bottom:10px;background:#FAF6FB;border:1px solid #EEDFF3;border-radius:8px;padding:8px 12px;">Confirme que o cliente já recebeu o pedido. Depois disso, ele sai da lista de Pedidos ativos e vai para o Histórico de Pedidos.</div>
+  <div style="font-size:13px;font-weight:600;margin-bottom:12px;" id="entrega-resumo-label">—</div>
+</div><div class="modal-footer"><button class="btn" data-close="modal-entrega">Cancelar</button><button class="btn btn-rosa" id="btn-entrega-confirmar"><i class="ti ti-check" style="font-size:12px;"></i> Confirmar entrega</button></div></div></div>
 
 <!-- MODAL: CONFIG CNPJ -->
 <div class="modal-overlay" id="modal-config-cnpj">
@@ -2721,7 +2771,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // Fix: mover páginas novas para dentro do content-area
   (function(){
     var ca = document.querySelector('.content-area');
-    ['page-pedidos','page-producao','page-etiquetas','page-estoque','page-caixasprontas','page-clientes','page-acoes','page-financeiro','page-notasfiscais','page-script','page-followup','page-horario','page-chatinterno','page-relatorio','page-broadcast','page-templates','page-whatsapp','page-equipe','page-config'].forEach(function(id){
+    ['page-pedidos','page-producao','page-etiquetas','page-estoque','page-caixasprontas','page-historicopedidos','page-clientes','page-acoes','page-financeiro','page-notasfiscais','page-script','page-followup','page-horario','page-chatinterno','page-relatorio','page-broadcast','page-templates','page-whatsapp','page-equipe','page-config'].forEach(function(id){
       var el = document.getElementById(id);
       if(el && el.parentElement && !el.parentElement.classList.contains('content-area')){
         ca.appendChild(el);
@@ -3340,11 +3390,13 @@ document.addEventListener('DOMContentLoaded',function(){
             data: p.created_at ? new Date(p.created_at).toLocaleDateString('pt-BR') : '',
             pill: STATUS_PILL_MAP[statusCrm] || 'p-novo',
             itens: itens,
-            doc: '', wapp: p.whatsapp||'',
+            doc: p.documento||'', wapp: p.whatsapp||'',
             pagamento: '', prazo: '', frete: '', obs: '',
             entradaPaga: !!p.pagamento_70_pago,
             entradaData: '', entradaMotivo: '',
             restantePago: !!p.pagamento_70_pago,
+            despachoData: p.despacho_data||'', despachoMotorista: p.despacho_motorista||'', despachoTransportadora: p.despacho_transportadora||'',
+            entregueEm: p.entregue_em||null,
             cancelamento: p.cancelamento_status ? {
               motivo: p.cancelamento_motivo, status: p.cancelamento_status,
               solicitadoPor: '', decididoPor: '', motivoDecisao: p.cancelamento_motivo_decisao||'',
@@ -3426,11 +3478,18 @@ document.addEventListener('DOMContentLoaded',function(){
       return b.id.localeCompare(a.id);
     });
 
+    // Histórico já mostra os "Entregue" separadamente — a aba Pedidos só
+    // trabalha com pedidos ainda em andamento.
+    orders = orders.filter(function(o){ return o.status!=='Entregue'; });
+
     if(!orders.length) { list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">Nenhum pedido encontrado</div>'; return; }
 
     list.innerHTML = orders.map(function(o) {
       var emFluxoCancelamento = o.status==='Cancelamento solicitado' || o.status==='Cancelado';
-      var opts = ['Novo lead','Orçamento enviado','Arte pendente','Em produção','Pronto para despacho','Entregue']
+      // Fluxo revisado: um pedido lançado na aba Pedidos já é uma venda
+      // fechada — "Novo lead"/"Orçamento enviado" são etapas de
+      // negociação (Kanban/Chat), não fazem mais sentido aqui.
+      var opts = ['Pedido aprovado','Elaboração da arte','Em produção','Pronto para despacho','Pedido despachado','Entregue']
         .map(function(s){ return '<option'+(s===o.status?' selected':'')+'>'+s+'</option>'; }).join('');
       var statusCel;
       if(emFluxoCancelamento){
@@ -3475,12 +3534,238 @@ document.addEventListener('DOMContentLoaded',function(){
     }).join('');
   }
 
+  /* ============================================================
+     DESPACHO DO PEDIDO
+     ============================================================ */
+  var DESPACHO_PEDIDO_ID = null;
+
+  function abrirModalDespacho(orderId){
+    var order = ORDERS.find(function(o){ return o.id===orderId; });
+    if(!order) return;
+    DESPACHO_PEDIDO_ID = orderId;
+    document.getElementById('desp-numero-label').textContent = order.id + ' — ' + order.client;
+    document.getElementById('desp-data').value = new Date().toISOString().split('T')[0];
+    document.getElementById('desp-motorista').value = '';
+    document.getElementById('desp-transportadora').value = '';
+    var destino = [order.rua, order.bairro, order.cidade].filter(Boolean).join(', ') || 'Endereço não informado';
+    document.getElementById('desp-destino-label').textContent = destino;
+    document.getElementById('desp-obs-label').textContent = order.obs || 'Nenhuma observação registrada.';
+    openModal('modal-despacho');
+  }
+  window.abrirModalDespacho = abrirModalDespacho;
+
+  function confirmarDespachoPedido(){
+    var order = ORDERS.find(function(o){ return o.id===DESPACHO_PEDIDO_ID; });
+    if(!order || !order._uuid){ toast('Pedido não encontrado.'); return; }
+    var motorista = (document.getElementById('desp-motorista').value||'').trim();
+    var transportadora = (document.getElementById('desp-transportadora').value||'').trim();
+    if(!motorista || !transportadora){ toast('⚠️ Informe o motorista e a transportadora.'); return; }
+    var dataDespacho = document.getElementById('desp-data').value;
+
+    sbClient.from('pedidos').update({
+      status: statusParaBanco('Pedido despachado'),
+      despacho_data: dataDespacho,
+      despacho_motorista: motorista,
+      despacho_transportadora: transportadora
+    }).eq('id', order._uuid).then(function(res){
+      if(res.error){ toast(traduzirErroBanco(res.error.message)); return; }
+      sbClient.from('status_historico').insert({ pedido_id: order._uuid, status: statusParaBanco('Pedido despachado') });
+      order.status = 'Pedido despachado';
+      order.pill = STATUS_PILL_MAP['Pedido despachado'] || 'p-orc';
+      order.despachoData = dataDespacho; order.despachoMotorista = motorista; order.despachoTransportadora = transportadora;
+      closeModal('modal-despacho');
+      renderOrders();
+      toast('🚚 Pedido '+order.id+' despachado com '+transportadora+'!');
+    });
+  }
+
+  /* ============================================================
+     CONFIRMAR ENTREGA
+     ============================================================
+     Ao confirmar, o pedido sai da lista de Pedidos ativos (filtrado em
+     renderOrders) e passa a aparecer só no Histórico de Pedidos.
+     ============================================================ */
+  var ENTREGA_PEDIDO_ID = null;
+
+  function confirmarEntregaPedido(orderId){
+    var order = ORDERS.find(function(o){ return o.id===orderId; });
+    if(!order) return;
+    ENTREGA_PEDIDO_ID = orderId;
+    document.getElementById('entrega-resumo-label').textContent = order.id + ' — ' + order.client + ' · ' + order.prodDesc;
+    openModal('modal-entrega');
+  }
+  window.confirmarEntregaPedido = confirmarEntregaPedido;
+
+  function efetivarEntregaPedido(){
+    var order = ORDERS.find(function(o){ return o.id===ENTREGA_PEDIDO_ID; });
+    if(!order || !order._uuid){ toast('Pedido não encontrado.'); return; }
+
+    sbClient.from('pedidos').update({
+      status: statusParaBanco('Entregue'),
+      entregue_em: new Date().toISOString(),
+      entregue_por: currentUser._supabaseId
+    }).eq('id', order._uuid).then(function(res){
+      if(res.error){ toast(traduzirErroBanco(res.error.message)); return; }
+      sbClient.from('status_historico').insert({ pedido_id: order._uuid, status: statusParaBanco('Entregue') });
+      order.status = 'Entregue';
+      order.pill = STATUS_PILL_MAP['Entregue'] || 'p-entregue';
+      order.entregueEm = new Date().toISOString();
+      closeModal('modal-entrega');
+      renderOrders(); // o pedido some da lista, já que renderOrders filtra "Entregue"
+      if(typeof renderHistoricoPedidos==='function') renderHistoricoPedidos();
+      toast('✅ Pedido '+order.id+' entregue! Movido para o Histórico de Pedidos.');
+    });
+  }
+
+  /* ============================================================
+     HISTÓRICO DE PEDIDOS
+     ============================================================
+     Mostra só pedidos com status "Entregue" — não é uma tabela própria,
+     é um recorte de ORDERS (já carregado do banco), com busca, filtros e
+     métricas. Reverter para status anterior é restrito a Admin Geral/
+     Master, como definido.
+     ============================================================ */
+  function historicoPedidosLista(){
+    return ORDERS.filter(function(o){ return o.status==='Entregue'; });
+  }
+
+  function popularFiltroVendedorHistorico(){
+    var sel = document.getElementById('hist-filtro-vendedor');
+    if(!sel) return;
+    var vendedoresUnicos = Array.from(new Set(historicoPedidosLista().map(function(o){ return o.vendedor; }).filter(Boolean)));
+    var valorAtual = sel.value;
+    sel.innerHTML = '<option value="">Todos vendedores</option>' + vendedoresUnicos.map(function(v){ return '<option value="'+esc(v)+'">'+esc(v)+'</option>'; }).join('');
+    sel.value = valorAtual;
+  }
+
+  function renderHistoricoPedidos(){
+    var tbody = document.getElementById('hist-tbody');
+    if(!tbody) return;
+    var termo = (document.getElementById('hist-busca').value||'').trim().toLowerCase();
+    var vendF = document.getElementById('hist-filtro-vendedor').value;
+    var dataDe = document.getElementById('hist-data-de').value;
+    var dataAte = document.getElementById('hist-data-ate').value;
+    var valorMin = parseFloat(document.getElementById('hist-valor-min').value)||null;
+    var valorMax = parseFloat(document.getElementById('hist-valor-max').value)||null;
+
+    var entregues = historicoPedidosLista().filter(function(o){
+      if(termo){
+        var alvo = (o.client+' '+(o.doc||'')).toLowerCase();
+        if(alvo.indexOf(termo)<0) return false;
+      }
+      if(vendF && o.vendedor!==vendF) return false;
+      if(o.entregueEm){
+        var dataEntrega = o.entregueEm.split('T')[0];
+        if(dataDe && dataEntrega < dataDe) return false;
+        if(dataAte && dataEntrega > dataAte) return false;
+      }
+      if(valorMin!=null && o.valor < valorMin) return false;
+      if(valorMax!=null && o.valor > valorMax) return false;
+      return true;
+    });
+
+    entregues.sort(function(a,b){ return (b.entregueEm||'').localeCompare(a.entregueEm||''); });
+
+    // Métricas resumidas
+    var total = entregues.length;
+    var valorTotal = entregues.reduce(function(s,o){ return s+(o.valor||0); },0);
+    var ticketMedio = total ? valorTotal/total : 0;
+    document.getElementById('hist-total-pedidos').textContent = total;
+    document.getElementById('hist-valor-total').textContent = 'R$ '+valorTotal.toLocaleString('pt-BR',{minimumFractionDigits:2});
+    document.getElementById('hist-ticket-medio').textContent = 'R$ '+ticketMedio.toLocaleString('pt-BR',{minimumFractionDigits:2});
+
+    var souAdminGeralOuMaster = currentUser && (currentUser.isAdminGeral || currentUser.isAdminMaster);
+
+    if(!entregues.length){
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:20px;">Nenhum pedido encontrado.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = entregues.map(function(o){
+      var dataEntregaFmt = o.entregueEm ? new Date(o.entregueEm).toLocaleDateString('pt-BR') : '—';
+      var acaoReverter = souAdminGeralOuMaster
+        ? '<button class="btn btn-sm" onclick="reverterEntregaPedido(\''+o.id+'\')" title="Reverter entrega (voltar para Pronto para despacho)"><i class="ti ti-arrow-back-up" style="font-size:11px;"></i></button>'
+        : '';
+      return '<tr><td>'+esc(o.id)+'</td><td>'+esc(o.client)+'</td><td>'+esc(o.doc||'—')+'</td><td>'+esc(o.vendedor||'—')+'</td><td style="font-weight:600;color:var(--rosa);">R$'+o.valor.toLocaleString('pt-BR')+'</td><td>'+dataEntregaFmt+'</td><td>'+esc(o.despachoTransportadora||'—')+'</td><td>'+acaoReverter+'</td></tr>';
+    }).join('');
+  }
+
+  function reverterEntregaPedido(orderId){
+    if(!confirm('Reverter a entrega deste pedido? Ele volta para "Pronto para despacho" e sai do Histórico.')) return;
+    var order = ORDERS.find(function(o){ return o.id===orderId; });
+    if(!order || !order._uuid){ toast('Pedido não encontrado.'); return; }
+    sbClient.from('pedidos').update({
+      status: statusParaBanco('Pronto para despacho'), entregue_em: null, entregue_por: null
+    }).eq('id', order._uuid).then(function(res){
+      if(res.error){ toast(traduzirErroBanco(res.error.message)); return; }
+      order.status = 'Pronto para despacho';
+      order.pill = STATUS_PILL_MAP['Pronto para despacho'] || 'p-orc';
+      order.entregueEm = null;
+      renderHistoricoPedidos();
+      renderOrders();
+      toast('↩️ Entrega revertida — pedido '+order.id+' voltou para "Pronto para despacho".');
+    });
+  }
+  window.reverterEntregaPedido = reverterEntregaPedido;
+
+  function exportarHistoricoPedidos(){
+    var entregues = historicoPedidosLista();
+    var rows = [['Pedido','Cliente','CPF/CNPJ','Vendedor','Valor','Entregue em','Transportadora','Motorista']];
+    entregues.forEach(function(o){
+      rows.push([o.id, o.client, o.doc||'', o.vendedor||'', o.valor, o.entregueEm?new Date(o.entregueEm).toLocaleDateString('pt-BR'):'', o.despachoTransportadora||'', o.despachoMotorista||'']);
+    });
+    exportCSVGenerico(rows, 'historico_pedidos_mekmix.csv');
+  }
+
+  function initHistoricoPedidos(){
+    popularFiltroVendedorHistorico();
+    renderHistoricoPedidos();
+    ['hist-busca','hist-filtro-vendedor','hist-data-de','hist-data-ate','hist-valor-min','hist-valor-max'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el && !el._bound){
+        el.addEventListener(id==='hist-busca'?'input':'change', renderHistoricoPedidos);
+        el._bound = true;
+      }
+    });
+    var btnLimpar = document.getElementById('btn-hist-limpar-filtros');
+    if(btnLimpar && !btnLimpar._bound){
+      btnLimpar.addEventListener('click', function(){
+        ['hist-busca','hist-filtro-vendedor','hist-data-de','hist-data-ate','hist-valor-min','hist-valor-max'].forEach(function(id){
+          document.getElementById(id).value = '';
+        });
+        renderHistoricoPedidos();
+      });
+      btnLimpar._bound = true;
+    }
+    var btnExport = document.getElementById('btn-export-historico');
+    if(btnExport && !btnExport._bound){
+      btnExport.addEventListener('click', exportarHistoricoPedidos);
+      btnExport._bound = true;
+    }
+  }
+
   function updateOrderStatus(sel) {
     var id = sel.getAttribute('data-id');
     var newStatus = sel.value;
     var order = ORDERS.find(function(o){ return o.id === id; });
     if(!order || !order._uuid || !sbClient){ toast('Não foi possível localizar este pedido no banco.'); return; }
     var oldStatus = order.status;
+
+    // "Pedido despachado" precisa dos dados de transportadora/motorista
+    // antes de salvar — abre o modal específico, sem persistir nada ainda
+    // (o select volta pro status anterior até o modal ser confirmado).
+    if(newStatus==='Pedido despachado'){
+      sel.value = oldStatus;
+      abrirModalDespacho(id);
+      return;
+    }
+    // "Entregue" também tem um fluxo próprio (marca quem/quando entregou,
+    // e o pedido sai da lista de Pedidos ativos).
+    if(newStatus==='Entregue'){
+      sel.value = oldStatus;
+      confirmarEntregaPedido(id);
+      return;
+    }
 
     sbClient.from('pedidos').update({status: statusParaBanco(newStatus)}).eq('id', order._uuid).then(function(res){
       if(res.error){ toast('Erro ao atualizar status: '+res.error.message); sel.value = oldStatus; return; }
@@ -5647,7 +5932,7 @@ document.addEventListener('DOMContentLoaded',function(){
     dashboard:'Início / Dashboard', chats:'Chats ao vivo', chatinterno:'Chat interno', kanban:'Kanban',
     contatos:'Contatos', followup:'Follow-up 30d', clientes:'Clientes',
     acoes:'Ações de vendas', pedidos:'Pedidos', producao:'Fila de produção', etiquetas:'Etiquetas',
-    estoque:'Estoque', caixasprontas:'Caixas Prontas', relatorio:'Relatórios', broadcast:'Broadcast',
+    estoque:'Estoque', caixasprontas:'Caixas Prontas', historicopedidos:'Histórico de Pedidos', relatorio:'Relatórios', broadcast:'Broadcast',
     templates:'Templates', financeiro:'Financeiro', notasfiscais:'Notas Fiscais',
     equipe:'Equipe', config:'Configurações', script:'Script de vendas'
   };
@@ -6790,6 +7075,12 @@ document.addEventListener('DOMContentLoaded',function(){
   var btnRascunho = document.getElementById('btn-salvar-rascunho');
   if(btnRascunho) btnRascunho.addEventListener('click', function(){ confirmarPedido(true); });
 
+  var btnDespConfirmar = document.getElementById('btn-desp-confirmar');
+  if(btnDespConfirmar) btnDespConfirmar.addEventListener('click', confirmarDespachoPedido);
+
+  var btnEntregaConfirmar = document.getElementById('btn-entrega-confirmar');
+  if(btnEntregaConfirmar) btnEntregaConfirmar.addEventListener('click', efetivarEntregaPedido);
+
 
 
   // ── BUSCA DE CLIENTES NO FORMULÁRIO ──
@@ -7733,6 +8024,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if(id === 'contatos') { initContatos(); }
     if(id === 'relatorio') { initRelatorios(); }
     if(id === 'acoes') { initAcoesVendas(); }
+    if(id === 'historicopedidos') { initHistoricoPedidos(); }
     if(id === 'config') { configCarregar(); }
     if(id === 'script') { initScriptVendas(); }
   };
