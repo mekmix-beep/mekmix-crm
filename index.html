@@ -2108,7 +2108,10 @@ var STATUS_CRM_PARA_BANCO = {
   'Entregue': 'ent',
   'Follow-up 30d': 'col',
   'Cancelamento solicitado': 'Cancelamento solicitado', // valor novo, já por extenso
-  'Cancelado': 'Cancelado' // valor novo, já por extenso
+  'Cancelado': 'Cancelado', // valor novo, já por extenso
+  'Pedido aprovado': 'Pedido aprovado', // valor novo, já por extenso
+  'Elaboração da arte': 'Elaboração da arte', // valor novo, já por extenso
+  'Pedido despachado': 'Pedido despachado' // valor novo, já por extenso
 };
 var STATUS_BANCO_PARA_CRM = {};
 Object.keys(STATUS_CRM_PARA_BANCO).forEach(function(k){ STATUS_BANCO_PARA_CRM[STATUS_CRM_PARA_BANCO[k]] = k; });
@@ -3786,29 +3789,48 @@ document.addEventListener('DOMContentLoaded',function(){
       // O estoque pode ficar negativo aqui de propósito: refletir a dívida real
       // é mais útil do que travar em zero e perder a informação de quanto falta
       // repor — a venda nunca é bloqueada por falta de estoque.
-      if(newStatus === 'Em produção' && oldStatus !== 'Em produção' && !order.estoqueBaixado) {
-        var tam = order.prod;
-        if(STOCK[tam]) {
-          var totalUnid = order.unid;
-          var upCx = UNID_PER_CX[tam];
-          var caixasBaixar = Math.floor(totalUnid / upCx);
-          var novoValor = STOCK[tam].caixas - caixasBaixar;
+      //
+      // IMPORTANTE: a entrada na Fila de Produção NÃO pode depender de
+      // STOCK[tam] existir — antes, se o tamanho nunca tivesse nenhuma
+      // entrada de estoque cadastrada (STOCK[tam] undefined), o pedido
+      // inteiro ficava de fora da Fila de Produção silenciosamente, mesmo
+      // já estando "Em produção" de verdade no banco. Agora a entrada na
+      // fila sempre acontece; só o cálculo de baixa de estoque (que
+      // precisa de UNID_PER_CX) é condicional.
+      if(newStatus === 'Em produção' && oldStatus !== 'Em produção') {
+        if(!PROD_QUEUE.find(function(p){ return p.id===id; })) {
+          PROD_QUEUE.push({id:id,pos:PROD_QUEUE.length+1,priority:false,client:order.client,prod:order.prod+' · '+order.qtd+'cx · '+order.unid.toLocaleString('pt-BR')+'un',tinta:'—',vendedor:order.vendedor,data:order.data,prazo:'—'});
+          renderProdQueue();
+        }
 
-          sbClient.from('estoque').update({caixas: novoValor}).eq('tamanho', tam).then(function(){
+        if(!order.estoqueBaixado){
+          var tam = order.prod;
+          var upCx = UNID_PER_CX[tam] || 1000; // padrão seguro se o tamanho ainda não tiver essa configuração
+          var caixasBaixar = Math.floor(order.unid / upCx);
+          var disponivelAtual = STOCK[tam] ? STOCK[tam].caixas : 0;
+          var novoValor = disponivelAtual - caixasBaixar;
+
+          // upsert em vez de update: cria a linha do tamanho no banco se
+          // ainda não existir (mesmo padrão já usado em
+          // estoquePersistirMovimento), evitando falha silenciosa.
+          sbClient.from('estoque').upsert({
+            tamanho: tam, caixas: novoValor,
+            unidades_avulsas: STOCK[tam] ? STOCK[tam].unid : 0,
+            minimo_caixas: STOCK[tam] ? STOCK[tam].minCaixas : 3,
+            unidades_por_caixa: upCx
+          }, {onConflict:'tamanho'}).then(function(){
             sbClient.from('pedidos').update({estoque_baixado: true}).eq('id', order._uuid).then(function(){
               sbClient.from('estoque_log').insert({
                 tipo:'saida', tamanho:tam, caixas:caixasBaixar, unidades:0,
                 motivo:'Produção '+id+' (auto)', lancado_por: currentUser._supabaseId
               }).then(function(){
+                if(!STOCK[tam]) STOCK[tam] = {caixas:0, unid:0, minCaixas:3};
                 STOCK[tam].caixas = novoValor;
+                if(!UNID_PER_CX[tam]) UNID_PER_CX[tam] = upCx;
                 order.estoqueBaixado = true;
                 STOCK_LOG.unshift({tipo:'saida',tam:tam,caixas:caixasBaixar,unid:0,nf:'',data:new Date().toLocaleDateString('pt-BR'),motivo:'Produção '+id+' (auto)',lancadoPor:'Sistema (automático)'});
-                if(!PROD_QUEUE.find(function(p){ return p.id===id; })) {
-                  PROD_QUEUE.push({id:id,pos:PROD_QUEUE.length+1,priority:false,client:order.client,prod:order.prod+' · '+order.qtd+'cx · '+order.unid.toLocaleString('pt-BR')+'un',tinta:'—',vendedor:order.vendedor,data:order.data,prazo:'—'});
-                }
                 renderStockGrid();
                 renderStockLog();
-                renderProdQueue();
                 toast('📦 Baixa automática: ' + caixasBaixar + 'cx de ' + tam + ' — ' + order.client);
                 checkStockAlerts();
                 // Consome os lotes PEPS e salva o custo real do pedido —
