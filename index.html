@@ -6877,8 +6877,12 @@ document.addEventListener('DOMContentLoaded',function(){
 
     // Rascunho fica marcado de verdade via is_rascunho, sem "disfarçar"
     // como se fosse um status normal de pedido — evita confundir rascunho
-    // com pedido já enviado ao cliente.
-    var statusInicial = rascunho ? 'Novo lead' : 'Em produção';
+    // com pedido já enviado ao cliente. Pedido normal (não rascunho) nasce
+    // como "Pedido aprovado" — a venda já foi fechada com o cliente, mas
+    // ainda precisa passar por "Elaboração da arte" antes de ir pra
+    // produção de verdade (é só aí que a baixa de estoque acontece, em
+    // updateOrderStatus).
+    var statusInicial = rascunho ? 'Novo lead' : 'Pedido aprovado';
     var prodDesc = NP_ITEMS.map(function(i){
       return (i.tipo==='caixas' ? i.qtd+'cx' : i.qtd+'un') + ' ' + i.tam;
     }).join(' + ');
@@ -6954,62 +6958,25 @@ document.addEventListener('DOMContentLoaded',function(){
               entradaData: entradaStatus==='previsto' ? (document.getElementById('np-entrada-data').value||'') : '',
               entradaMotivo: entradaStatus==='previsto' ? (document.getElementById('np-entrada-motivo').value||'') : '',
               restantePago: false, cancelamento: null,
-              estoqueBaixado: !rascunho, custoTotal: custoTotalPedidoFinal
+              estoqueBaixado: false, custoTotal: 0
             };
             ORDERS.unshift(newOrder);
-            if(!rascunho){
-              PROD_QUEUE.push({id:pid,pos:PROD_QUEUE.length+1,priority:false,client:nome,prod:prodDesc,tinta:NP_TINTA,vendedor:vendedorNome,data:new Date().toLocaleDateString('pt-BR'),prazo:'—'});
-              if(tamanhosComFalta && tamanhosComFalta.length){
-                toast('⚠️ Pedido '+pid+' criado, mas com estoque insuficiente: '+tamanhosComFalta.join(', ')+'. Sinalizado para o Gestor de Estoque.');
-              } else {
-                toast('✅ Pedido '+pid+' criado, estoque atualizado e adicionado à fila de produção!');
-              }
-            } else {
+            if(rascunho){
               toast('✅ Pedido ' + pid + ' criado como rascunho!');
+            } else {
+              toast('✅ Pedido '+pid+' aprovado! Avance o status para "Elaboração da arte" e depois "Em produção" quando a arte estiver pronta.');
             }
             renderOrders();
             closeModal('modal-novo-pedido');
             if(btnConfirmar) btnConfirmar.disabled=false;
           }
 
-          // 4) Baixa de estoque real no banco — só quando não é rascunho.
-          // Além de atualizar o agregado (STOCK), consome os lotes na
-          // ordem PEPS para descobrir o custo real do que foi vendido —
-          // é esse valor que vira a margem de lucro do pedido.
-          if(!rascunho){
-            var tamanhosComFalta = [];
-            var pendentes = NP_ITEMS.length;
-            var custoTotalPedido = 0;
-            if(pendentes===0){ finalizarNaTela([]); return; }
-            NP_ITEMS.forEach(function(item){
-              var disponivel = STOCK[item.tam] ? STOCK[item.tam].caixas : 0;
-              if(item.qtd > disponivel) tamanhosComFalta.push(item.tam+' ('+item.qtd+'cx pedido, '+disponivel+' disponível)');
-              var novoValor = disponivel - item.qtd; // pode ficar negativo de propósito
-              sbClient.from('estoque').update({caixas: novoValor}).eq('tamanho', item.tam).then(function(){
-                sbClient.from('estoque_log').insert({
-                  tipo:'saida', tamanho:item.tam, caixas:item.qtd, unidades:0,
-                  motivo:'Pedido '+pid+' — '+nome, lancado_por: currentUser._supabaseId
-                }).then(function(){
-                  if(STOCK[item.tam]) STOCK[item.tam].caixas = novoValor;
-                  estoqueConsumirPEPS(item.tam, item.qtd, function(custoItem, consumos){
-                    custoTotalPedido += custoItem;
-                    estoqueRegistrarConsumoPedido(pedidoUuid, consumos, function(){
-                      pendentes--;
-                      if(pendentes===0){
-                        sbClient.from('pedidos').update({custo_total: custoTotalPedido}).eq('id', pedidoUuid).then(function(){
-                          custoTotalPedidoFinal = custoTotalPedido;
-                          capitalGiroCriarPendencia(pedidoUuid, custoTotalPedido);
-                          finalizarNaTela(tamanhosComFalta);
-                        });
-                      }
-                    });
-                  });
-                });
-              });
-            });
-          } else {
-            finalizarNaTela([]);
-          }
+          // Pedido nasce como "Pedido aprovado" (ou "Novo lead" se
+          // rascunho) — SEM baixa de estoque ainda. A baixa só acontece
+          // quando o status realmente vira "Em produção" (a arte já
+          // pronta), via updateOrderStatus — que já tem essa lógica
+          // implementada e testada.
+          finalizarNaTela();
         });
       });
     });
