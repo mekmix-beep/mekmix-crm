@@ -2345,16 +2345,34 @@ function entrarComPerfil(userId, telefoneFallback, callback){
     // Carrega os dados reais do banco (pedidos, estoque, histórico de
     // movimentações) antes de montar o dashboard — sem isso, o painel
     // ficaria vazio ou mostrando dados desatualizados do cache.
-    carregarEstoqueDoBanco(function(){
-      carregarEstoqueLogDoBanco(function(){
-        carregarPedidosDoBanco(function(){
-          if(typeof checkStockAlerts==='function') checkStockAlerts();
-          if(typeof renderNotificacoes==='function') renderNotificacoes();
-          if(typeof renderFollowup==='function') renderFollowup(); // atualiza o badge da sidebar
-          renderDashboard();
+    // Protegido com typeof porque essas funções são definidas dentro do
+    // listener de DOMContentLoaded (mais abaixo no arquivo) — se o login
+    // acontecer antes desse listener terminar de rodar (raro, mas
+    // possível em conexões lentas), a chamada direta quebraria com
+    // "ReferenceError: is not defined" e travaria todo o restante do
+    // fluxo de login em silêncio.
+    function carregarDadosIniciaisComRetry(tentativas){
+      if(typeof carregarEstoqueDoBanco==='function' && typeof carregarEstoqueLogDoBanco==='function' && typeof carregarPedidosDoBanco==='function'){
+        carregarEstoqueDoBanco(function(){
+          carregarEstoqueLogDoBanco(function(){
+            carregarPedidosDoBanco(function(){
+              if(typeof checkStockAlerts==='function') checkStockAlerts();
+              if(typeof renderNotificacoes==='function') renderNotificacoes();
+              if(typeof renderFollowup==='function') renderFollowup(); // atualiza o badge da sidebar
+              renderDashboard();
+            });
+          });
         });
-      });
-    });
+      } else if(tentativas>0){
+        // As funções ainda não existem no escopo — tenta de novo em
+        // breve, dando tempo do DOMContentLoaded terminar de registrar
+        // tudo. Não deveria levar mais que 1-2 tentativas na prática.
+        setTimeout(function(){ carregarDadosIniciaisComRetry(tentativas-1); }, 200);
+      } else {
+        console.error('Não foi possível carregar os dados iniciais — funções de carregamento não encontradas.');
+      }
+    }
+    carregarDadosIniciaisComRetry(10);
     if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
     if(callback) callback(true, null);
   });
@@ -6624,6 +6642,12 @@ document.addEventListener('DOMContentLoaded',function(){
         sbClient.from('itens_pedido').insert(itensParaInserir).then(function(resItens){
           if(resItens.error){ toast('Pedido criado, mas houve erro ao salvar os itens: '+resItens.error.message); }
 
+          // custoTotalPedidoFinal fica disponível tanto para a baixa de
+          // estoque (que roda antes) quanto para finalizarNaTela (que
+          // roda depois) — newOrder só existe DENTRO de finalizarNaTela,
+          // então não pode ser referenciado fora dela.
+          var custoTotalPedidoFinal = 0;
+
           function finalizarNaTela(tamanhosComFalta){
             var newOrder = {
               id: pid, _uuid: pedidoUuid, client: nome,
@@ -6645,7 +6669,7 @@ document.addEventListener('DOMContentLoaded',function(){
               entradaData: entradaStatus==='previsto' ? (document.getElementById('np-entrada-data').value||'') : '',
               entradaMotivo: entradaStatus==='previsto' ? (document.getElementById('np-entrada-motivo').value||'') : '',
               restantePago: false, cancelamento: null,
-              estoqueBaixado: !rascunho
+              estoqueBaixado: !rascunho, custoTotal: custoTotalPedidoFinal
             };
             ORDERS.unshift(newOrder);
             if(!rascunho){
@@ -6688,7 +6712,7 @@ document.addEventListener('DOMContentLoaded',function(){
                       pendentes--;
                       if(pendentes===0){
                         sbClient.from('pedidos').update({custo_total: custoTotalPedido}).eq('id', pedidoUuid).then(function(){
-                          newOrder.custoTotal = custoTotalPedido;
+                          custoTotalPedidoFinal = custoTotalPedido;
                           capitalGiroCriarPendencia(pedidoUuid, custoTotalPedido);
                           finalizarNaTela(tamanhosComFalta);
                         });
