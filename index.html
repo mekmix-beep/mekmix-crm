@@ -2151,6 +2151,7 @@ function perfilParaUser(perfil){
     podeVerNotasFiscais: !!perfil.pode_ver_notas_fiscais,
     podeImportarNotasFiscais: !!perfil.pode_importar_notas_fiscais,
     podeGerenciarPermissoes: !!perfil.pode_gerenciar_permissoes,
+    podeAlterarStatusPedido: !!perfil.pode_alterar_status_pedido,
     modulos: perfil.modulos || [],
     terceirizado: !!perfil.terceirizado,
     valorHora: perfil.valor_hora || 0,
@@ -2391,10 +2392,6 @@ function entrarComPerfil(userId, telefoneFallback, callback){
     goPage('dashboard','Início');
     applyRole();renderConvList();openConv('AC');
     tplCarregarDoBanco(function(){ renderTemplates(); renderQR(); });
-    // Carrega todos os colaboradores para popular os selects de vendedor
-    // (filtros e formulários) logo no login — sem esperar a pessoa abrir
-    // a aba Equipe ou Chat Interno primeiro.
-    if(typeof equipeCarregarTodos==='function') equipeCarregarTodos(function(){});
     // Carrega os dados reais do banco (pedidos, estoque, histórico de
     // movimentações) antes de montar o dashboard — sem isso, o painel
     // ficaria vazio ou mostrando dados desatualizados do cache.
@@ -2404,15 +2401,26 @@ function entrarComPerfil(userId, telefoneFallback, callback){
     // possível em conexões lentas), a chamada direta quebraria com
     // "ReferenceError: is not defined" e travaria todo o restante do
     // fluxo de login em silêncio.
+    //
+    // IMPORTANTE: equipeCarregarTodos (que popula USERS) precisa
+    // terminar ANTES de carregarPedidosDoBanco — a resolução do nome do
+    // vendedor de cada pedido depende de USERS já estar completo nesse
+    // momento. Antes, os dois carregamentos rodavam em paralelo sem
+    // nenhuma garantia de ordem: se pedidos terminasse primeiro, o
+    // vendedor ficava vazio para sempre naquele pedido, e o filtro de
+    // "só mostra pedidos do próprio vendedor" (para quem não é Admin)
+    // escondia o pedido da tela — mesmo ele existindo no banco.
     function carregarDadosIniciaisComRetry(tentativas){
-      if(typeof carregarEstoqueDoBanco==='function' && typeof carregarEstoqueLogDoBanco==='function' && typeof carregarPedidosDoBanco==='function'){
-        carregarEstoqueDoBanco(function(){
-          carregarEstoqueLogDoBanco(function(){
-            carregarPedidosDoBanco(function(){
-              if(typeof checkStockAlerts==='function') checkStockAlerts();
-              if(typeof renderNotificacoes==='function') renderNotificacoes();
-              if(typeof renderFollowup==='function') renderFollowup(); // atualiza o badge da sidebar
-              renderDashboard();
+      if(typeof carregarEstoqueDoBanco==='function' && typeof carregarEstoqueLogDoBanco==='function' && typeof carregarPedidosDoBanco==='function' && typeof equipeCarregarTodos==='function'){
+        equipeCarregarTodos(function(){
+          carregarEstoqueDoBanco(function(){
+            carregarEstoqueLogDoBanco(function(){
+              carregarPedidosDoBanco(function(){
+                if(typeof checkStockAlerts==='function') checkStockAlerts();
+                if(typeof renderNotificacoes==='function') renderNotificacoes();
+                if(typeof renderFollowup==='function') renderFollowup(); // atualiza o badge da sidebar
+                renderDashboard();
+              });
             });
           });
         });
@@ -3229,6 +3237,11 @@ document.addEventListener('DOMContentLoaded',function(){
     var pedidosAtivos = ORDERS.filter(function(o){
       return o.status!=='Cancelado' && o.status!=='Cancelamento solicitado';
     });
+    // Mesma permissão usada em Pedidos e Fila de Produção — o Kanban
+    // reaproveita updateOrderStatus() no drop, então a trava visual aqui
+    // evita a pessoa arrastar um card só para descobrir, ao soltar, que
+    // não tinha permissão.
+    var podeArrastar = currentUser && (currentUser.isAdminGeral || currentUser.isAdminMaster || currentUser.podeAlterarStatusPedido);
     KANBAN_COLUNAS.forEach(function(col){
       var pedidosDaColuna = pedidosAtivos.filter(function(o){
         if(o.status!==col.status) return false;
@@ -3240,7 +3253,7 @@ document.addEventListener('DOMContentLoaded',function(){
       if(countEl) countEl.textContent = pedidosDaColuna.length;
       if(cardsEl){
         cardsEl.innerHTML = pedidosDaColuna.map(function(o){
-          return '<div class="k-card" draggable="true" data-order-id="'+o.id+'">'+
+          return '<div class="k-card" draggable="'+(podeArrastar?'true':'false')+'" data-order-id="'+o.id+'">'+
             '<div class="k-card-name">'+esc(o.client)+'</div>'+
             '<div class="k-card-info">'+esc(o.prodDesc||o.prod)+'</div>'+
             '<div class="k-card-foot"><span class="pill '+col.pill+'" style="font-size:10px;">'+esc(o.vendedor||'—')+'</span></div>'+
@@ -3361,7 +3374,8 @@ document.addEventListener('DOMContentLoaded',function(){
      resto do código continua lendo essas mesmas variáveis — só a forma
      de preenchê-las mudou.
      ============================================================ */
-  var STATUS_PILL_MAP = {'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Pronto para despacho':'p-despacho','Entregue':'p-entregue','Follow-up 30d':'p-follow','Cancelamento solicitado':'p-follow','Cancelado':'p-cancelado'};
+  var STATUS_PILL_MAP = {'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Pedido aprovado':'p-orc','Elaboração da arte':'p-arte','Em produção':'p-prod','Pronto para despacho':'p-despacho','Pedido despachado':'p-despacho','Entregue':'p-entregue','Follow-up 30d':'p-follow','Cancelamento solicitado':'p-follow','Cancelado':'p-cancelado'};
+  var STATUS_PILL_BG_MAP = {'Pedido aprovado':'#FAEEDA','Elaboração da arte':'#EDE3F5','Em produção':'#E6F1FB','Pronto para despacho':'#FFF7ED','Pedido despachado':'#FFF7ED','Entregue':'#E1F5EE'};
 
   function carregarPedidosDoBanco(callback){
     if(!sbClient){ if(callback) callback(); return; }
@@ -3469,7 +3483,12 @@ document.addEventListener('DOMContentLoaded',function(){
     var sortF = document.getElementById('filter-ped-sort') ? document.getElementById('filter-ped-sort').value : 'data';
 
     var orders = ORDERS.filter(function(o) {
-      if(!currentUser.isAdmin && o.vendedor !== currentUser.name) return false;
+      // isAdmin, isAdminGeral e isAdminMaster sempre veem tudo — reforçado
+      // explicitamente aqui (não só isAdmin) como proteção extra: mesmo
+      // que currentUser não esteja 100% populado no primeiro instante da
+      // renderização, qualquer um desses três já libera a visão completa.
+      var vejoTudo = currentUser.isAdmin || currentUser.isAdminGeral || currentUser.isAdminMaster;
+      if(!vejoTudo && o.vendedor !== currentUser.name) return false;
       if(statusF && o.status !== statusF) return false;
       if(vendF && o.vendedor !== vendF) return false;
       return true;
@@ -3495,11 +3514,18 @@ document.addEventListener('DOMContentLoaded',function(){
       var opts = ['Pedido aprovado','Elaboração da arte','Em produção','Pronto para despacho','Pedido despachado','Entregue']
         .map(function(s){ return '<option'+(s===o.status?' selected':'')+'>'+s+'</option>'; }).join('');
       var statusCel;
+      // Todos podem VER o status — só quem tem a permissão específica
+      // (Admin Master/Geral, ou marcada individualmente, ex: Gerente de
+      // Estoque/Estoquista) pode de fato ALTERAR. Sem essa permissão, o
+      // status aparece como texto fixo, não como campo editável.
+      var podeAlterarStatus = currentUser && (currentUser.isAdminGeral || currentUser.isAdminMaster || currentUser.podeAlterarStatusPedido);
       if(emFluxoCancelamento){
         var corTxt = o.status==='Cancelado' ? '#791F1F' : '#633806';
         statusCel = '<span class="pill" style="background:'+(o.status==='Cancelado'?'#FCEBEB':'#FAEEDA')+';color:'+corTxt+';">'+o.status+'</span>';
-      } else {
+      } else if(podeAlterarStatus){
         statusCel = '<select class="order-sel" data-id="' + o.id + '" onchange="updateOrderStatus(this)">' + opts + '</select>';
+      } else {
+        statusCel = '<span class="pill" style="background:'+(STATUS_PILL_BG_MAP[o.status]||'#EDE3F5')+';color:var(--text2);">'+o.status+'</span>';
       }
       var btnCancelar = (!emFluxoCancelamento)
         ? '<button class="btn btn-sm" style="font-size:10px;padding:3px 7px;" onclick="pedAbrirSolicitarCancelamento(\''+o.id+'\')" title="Solicitar cancelamento"><i class="ti ti-x" style="font-size:10px;"></i></button>'
@@ -3748,6 +3774,14 @@ document.addEventListener('DOMContentLoaded',function(){
   }
 
   function updateOrderStatus(sel) {
+    // Reforço de segurança: mesmo que o <select> não devesse existir na
+    // tela para quem não tem permissão, essa checagem impede a alteração
+    // mesmo que alguém dispare a função por outro caminho (ex: console).
+    // A regra final de verdade continua sendo o trigger no banco — isso
+    // é só uma camada extra de clareza e proteção no front-end.
+    var podeAlterar = currentUser && (currentUser.isAdminGeral || currentUser.isAdminMaster || currentUser.podeAlterarStatusPedido);
+    if(!podeAlterar){ toast('⚠️ Você não tem permissão para alterar o status de pedidos.'); if(typeof renderOrders==='function') renderOrders(); return; }
+
     var id = sel.getAttribute('data-id');
     var newStatus = sel.value;
     var order = ORDERS.find(function(o){ return o.id === id; });
@@ -3860,7 +3894,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // usada para reatribuir vendedor no chat de clientes, reaproveitada aqui
   // porque é o mesmo nível de responsabilidade comercial.
   function pedPodeAprovarCancelamento(){
-    return currentUser && (currentUser.isAdminGeral || currentUser.podeReatribuirVendedor);
+    return currentUser && (currentUser.isAdminGeral || currentUser.isAdminMaster || currentUser.podeReatribuirVendedor);
   }
 
   function pedSolicitarCancelamento(orderId, motivo){
@@ -4426,11 +4460,16 @@ document.addEventListener('DOMContentLoaded',function(){
     var count = document.getElementById('prod-count');
     if(count) count.textContent = PROD_QUEUE.length + ' pedido' + (PROD_QUEUE.length !== 1 ? 's' : '');
 
+    var podeReordenar = currentUser && (currentUser.isAdminGeral || currentUser.isAdminMaster || currentUser.podeAlterarStatusPedido);
+
     queue.innerHTML = '';
     PROD_QUEUE.forEach(function(item, idx) {
       var card = document.createElement('div');
       card.className = 'prod-card' + (item.priority ? ' priority' : '');
-      card.setAttribute('draggable', 'true');
+      // Todos podem VER a fila — só quem tem a permissão pode arrastar
+      // para reordenar. O "grip" (ícone de arrastar) só aparece para
+      // quem tem a permissão, deixando claro visualmente quem pode agir.
+      card.setAttribute('draggable', podeReordenar ? 'true' : 'false');
       card.setAttribute('data-idx', idx);
       // O tamanho do copo vem no início da descrição (ex: "500ml · 2cx · 2.000un")
       var tamMatch = (item.prod||'').match(/^(\d+ml)/);
@@ -4439,7 +4478,7 @@ document.addEventListener('DOMContentLoaded',function(){
         ? '<span class="pill" style="background:#FCEBEB;color:#791F1F;font-size:9px;margin-left:6px;" title="Estoque de '+tamItem+' insuficiente"><i class="ti ti-alert-triangle" style="font-size:9px;"></i> Estoque</span>'
         : '';
       card.innerHTML =
-        '<i class="ti ti-grip-vertical prod-drag-handle"></i>' +
+        (podeReordenar ? '<i class="ti ti-grip-vertical prod-drag-handle"></i>' : '<span style="width:16px;display:inline-block;"></span>') +
         '<div class="prod-pos">' + (idx+1) + '</div>' +
         '<div class="prod-info">' +
           '<div class="prod-name">' + item.client + alertaEstoqueProd + '</div>' +
@@ -4447,14 +4486,18 @@ document.addEventListener('DOMContentLoaded',function(){
           '<div class="prod-date"><i class="ti ti-calendar" style="font-size:10px;"></i> Entrou: ' + item.data + ' &nbsp;|&nbsp; Prazo: ' + item.prazo + '</div>' +
         '</div>' +
         '<div class="prod-right">' +
-          '<div class="prod-move">' +
-            '<button data-move="up" data-idx="' + idx + '" title="Subir na fila">▲</button>' +
-            '<button data-move="down" data-idx="' + idx + '" title="Descer na fila">▼</button>' +
-          '</div>' +
-          '<button class="prod-priority-btn' + (item.priority ? ' on' : '') + '" data-pidx="' + idx + '">' +
-            (item.priority ? '🔥 Urgente' : '⬜ Normal') +
-          '</button>' +
-          '<button class="btn btn-rosa btn-sm" style="margin-top:6px;font-size:10px;padding:3px 8px;" data-pronto-id="' + item.id + '"><i class="ti ti-check" style="font-size:10px;"></i> Pronto p/ despacho</button>' +
+          (podeReordenar ? (
+            '<div class="prod-move">' +
+              '<button data-move="up" data-idx="' + idx + '" title="Subir na fila">▲</button>' +
+              '<button data-move="down" data-idx="' + idx + '" title="Descer na fila">▼</button>' +
+            '</div>' +
+            '<button class="prod-priority-btn' + (item.priority ? ' on' : '') + '" data-pidx="' + idx + '">' +
+              (item.priority ? '🔥 Urgente' : '⬜ Normal') +
+            '</button>' +
+            '<button class="btn btn-rosa btn-sm" style="margin-top:6px;font-size:10px;padding:3px 8px;" data-pronto-id="' + item.id + '"><i class="ti ti-check" style="font-size:10px;"></i> Pronto p/ despacho</button>'
+          ) : (
+            item.priority ? '<span class="prod-priority-btn on">🔥 Urgente</span>' : ''
+          )) +
         '</div>';
       queue.appendChild(card);
     });
@@ -4463,9 +4506,20 @@ document.addEventListener('DOMContentLoaded',function(){
     queue.querySelectorAll('[data-pronto-id]').forEach(function(btn){
       btn.addEventListener('click', function(e){
         e.stopPropagation();
+        // Reforço de segurança: mesmo padrão das outras ações desta tela —
+        // o botão só deveria existir no DOM para quem tem permissão, mas
+        // essa checagem extra protege contra qualquer jeito de disparar
+        // o clique sem passar pela renderização condicional.
+        var podeAlterar = currentUser && (currentUser.isAdminGeral || currentUser.isAdminMaster || currentUser.podeAlterarStatusPedido);
+        if(!podeAlterar){ toast('⚠️ Você não tem permissão para alterar o status de pedidos.'); return; }
         var id = this.getAttribute('data-pronto-id');
         var order = ORDERS.find(function(o){ return o.id===id; });
-        if(order){
+        if(!order || !order._uuid || !sbClient){ toast('Não foi possível localizar este pedido no banco.'); return; }
+        var btnClicado = this;
+        btnClicado.disabled = true;
+        sbClient.from('pedidos').update({status: statusParaBanco('Pronto para despacho')}).eq('id', order._uuid).then(function(res){
+          if(res.error){ toast(traduzirErroBanco(res.error.message)); btnClicado.disabled = false; return; }
+          sbClient.from('status_historico').insert({ pedido_id: order._uuid, status: statusParaBanco('Pronto para despacho') });
           order.status = 'Pronto para despacho';
           order.pill = 'p-despacho';
           // Gera a etiqueta de entrega só agora — não antes, para não criar
@@ -4473,13 +4527,13 @@ document.addEventListener('DOMContentLoaded',function(){
           // produção. Uma etiqueta por volume/caixa do pedido.
           if(typeof etqGerarParaPedido==='function') etqGerarParaPedido(order);
           if(typeof notifPedidoProntoDespacho==='function') notifPedidoProntoDespacho(order);
-        }
-        var idx = PROD_QUEUE.findIndex(function(p){ return p.id===id; });
-        if(idx>=0) PROD_QUEUE.splice(idx,1);
-        renderProdQueue();
-        if(typeof renderOrders==='function') renderOrders();
-        if(typeof renderEtiquetas==='function') renderEtiquetas();
-        toast('✅ '+id+' marcado como pronto para despacho! Etiqueta gerada.');
+          var idx = PROD_QUEUE.findIndex(function(p){ return p.id===id; });
+          if(idx>=0) PROD_QUEUE.splice(idx,1);
+          renderProdQueue();
+          if(typeof renderOrders==='function') renderOrders();
+          if(typeof renderEtiquetas==='function') renderEtiquetas();
+          toast('✅ '+id+' marcado como pronto para despacho! Etiqueta gerada.');
+        });
       });
     });
 
@@ -4520,6 +4574,13 @@ document.addEventListener('DOMContentLoaded',function(){
 
   var prodDragging = null;
   function initProdDnd(queue) {
+    // Reforço de segurança: mesmo com draggable="false" no HTML, os
+    // listeners de touch (usados no mobile) não dependem desse atributo
+    // — por isso a checagem de permissão é repetida aqui, na origem dos
+    // eventos, e não só na renderização visual.
+    var podeReordenar = currentUser && (currentUser.isAdminGeral || currentUser.isAdminMaster || currentUser.podeAlterarStatusPedido);
+    if(!podeReordenar) return;
+
     var cards = queue.querySelectorAll('.prod-card');
     cards.forEach(function(card) {
       // Desktop drag
@@ -6154,7 +6215,7 @@ document.addEventListener('DOMContentLoaded',function(){
     // Script) só podem ser editadas por Admin Geral ou Admin Master, e
     // nunca para si mesmo (a própria pessoa não se autopromove).
     var podeEditarPermissoes = (souAdminGeral || souAdminMaster) && !isMe;
-    ['usr-permissoes-chat-wrap','usr-permissoes-op-wrap','usr-permissoes-fin-wrap','usr-permissoes-script-wrap'].forEach(function(id){
+    ['usr-permissoes-chat-wrap','usr-permissoes-op-wrap','usr-permissoes-pedidos-wrap','usr-permissoes-fin-wrap','usr-permissoes-script-wrap'].forEach(function(id){
       var el = document.getElementById(id);
       if(el) el.style.display = podeEditarPermissoes ? '' : 'none';
     });
@@ -6179,6 +6240,7 @@ document.addEventListener('DOMContentLoaded',function(){
       ['usr-excluir-cliente','usr-perm-item-excluircliente','podeExcluirCliente'],
       ['usr-exportar-clientes','usr-perm-item-exportarclientes','podeExportarClientes'],
       ['usr-gerenciar-estoque','usr-perm-item-estoque','podeGerenciarEstoque'],
+      ['usr-alterar-status-pedido','usr-perm-item-statuspedido','podeAlterarStatusPedido'],
       ['usr-ver-financeiro','usr-perm-item-verfinanceiro','podeVerFinanceiro'],
       ['usr-exportar-financeiro','usr-perm-item-exportarfinanceiro','podeExportarFinanceiro'],
       ['usr-ver-notas-fiscais','usr-perm-item-vernf','podeVerNotasFiscais'],
@@ -6254,6 +6316,7 @@ document.addEventListener('DOMContentLoaded',function(){
       pode_excluir_cliente: lerPermissao('usr-excluir-cliente','podeExcluirCliente'),
       pode_exportar_clientes: lerPermissao('usr-exportar-clientes','podeExportarClientes'),
       pode_gerenciar_estoque: lerPermissao('usr-gerenciar-estoque','podeGerenciarEstoque'),
+      pode_alterar_status_pedido: lerPermissao('usr-alterar-status-pedido','podeAlterarStatusPedido'),
       pode_ver_financeiro: lerPermissao('usr-ver-financeiro','podeVerFinanceiro'),
       pode_exportar_financeiro: lerPermissao('usr-exportar-financeiro','podeExportarFinanceiro'),
       pode_ver_notas_fiscais: lerPermissao('usr-ver-notas-fiscais','podeVerNotasFiscais'),
@@ -11019,6 +11082,7 @@ function renderHorAuditoria(){
             <option value="supervisor_comercial">Supervisor Comercial</option>
             <option value="representante_comercial">Representante Comercial de Vendas</option>
             <option value="vendedor">Vendedor</option>
+            <option value="gerente_estoque">Gerente de Estoque</option>
             <option value="estoquista">Estoquista</option>
             <option value="serigrafista">Serigrafista</option>
             <option value="auxiliar_producao">Auxiliar de Produção</option>
@@ -11070,6 +11134,18 @@ function renderHorAuditoria(){
         <label class="usr-perm-item" id="usr-perm-item-estoque" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 8px;border-radius:6px;border:1px solid var(--border);transition:background .15s,border-color .15s;">
           <input type="checkbox" id="usr-gerenciar-estoque" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#E31787;"/>
           <span style="flex:1;">Gestor de estoque — pode registrar entradas, baixas, abertura de caixa, ajustes, caixas prontas e refugo</span>
+          <i class="ti ti-check" style="font-size:14px;color:#E31787;display:none;"></i>
+        </label>
+      </div>
+
+      <div id="usr-permissoes-pedidos-wrap" style="margin-top:16px;display:none;">
+        <div style="font-weight:600;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Pedidos e Produção</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
+          <i class="ti ti-lock" style="font-size:12px;"></i> Também definidas apenas por Admin Geral ou Admin Master. A visualização de Pedidos e Fila de Produção já é liberada para todos automaticamente — esta permissão controla só a AÇÃO de alterar status e reordenar.
+        </div>
+        <label class="usr-perm-item" id="usr-perm-item-statuspedido" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 8px;border-radius:6px;border:1px solid var(--border);transition:background .15s,border-color .15s;">
+          <input type="checkbox" id="usr-alterar-status-pedido" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#E31787;"/>
+          <span style="flex:1;">Pode alterar status de pedidos e reordenar a Fila de Produção</span>
           <i class="ti ti-check" style="font-size:14px;color:#E31787;display:none;"></i>
         </label>
       </div>
