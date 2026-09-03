@@ -3938,6 +3938,7 @@ document.addEventListener('DOMContentLoaded',function(){
       }
     });
   }
+  window.updateOrderStatus = updateOrderStatus;
 
   // ── CANCELAMENTO DE PEDIDO (solicitação + aprovação) ──
   // Regra: o vendedor NUNCA cancela um pedido sozinho. Ele só solicita, com
@@ -5948,6 +5949,7 @@ document.addEventListener('DOMContentLoaded',function(){
       toast('Selecione e copie manualmente.');
     });
   }
+  window.copyScript = copyScript;
 
   function switchScriptTab(btn) {
     document.querySelectorAll('.script-tab-btn').forEach(function(b){ b.classList.remove('active'); });
@@ -5957,6 +5959,7 @@ document.addEventListener('DOMContentLoaded',function(){
     var el = document.getElementById('script-' + tab);
     if(el) el.style.display = 'block';
   }
+  window.switchScriptTab = switchScriptTab;
 
   // ── DASHBOARD DINÂMICO ──
   function renderDashboard() {
@@ -8027,6 +8030,7 @@ document.addEventListener('DOMContentLoaded',function(){
     radios.forEach(function(r) { r.checked = r.value === (cli.preco_esp ? 'sim' : 'nao'); });
     openModal('modal-novo-cliente');
   }
+  window.editarCliente = editarCliente;
 
   function abrirPedidoCliente(id) {
     var cli = CLIENTES.find(function(c){ return c.id === id; });
@@ -8040,6 +8044,7 @@ document.addEventListener('DOMContentLoaded',function(){
       document.getElementById('np-vendedor').value = cli.vendedor;
     }, 200);
   }
+  window.abrirPedidoCliente = abrirPedidoCliente;
 
   function exportarExcel() {
     // Carregar SheetJS dinamicamente
