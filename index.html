@@ -2418,14 +2418,19 @@ function entrarComPerfil(userId, telefoneFallback, callback){
     // "só mostra pedidos do próprio vendedor" (para quem não é Admin)
     // escondia o pedido da tela — mesmo ele existindo no banco.
     function carregarDadosIniciaisComRetry(tentativas){
-      if(typeof carregarEstoqueDoBanco==='function' && typeof carregarEstoqueLogDoBanco==='function' && typeof carregarPedidosDoBanco==='function' && typeof equipeCarregarTodos==='function'){
-        equipeCarregarTodos(function(){
-          carregarEstoqueDoBanco(function(){
-            carregarEstoqueLogDoBanco(function(){
-              carregarPedidosDoBanco(function(){
-                if(typeof checkStockAlerts==='function') checkStockAlerts();
-                if(typeof renderNotificacoes==='function') renderNotificacoes();
-                if(typeof renderFollowup==='function') renderFollowup(); // atualiza o badge da sidebar
+      // Usa window.* explicitamente (não os nomes soltos) — essas 4
+      // funções são definidas dentro do listener DOMContentLoaded, um
+      // escopo fechado diferente do escopo global onde esta função roda.
+      // Elas só ficam de fato acessíveis aqui através da exposição
+      // window.nomeDaFuncao=... feita logo depois de cada definição.
+      if(typeof window.carregarEstoqueDoBanco==='function' && typeof window.carregarEstoqueLogDoBanco==='function' && typeof window.carregarPedidosDoBanco==='function' && typeof window.equipeCarregarTodos==='function'){
+        window.equipeCarregarTodos(function(){
+          window.carregarEstoqueDoBanco(function(){
+            window.carregarEstoqueLogDoBanco(function(){
+              window.carregarPedidosDoBanco(function(){
+                if(typeof window.checkStockAlerts==='function') window.checkStockAlerts();
+                if(typeof window.renderNotificacoes==='function') window.renderNotificacoes();
+                if(typeof window.renderFollowup==='function') window.renderFollowup(); // atualiza o badge da sidebar
                 renderDashboard();
                 DADOS_INICIAIS_CARREGADOS = true;
                 // Re-renderiza a tela em que a pessoa já estiver no momento
@@ -2438,9 +2443,9 @@ function entrarComPerfil(userId, telefoneFallback, callback){
                 // disponíveis — porque nada disparava um novo render.
                 var paginaAtual = document.querySelector('.page.visible');
                 var idPaginaAtual = paginaAtual ? paginaAtual.id.replace('page-','') : null;
-                if(idPaginaAtual === 'pedidos' && typeof renderOrders==='function') renderOrders();
-                if(idPaginaAtual === 'producao' && typeof renderProdQueue==='function') renderProdQueue();
-                if(idPaginaAtual === 'kanban' && typeof renderKanban==='function') renderKanban(document.getElementById('kanban-filtro-vendedor')?document.getElementById('kanban-filtro-vendedor').value:'');
+                if(idPaginaAtual === 'pedidos' && typeof window.renderOrders==='function') window.renderOrders();
+                if(idPaginaAtual === 'producao' && typeof window.renderProdQueue==='function') window.renderProdQueue();
+                if(idPaginaAtual === 'kanban' && typeof window.renderKanban==='function') window.renderKanban(document.getElementById('kanban-filtro-vendedor')?document.getElementById('kanban-filtro-vendedor').value:'');
               });
             });
           });
@@ -3283,6 +3288,7 @@ document.addEventListener('DOMContentLoaded',function(){
       }
     });
   }
+  window.renderKanban = renderKanban;
 
   // Popula o filtro de vendedor do Kanban com quem realmente tem pedido —
   // não uma lista fixa de nomes.
@@ -3468,6 +3474,15 @@ document.addEventListener('DOMContentLoaded',function(){
       if(callback) callback();
     });
   }
+  // Exposta no window: esta função está definida dentro do listener
+  // DOMContentLoaded (um escopo fechado), mas precisa ser chamada por
+  // entrarComPerfil, que está no escopo GLOBAL do script (fora desse
+  // listener). Sem essa exposição, entrarComPerfil nunca conseguiria
+  // enxergar esta função — mesmo esperando com retry por qualquer tempo,
+  // já que a barreira é de escopo, não de timing/ordem de carregamento.
+  // Esse era o bug real por trás da tela travada em "Carregando
+  // pedidos..." indefinidamente.
+  window.carregarPedidosDoBanco = carregarPedidosDoBanco;
 
   function carregarEstoqueDoBanco(callback){
     if(!sbClient){ if(callback) callback(); return; }
@@ -3481,6 +3496,7 @@ document.addEventListener('DOMContentLoaded',function(){
       if(callback) callback();
     });
   }
+  window.carregarEstoqueDoBanco = carregarEstoqueDoBanco;
 
   function carregarEstoqueLogDoBanco(callback){
     if(!sbClient){ if(callback) callback(); return; }
@@ -3494,6 +3510,7 @@ document.addEventListener('DOMContentLoaded',function(){
       if(callback) callback();
     });
   }
+  window.carregarEstoqueLogDoBanco = carregarEstoqueLogDoBanco;
 
   // ── RENDER PEDIDOS ──
   function renderOrders() {
@@ -3587,6 +3604,7 @@ document.addEventListener('DOMContentLoaded',function(){
       '</div>';
     }).join('');
   }
+  window.renderOrders = renderOrders;
 
   /* ============================================================
      DESPACHO DO PEDIDO
@@ -4188,6 +4206,7 @@ document.addEventListener('DOMContentLoaded',function(){
       }).join('');
     });
   }
+  window.renderFollowup = renderFollowup;
 
   function followupAvisar(orderId){
     var order = ORDERS.find(function(o){ return o.id===orderId; });
@@ -4605,6 +4624,7 @@ document.addEventListener('DOMContentLoaded',function(){
     // Drag & drop desktop + touch mobile
     initProdDnd(queue);
   }
+  window.renderProdQueue = renderProdQueue;
 
   var prodDragging = null;
   function initProdDnd(queue) {
@@ -4754,6 +4774,7 @@ document.addEventListener('DOMContentLoaded',function(){
     // Mantém a central de notificações sincronizada com o estoque.
     if(typeof renderNotificacoes==='function') renderNotificacoes();
   }
+  window.checkStockAlerts = checkStockAlerts;
 
   /* ============================================================
      CENTRAL DE NOTIFICAÇÕES — agrega, num só lugar, tudo que precisa
@@ -4865,6 +4886,7 @@ document.addEventListener('DOMContentLoaded',function(){
       });
     });
   }
+  window.renderNotificacoes = renderNotificacoes;
 
   // Chamado quando um pedido entra em "Pronto para despacho" — hoje só
   // recalcula a central; se um dia tivermos notificação push real (com
