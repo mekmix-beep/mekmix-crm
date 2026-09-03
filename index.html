@@ -548,6 +548,15 @@ input, textarea { cursor: text; }
 .dre-linha.dre-total{background:#FAF6FB;font-size:15px;padding:16px;}
 .dre-linha.dre-subtotal{background:#F7F7F9;font-weight:700;}
 .dre-linha .dre-linha-sub{font-size:10px;color:var(--text3);font-weight:400;margin-top:2px;}
+.det-ped-sec{background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:10px;}
+.det-ped-sec-titulo{font-weight:700;font-size:12px;margin-bottom:8px;color:var(--text1);}
+.det-ped-linha{display:flex;justify-content:space-between;gap:12px;font-size:12px;padding:4px 0;color:var(--text2);}
+.det-ped-linha span:first-child{color:var(--text3);}
+.det-ped-linha span:last-child{font-weight:500;color:var(--text1);text-align:right;}
+.det-ped-tabela{width:100%;border-collapse:collapse;font-size:12px;}
+.det-ped-tabela th{text-align:left;font-size:10px;color:var(--text3);text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.det-ped-tabela td{padding:6px 0;border-bottom:1px solid var(--border);}
+.det-ped-tabela tr:last-child td{border-bottom:none;}
 .fin-resumo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
 .fin-resumo-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;}
 .fin-resumo-val{font-size:20px;font-weight:700;}
@@ -2049,6 +2058,10 @@ input, textarea { cursor: text; }
   <div style="font-size:13px;font-weight:600;margin-bottom:12px;" id="entrega-resumo-label">—</div>
 </div><div class="modal-footer"><button class="btn" data-close="modal-entrega">Cancelar</button><button class="btn btn-rosa" id="btn-entrega-confirmar"><i class="ti ti-check" style="font-size:12px;"></i> Confirmar entrega</button></div></div></div>
 
+<!-- MODAL: DETALHE DO PEDIDO -->
+<div class="modal-overlay" id="modal-detalhe-pedido"><div class="modal" style="max-width:520px;"><div class="modal-head"><span class="modal-title" id="det-ped-titulo">Detalhes do pedido</span><button class="modal-close" data-close="modal-detalhe-pedido">×</button></div><div class="modal-body" id="det-ped-corpo">
+</div><div class="modal-footer"><button class="btn btn-rosa" data-close="modal-detalhe-pedido">Fechar</button></div></div></div>
+
 <!-- MODAL: CONFIG CNPJ -->
 <div class="modal-overlay" id="modal-config-cnpj">
   <div class="modal" style="max-width:400px;">
@@ -3403,6 +3416,11 @@ document.addEventListener('DOMContentLoaded',function(){
      ============================================================ */
   var STATUS_PILL_MAP = {'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Pedido aprovado':'p-orc','Elaboração da arte':'p-arte','Em produção':'p-prod','Pronto para despacho':'p-despacho','Pedido despachado':'p-despacho','Entregue':'p-entregue','Follow-up 30d':'p-follow','Cancelamento solicitado':'p-follow','Cancelado':'p-cancelado'};
   var STATUS_PILL_BG_MAP = {'Pedido aprovado':'#FAEEDA','Elaboração da arte':'#EDE3F5','Em produção':'#E6F1FB','Pronto para despacho':'#FFF7ED','Pedido despachado':'#FFF7ED','Entregue':'#E1F5EE'};
+  // Só o texto exibido na tela — o valor interno ("Em produção") continua
+  // sendo o que é salvo no banco, para não quebrar pedidos já existentes
+  // com esse status gravado. Pedida a mudança de rótulo: "Em produção"
+  // passa a aparecer como "Enviar p/ Produção" para o usuário.
+  var NOME_EXIBICAO_STATUS = {'Em produção': 'Enviar p/ Produção'};
 
   function carregarPedidosDoBanco(callback){
     if(!sbClient){ if(callback) callback(); return; }
@@ -3553,8 +3571,11 @@ document.addEventListener('DOMContentLoaded',function(){
       // Fluxo revisado: um pedido lançado na aba Pedidos já é uma venda
       // fechada — "Novo lead"/"Orçamento enviado" são etapas de
       // negociação (Kanban/Chat), não fazem mais sentido aqui.
+      // NOME_EXIBICAO_STATUS traduz só o TEXTO mostrado na tela — o valor
+      // interno continua "Em produção" (o que já está salvo no banco em
+      // pedidos antigos), evitando qualquer inconsistência de dado.
       var opts = ['Pedido aprovado','Elaboração da arte','Em produção','Pronto para despacho','Pedido despachado','Entregue']
-        .map(function(s){ return '<option'+(s===o.status?' selected':'')+'>'+s+'</option>'; }).join('');
+        .map(function(s){ return '<option value="'+s+'"'+(s===o.status?' selected':'')+'>'+(NOME_EXIBICAO_STATUS[s]||s)+'</option>'; }).join('');
       var statusCel;
       // Todos podem VER o status — só quem tem a permissão específica
       // (Admin Master/Geral, ou marcada individualmente, ex: Gerente de
@@ -3567,7 +3588,7 @@ document.addEventListener('DOMContentLoaded',function(){
       } else if(podeAlterarStatus){
         statusCel = '<select class="order-sel" data-id="' + o.id + '" onchange="updateOrderStatus(this)">' + opts + '</select>';
       } else {
-        statusCel = '<span class="pill" style="background:'+(STATUS_PILL_BG_MAP[o.status]||'#EDE3F5')+';color:var(--text2);">'+o.status+'</span>';
+        statusCel = '<span class="pill" style="background:'+(STATUS_PILL_BG_MAP[o.status]||'#EDE3F5')+';color:var(--text2);">'+(NOME_EXIBICAO_STATUS[o.status]||o.status)+'</span>';
       }
       var btnCancelar = (!emFluxoCancelamento)
         ? '<button class="btn btn-sm" style="font-size:10px;padding:3px 7px;" onclick="pedAbrirSolicitarCancelamento(\''+o.id+'\')" title="Solicitar cancelamento"><i class="ti ti-x" style="font-size:10px;"></i></button>'
@@ -3593,8 +3614,8 @@ document.addEventListener('DOMContentLoaded',function(){
         ? '<span class="pill" style="background:#FCEBEB;color:#791F1F;font-size:9px;" title="Estoque de '+o.prod+' insuficiente"><i class="ti ti-alert-triangle" style="font-size:9px;"></i> Estoque</span>'
         : '';
       return '<div class="order-row">' +
-        '<div class="order-num">' + o.id + '<div style="font-size:10px;color:var(--text3);">' + o.data + '</div></div>' +
-        '<div class="order-client" style="min-width:0;">' +
+        '<div class="order-num" style="cursor:pointer;" onclick="abrirDetalhePedido(\''+o.id+'\')" title="Ver detalhes do pedido">' + o.id + '<div style="font-size:10px;color:var(--text3);">' + o.data + '</div></div>' +
+        '<div class="order-client" style="min-width:0;cursor:pointer;" onclick="abrirDetalhePedido(\''+o.id+'\')" title="Ver detalhes do pedido">' +
           '<div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + o.client + ' ' + alertaEstoque + badgeRascunho + '</div>' +
           '<div style="font-size:10px;color:var(--text2);">' + o.prod + ' · ' + o.qtd + 'cx · ' + o.unid.toLocaleString('pt-BR') + 'un</div>' +
         '</div>' +
@@ -3605,6 +3626,76 @@ document.addEventListener('DOMContentLoaded',function(){
     }).join('');
   }
   window.renderOrders = renderOrders;
+
+  /* ============================================================
+     DETALHE / RESUMO DO PEDIDO
+     ============================================================
+     Modal somente leitura, aberto ao clicar no número/nome do pedido —
+     mostra todos os itens (útil quando o pedido tem múltiplos tamanhos),
+     dados do cliente, entrega, financeiro e status, sem precisar abrir o
+     formulário de edição completo.
+     ============================================================ */
+  function abrirDetalhePedido(orderId){
+    var order = ORDERS.find(function(o){ return o.id===orderId; });
+    if(!order) return;
+
+    var fmtMoeda = function(v){ return 'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2}); };
+
+    var linhasItens = (order.itens||[]).map(function(item){
+      return '<tr>' +
+        '<td>'+esc(item.tam)+'</td>' +
+        '<td>'+(item.tipo==='caixas'?item.qtd+' cx':item.qtd+' un')+'</td>' +
+        '<td style="text-align:right;">'+fmtMoeda(item.subtotal)+'</td>' +
+      '</tr>';
+    }).join('');
+    if(!linhasItens) linhasItens = '<tr><td colspan="3" style="text-align:center;color:var(--text3);">Nenhum item registrado</td></tr>';
+
+    var enderecoCompleto = [order.rua, order.bairro, order.cidade].filter(Boolean).join(', ') || '—';
+
+    var blocoDespacho = '';
+    if(order.despachoTransportadora || order.despachoMotorista){
+      blocoDespacho = '<div class="det-ped-sec"><div class="det-ped-sec-titulo">🚚 Despacho</div>' +
+        '<div class="det-ped-linha"><span>Data</span><span>'+(order.despachoData?new Date(order.despachoData).toLocaleDateString('pt-BR'):'—')+'</span></div>' +
+        '<div class="det-ped-linha"><span>Motorista</span><span>'+esc(order.despachoMotorista||'—')+'</span></div>' +
+        '<div class="det-ped-linha"><span>Transportadora</span><span>'+esc(order.despachoTransportadora||'—')+'</span></div>' +
+      '</div>';
+    }
+
+    var blocoCancelamento = '';
+    if(order.cancelamento){
+      blocoCancelamento = '<div class="det-ped-sec" style="background:#FCEBEB;"><div class="det-ped-sec-titulo" style="color:#791F1F;">⚠️ Cancelamento</div>' +
+        '<div class="det-ped-linha"><span>Status</span><span>'+esc(order.cancelamento.status||'—')+'</span></div>' +
+        '<div class="det-ped-linha"><span>Motivo</span><span>'+esc(order.cancelamento.motivo||'—')+'</span></div>' +
+      '</div>';
+    }
+
+    var html =
+      '<div class="det-ped-sec"><div class="det-ped-sec-titulo">👤 Cliente</div>' +
+        '<div class="det-ped-linha"><span>Nome / Razão social</span><span>'+esc(order.client)+'</span></div>' +
+        '<div class="det-ped-linha"><span>CPF/CNPJ</span><span>'+esc(order.doc||'—')+'</span></div>' +
+        '<div class="det-ped-linha"><span>WhatsApp</span><span>'+esc(order.wapp||'—')+'</span></div>' +
+        '<div class="det-ped-linha"><span>Vendedor</span><span>'+esc(order.vendedor||'—')+'</span></div>' +
+      '</div>' +
+      '<div class="det-ped-sec"><div class="det-ped-sec-titulo">📍 Entrega</div>' +
+        '<div class="det-ped-linha"><span>Endereço</span><span>'+esc(enderecoCompleto)+'</span></div>' +
+      '</div>' +
+      '<div class="det-ped-sec"><div class="det-ped-sec-titulo">📦 Itens do pedido</div>' +
+        '<table class="det-ped-tabela"><thead><tr><th>Tamanho</th><th>Quantidade</th><th style="text-align:right;">Subtotal</th></tr></thead><tbody>' +
+        linhasItens +
+        '</tbody></table>' +
+      '</div>' +
+      '<div class="det-ped-sec"><div class="det-ped-sec-titulo">💰 Financeiro</div>' +
+        '<div class="det-ped-linha" style="font-weight:700;font-size:14px;"><span>Total do pedido</span><span style="color:var(--rosa);">'+fmtMoeda(order.valor)+'</span></div>' +
+        '<div class="det-ped-linha"><span>Entrada (30%)</span><span>'+(order.entradaPaga?'✅ Paga':'⏳ Pendente')+'</span></div>' +
+        '<div class="det-ped-linha"><span>Restante (70%)</span><span>'+(order.restantePago?'✅ Pago':'⏳ Pendente')+'</span></div>' +
+      '</div>' +
+      blocoDespacho + blocoCancelamento;
+
+    document.getElementById('det-ped-titulo').textContent = order.id + ' — ' + (NOME_EXIBICAO_STATUS[order.status]||order.status);
+    document.getElementById('det-ped-corpo').innerHTML = html;
+    openModal('modal-detalhe-pedido');
+  }
+  window.abrirDetalhePedido = abrirDetalhePedido;
 
   /* ============================================================
      DESPACHO DO PEDIDO
@@ -4534,7 +4625,7 @@ document.addEventListener('DOMContentLoaded',function(){
       card.innerHTML =
         (podeReordenar ? '<i class="ti ti-grip-vertical prod-drag-handle"></i>' : '<span style="width:16px;display:inline-block;"></span>') +
         '<div class="prod-pos">' + (idx+1) + '</div>' +
-        '<div class="prod-info">' +
+        '<div class="prod-info" style="cursor:pointer;" onclick="abrirDetalhePedido(\''+item.id+'\')" title="Ver detalhes do pedido">' +
           '<div class="prod-name">' + item.client + alertaEstoqueProd + '</div>' +
           '<div class="prod-detail">' + item.prod + ' · Tinta ' + item.tinta + ' · ' + item.vendedor + '</div>' +
           '<div class="prod-date"><i class="ti ti-calendar" style="font-size:10px;"></i> Entrou: ' + item.data + ' &nbsp;|&nbsp; Prazo: ' + item.prazo + '</div>' +
