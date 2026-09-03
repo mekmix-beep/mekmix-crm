@@ -2167,6 +2167,13 @@ function perfilParaUser(perfil){
 }
 
 var USERS={};
+// Marca quando o carregamento inicial (pedidos, estoque, colaboradores)
+// realmente terminou — usado para diferenciar "ainda carregando" de
+// "carregou e está vazio de verdade" nas telas que dependem desses
+// dados, evitando mensagens confusas tipo "nenhum pedido encontrado"
+// durante o instante em que os dados ainda estão a caminho (comum logo
+// após F5, antes do carregamento assíncrono terminar).
+var DADOS_INICIAIS_CARREGADOS = false;
 var currentUser=null,currentPage='chats',mobState='list',resolveOn=false,recOn=false,currentKey='AC',editTplIdx=-1;
 
 var TEMPLATES=[];
@@ -2420,6 +2427,20 @@ function entrarComPerfil(userId, telefoneFallback, callback){
                 if(typeof renderNotificacoes==='function') renderNotificacoes();
                 if(typeof renderFollowup==='function') renderFollowup(); // atualiza o badge da sidebar
                 renderDashboard();
+                DADOS_INICIAIS_CARREGADOS = true;
+                // Re-renderiza a tela em que a pessoa já estiver no momento
+                // em que os dados terminam de chegar — sem isso, se ela
+                // tivesse navegado para Pedidos ou Fila de Produção ANTES
+                // do carregamento assíncrono terminar (comum no F5, quando
+                // o navegador preserva a tela visualmente por um instante
+                // antes do JS assumir), a lista ficava mostrando "nenhum
+                // pedido encontrado" para sempre, mesmo com os dados já
+                // disponíveis — porque nada disparava um novo render.
+                var paginaAtual = document.querySelector('.page.visible');
+                var idPaginaAtual = paginaAtual ? paginaAtual.id.replace('page-','') : null;
+                if(idPaginaAtual === 'pedidos' && typeof renderOrders==='function') renderOrders();
+                if(idPaginaAtual === 'producao' && typeof renderProdQueue==='function') renderProdQueue();
+                if(idPaginaAtual === 'kanban' && typeof renderKanban==='function') renderKanban(document.getElementById('kanban-filtro-vendedor')?document.getElementById('kanban-filtro-vendedor').value:'');
               });
             });
           });
@@ -3504,7 +3525,11 @@ document.addEventListener('DOMContentLoaded',function(){
     // trabalha com pedidos ainda em andamento.
     orders = orders.filter(function(o){ return o.status!=='Entregue'; });
 
-    if(!orders.length) { list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">Nenhum pedido encontrado</div>'; return; }
+    if(!orders.length) {
+      var msgVazio = DADOS_INICIAIS_CARREGADOS ? 'Nenhum pedido encontrado' : 'Carregando pedidos...';
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">'+msgVazio+'</div>';
+      return;
+    }
 
     list.innerHTML = orders.map(function(o) {
       var emFluxoCancelamento = o.status==='Cancelamento solicitado' || o.status==='Cancelado';
@@ -3774,6 +3799,15 @@ document.addEventListener('DOMContentLoaded',function(){
   }
 
   function updateOrderStatus(sel) {
+    // Se os dados ainda estão carregando (ex: logo após F5), currentUser
+    // pode ainda não ter todas as permissões atualizadas — melhor avisar
+    // claramente do que deixar o select voltar sozinho sem explicação.
+    if(!DADOS_INICIAIS_CARREGADOS){
+      toast('⏳ Ainda carregando dados — aguarde um instante e tente de novo.');
+      if(typeof renderOrders==='function') renderOrders();
+      return;
+    }
+
     // Reforço de segurança: mesmo que o <select> não devesse existir na
     // tela para quem não tem permissão, essa checagem impede a alteração
     // mesmo que alguém dispare a função por outro caminho (ex: console).
