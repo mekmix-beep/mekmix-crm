@@ -1166,6 +1166,10 @@ input, textarea { cursor: text; }
           <div class="panel-head"><span class="panel-title"><i class="ti ti-alert-triangle" style="font-size:14px;color:#E31787;"></i> Cancelamentos aguardando aprovação <span class="sb-badge" id="ped-cancelamentos-badge" style="display:none;">0</span></span></div>
           <div id="ped-cancelamentos-list" style="font-size:12px;color:var(--text2);">Nenhuma solicitação de cancelamento pendente.</div>
         </div>
+        <div class="panel" id="ped-edicoes-painel" style="display:none;">
+          <div class="panel-head"><span class="panel-title"><i class="ti ti-edit" style="font-size:14px;color:#772D83;"></i> Edições aguardando aprovação <span class="sb-badge" id="ped-edicoes-badge" style="display:none;">0</span></span></div>
+          <div id="ped-edicoes-list" style="font-size:12px;color:var(--text2);">Nenhuma solicitação de edição pendente.</div>
+        </div>
         <div class="panel"><div id="orders-list"></div></div>
       </div>
 
@@ -2165,6 +2169,7 @@ function perfilParaUser(perfil){
     podeImportarNotasFiscais: !!perfil.pode_importar_notas_fiscais,
     podeGerenciarPermissoes: !!perfil.pode_gerenciar_permissoes,
     podeAlterarStatusPedido: !!perfil.pode_alterar_status_pedido,
+    podeEditarPedido: !!perfil.pode_editar_pedido,
     modulos: perfil.modulos || [],
     terceirizado: !!perfil.terceirizado,
     valorHora: perfil.valor_hora || 0,
@@ -3439,7 +3444,7 @@ document.addEventListener('DOMContentLoaded',function(){
             _uuid: p.id, // guarda o UUID real, necessário para updates
             client: p.nome,
             cidade: (p.cidade||'')+(p.estado?'/'+p.estado:''),
-            rua: '', bairro: '', // colunas não existem em pedidos ainda no schema atual
+            rua: p.rua||'', bairro: p.bairro||'',
             prod: itens[0] ? itens[0].tam : '',
             prodDesc: itens.map(function(i){ return i.qtd+'cx '+i.tam; }).join(' + '),
             qtd: qtdCaixasTotal,
@@ -3453,7 +3458,8 @@ document.addEventListener('DOMContentLoaded',function(){
             pill: STATUS_PILL_MAP[statusCrm] || 'p-novo',
             itens: itens,
             doc: p.documento||'', wapp: p.whatsapp||'',
-            pagamento: '', prazo: '', frete: '', obs: '',
+            pagamento: p.forma_pagamento||'', prazo: p.prazo_pagamento||'', frete: p.frete||'', obs: p.observacoes||'',
+            impressao: p.impressao||'', tinta: p.cor_tinta||'', arte: p.arte||'',
             entradaPaga: !!p.pagamento_70_pago,
             entradaData: '', entradaMotivo: '',
             restantePago: !!p.pagamento_70_pago,
@@ -3465,7 +3471,9 @@ document.addEventListener('DOMContentLoaded',function(){
               statusAnterior: p.status_anterior_cancelamento
             } : null,
             estoqueBaixado: !!p.estoque_baixado,
-            custoTotal: p.custo_total || 0
+            custoTotal: p.custo_total || 0,
+            ultimaEdicaoEm: p.ultima_edicao_em||null,
+            edicaoPendente: null // preenchido por carregarEdicoesPendentesDoBanco logo em seguida
           });
         });
         // Resolve nome do vendedor a partir do cache USERS, quando já carregado
@@ -3489,9 +3497,42 @@ document.addEventListener('DOMContentLoaded',function(){
           });
         });
       }
+      carregarEdicoesPendentesDoBanco(function(){ if(callback) callback(); });
+    });
+  }
+
+  // Solicitações de edição de pedido — carregadas à parte (tabela própria,
+  // não vem no select de pedidos) e amarradas no ORDERS local por
+  // pedido_id. EDICOES_PENDENTES guarda só as com status='pendente' (pra
+  // desenhar o card de aprovação); EDICOES_DECIDIDAS_NAO_VISTAS guarda as
+  // que já foram decididas e o solicitante (usuário atual) ainda não viu
+  // nesta sessão — usada só pro sino de notificação.
+  var EDICOES_PENDENTES = [];
+  var EDICOES_DECIDIDAS_NAO_VISTAS = [];
+  function carregarEdicoesPendentesDoBanco(callback){
+    if(!sbClient || !currentUser){ if(callback) callback(); return; }
+    sbClient.from('pedidos_edicoes_solicitacoes').select('*').order('solicitado_em', {ascending:false}).then(function(res){
+      EDICOES_PENDENTES = [];
+      EDICOES_DECIDIDAS_NAO_VISTAS = [];
+      ORDERS.forEach(function(o){ o.edicaoPendente = null; });
+      if(!res.error && res.data){
+        res.data.forEach(function(s){
+          var order = ORDERS.find(function(o){ return o._uuid===s.pedido_id; });
+          if(s.status==='pendente'){
+            if(order) order.edicaoPendente = s;
+            EDICOES_PENDENTES.push(s);
+          } else if(s.solicitado_por===currentUser._supabaseId && !s.visto_pelo_solicitante && !EDICOES_DECISOES_VISTAS[s.id]){
+            EDICOES_DECIDIDAS_NAO_VISTAS.push(s);
+          }
+        });
+      }
+      if(typeof renderOrders==='function') renderOrders();
+      if(typeof renderEdicoesPendentes==='function') renderEdicoesPendentes();
+      if(typeof renderNotificacoes==='function') renderNotificacoes();
       if(callback) callback();
     });
   }
+  window.carregarEdicoesPendentesDoBanco = carregarEdicoesPendentesDoBanco;
   // Exposta no window: esta função está definida dentro do listener
   // DOMContentLoaded (um escopo fechado), mas precisa ser chamada por
   // entrarComPerfil, que está no escopo GLOBAL do script (fora desse
@@ -3598,13 +3639,25 @@ document.addEventListener('DOMContentLoaded',function(){
       var badgeRascunho = o.isRascunho
         ? '<span class="pill" style="background:#FEF3C7;color:#7B5800;font-size:9px;margin-left:4px;">📝 Rascunho</span>'
         : '';
-      // Edição de pedido: liberada enquanto o pedido ainda não avançou
-      // para "Pronto para despacho" — depois disso, mudar quantidade/
-      // valor exigiria refazer baixa de estoque e cálculo financeiro já
-      // consolidados, então a edição livre para por aqui.
-      var statusEditaveis = ['Novo lead','Orçamento enviado','Arte pendente','Em produção'];
+      // Edição de pedido: liberada só enquanto o pedido ainda não entrou
+      // de verdade em produção — a partir de "Em produção" já rolou (ou
+      // vai rolar) baixa de estoque, então editar quantidade ali geraria
+      // inconsistência. Pra adicionar algo depois disso, é pedido novo.
+      // ('Novo lead'/'Orçamento enviado'/'Arte pendente' seguem aqui só
+      // por causa de pedidos antigos que ainda possam estar nesses status
+      // legados, de antes do redesenho do fluxo.)
+      var statusEditaveis = ['Novo lead','Orçamento enviado','Arte pendente','Pedido aprovado','Elaboração da arte'];
+      var temEdicaoPendente = !!o.edicaoPendente;
       var btnEditar = (statusEditaveis.indexOf(o.status)>=0 && !emFluxoCancelamento)
-        ? '<button class="btn btn-sm" style="font-size:10px;padding:3px 7px;" onclick="abrirEdicaoPedido(\''+o.id+'\')" title="Editar pedido"><i class="ti ti-edit" style="font-size:10px;"></i></button>'
+        ? (temEdicaoPendente
+            ? '<button class="btn btn-sm" style="font-size:10px;padding:3px 7px;opacity:.6;" disabled title="Edição aguardando aprovação"><i class="ti ti-clock" style="font-size:10px;"></i></button>'
+            : '<button class="btn btn-sm" style="font-size:10px;padding:3px 7px;" onclick="abrirEdicaoPedido(\''+o.id+'\')" title="Editar pedido"><i class="ti ti-edit" style="font-size:10px;"></i></button>')
+        : '';
+      var badgeEditado = o.ultimaEdicaoEm
+        ? '<button class="pill" style="background:#EDE3F5;color:#772D83;font-size:9px;border:none;cursor:pointer;" onclick="pedAbrirHistoricoEdicoes(\''+o.id+'\')" title="Ver histórico de edições">✎ Editado</button>'
+        : '';
+      var badgeEdicaoPendente = temEdicaoPendente
+        ? '<span class="pill" style="background:#FAEEDA;color:#633806;font-size:9px;">✎ Edição pendente</span>'
         : '';
       // Etiqueta de alerta de estoque: dinâmica, recalculada a cada render —
       // some sozinha assim que o estoque daquele tamanho for reposto. Só faz
@@ -3616,7 +3669,7 @@ document.addEventListener('DOMContentLoaded',function(){
       return '<div class="order-row">' +
         '<div class="order-num" style="cursor:pointer;" onclick="abrirDetalhePedido(\''+o.id+'\')" title="Ver detalhes do pedido">' + o.id + '<div style="font-size:10px;color:var(--text3);">' + o.data + '</div></div>' +
         '<div class="order-client" style="min-width:0;cursor:pointer;" onclick="abrirDetalhePedido(\''+o.id+'\')" title="Ver detalhes do pedido">' +
-          '<div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + o.client + ' ' + alertaEstoque + badgeRascunho + '</div>' +
+          '<div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + o.client + ' ' + alertaEstoque + badgeRascunho + badgeEditado + badgeEdicaoPendente + '</div>' +
           '<div style="font-size:10px;color:var(--text2);">' + o.prod + ' · ' + o.qtd + 'cx · ' + o.unid.toLocaleString('pt-BR') + 'un</div>' +
         '</div>' +
         (currentUser.isAdmin ? '<div style="font-size:11px;color:var(--text2);width:50px;flex-shrink:0;">' + o.vendedor + '</div>' : '') +
@@ -4041,6 +4094,45 @@ document.addEventListener('DOMContentLoaded',function(){
     return currentUser && (currentUser.isAdminGeral || currentUser.isAdminMaster || currentUser.podeReatribuirVendedor);
   }
 
+  // ── EDIÇÃO DE PEDIDO (direto ou solicitação + aprovação) ──
+  // Regra: quem tem essa permissão edita o pedido direto, a qualquer
+  // momento (enquanto o pedido ainda estiver na janela editável). Quem
+  // não tem só pode SOLICITAR — a edição de verdade só é aplicada
+  // quando alguém com essa permissão aprova. Espelha o mesmo desenho
+  // de pedPodeAprovarCancelamento acima.
+  function pedPodeEditarPedido(){
+    return currentUser && (currentUser.isAdminGeral || currentUser.isAdminMaster || currentUser.podeEditarPedido);
+  }
+  window.pedPodeEditarPedido = pedPodeEditarPedido;
+
+  // Guarda em memória (não persiste — reinicia a cada login/reload,
+  // igual o resto da sessão) quais solicitações de edição já decididas
+  // o usuário atual já viu, pra sumir do sino sem precisar de uma
+  // coluna "vista" com policy própria.
+  var EDICOES_DECISOES_VISTAS = {};
+
+  // Mapa único campo→rótulo amigável, usado tanto no log de auditoria
+  // quanto no diff mostrado pra quem vai aprovar/negar uma solicitação.
+  var CAMPOS_EDICAO_LABEL = {
+    nome:'Nome/Razão social', documento:'CPF/CNPJ', whatsapp:'WhatsApp', cidade:'Cidade',
+    rua:'Rua', bairro:'Bairro', forma_pagamento:'Forma de pagamento', prazo_pagamento:'Prazo',
+    frete:'Frete', observacoes:'Observações', impressao:'Impressão', cor_tinta:'Cor da tinta',
+    arte:'Arte', valor_estimado:'Valor do pedido'
+  };
+  function montarDiffTexto(antes, depois){
+    var linhas = [];
+    Object.keys(CAMPOS_EDICAO_LABEL).forEach(function(campo){
+      var vAntes = antes[campo], vDepois = depois[campo];
+      if(String(vAntes||'') !== String(vDepois||'')){
+        linhas.push('<div><b>'+CAMPOS_EDICAO_LABEL[campo]+':</b> '+esc(String(vAntes||'—'))+' → '+esc(String(vDepois||'—'))+'</div>');
+      }
+    });
+    var itensAntes = (antes.itens||[]).map(function(i){ return i.qtd+'x '+i.tam; }).join(', ')||'—';
+    var itensDepois = (depois.itens||[]).map(function(i){ return i.qtd+'x '+i.tam; }).join(', ')||'—';
+    if(itensAntes !== itensDepois) linhas.push('<div><b>Itens:</b> '+esc(itensAntes)+' → '+esc(itensDepois)+'</div>');
+    return linhas.length ? linhas.join('') : '<i>Nenhuma mudança detectada.</i>';
+  }
+
   function pedSolicitarCancelamento(orderId, motivo){
     var order = ORDERS.find(function(o){ return o.id === orderId; });
     if(!order) return false;
@@ -4369,6 +4461,166 @@ document.addEventListener('DOMContentLoaded',function(){
     openModal('modal-pcd');
   }
   window.pedAbrirDecisaoCancelamento = pedAbrirDecisaoCancelamento;
+
+  // ── EDIÇÃO DE PEDIDO: card de aprovação + decisão ──
+  function renderEdicoesPendentes(){
+    var wrap = document.getElementById('ped-edicoes-list');
+    if(!wrap) return;
+    var badge = document.getElementById('ped-edicoes-badge');
+    if(badge){
+      badge.textContent = EDICOES_PENDENTES.length;
+      badge.style.display = EDICOES_PENDENTES.length ? '' : 'none';
+    }
+    if(!EDICOES_PENDENTES.length){ wrap.innerHTML = 'Nenhuma solicitação de edição pendente.'; return; }
+    wrap.innerHTML = EDICOES_PENDENTES.map(function(s){
+      var order = ORDERS.find(function(o){ return o._uuid===s.pedido_id; });
+      var solicitante = Object.keys(USERS).map(function(k){return USERS[k];}).find(function(u){ return u._supabaseId===s.solicitado_por; });
+      return '<div class="panel" style="margin-bottom:8px;">'+
+        '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">'+
+        '<div><b>'+(order?order.id:'—')+'</b> — '+esc(order?order.client:'')+' · '+esc(order?(order.prodDesc||order.prod):'')+
+        '<div style="color:var(--text2);font-size:11px;margin-top:2px;">Solicitado por <b>'+esc(solicitante?solicitante.name:'—')+'</b></div>'+
+        '<div style="color:var(--text2);font-size:11px;margin-top:2px;font-style:italic;">"'+esc(s.motivo)+'"</div></div>'+
+        '<div style="display:flex;gap:6px;align-items:flex-start;">'+
+        '<button class="btn btn-sm btn-rosa" onclick="pedAbrirDecisaoEdicao(\''+s.id+'\',\'aprovar\')"><i class="ti ti-check" style="font-size:11px;"></i> Aprovar</button>'+
+        '<button class="btn btn-sm btn-danger" onclick="pedAbrirDecisaoEdicao(\''+s.id+'\',\'negar\')"><i class="ti ti-x" style="font-size:11px;"></i> Negar</button>'+
+        '</div></div></div>';
+    }).join('');
+  }
+  window.renderEdicoesPendentes = renderEdicoesPendentes;
+
+  function pedSnapshotAtualDoPedido(order){
+    return {
+      nome: order.client, documento: order.doc, whatsapp: order.wapp, cidade: order.cidade,
+      rua: order.rua, bairro: order.bairro, forma_pagamento: order.pagamento, prazo_pagamento: order.prazo,
+      frete: order.frete, observacoes: order.obs, impressao: order.impressao, cor_tinta: order.tinta,
+      arte: order.arte, valor_estimado: order.valor, itens: order.itens
+    };
+  }
+
+  var pedDecisaoEdicaoCtx = null; // {solicitacaoId, acao:'aprovar'|'negar'}
+  function pedAbrirDecisaoEdicao(solicitacaoId, acao){
+    var s = EDICOES_PENDENTES.find(function(x){ return x.id===solicitacaoId; });
+    if(!s) return;
+    var order = ORDERS.find(function(o){ return o._uuid===s.pedido_id; });
+    pedDecisaoEdicaoCtx = {solicitacaoId:solicitacaoId, acao:acao};
+    document.getElementById('ded-modal-title').textContent = (acao==='aprovar'?'Aprovar':'Negar')+' edição — '+(order?order.id:'');
+    document.getElementById('ded-resumo').textContent = order ? (order.client+' · '+(order.prodDesc||order.prod)+' · R$'+order.valor.toLocaleString('pt-BR')) : '';
+    document.getElementById('ded-motivo-original').textContent = s.motivo||'';
+    document.getElementById('ded-diff').innerHTML = order ? montarDiffTexto(pedSnapshotAtualDoPedido(order), s.dados_propostos||{}) : '—';
+    document.getElementById('ded-resposta').value = '';
+    document.getElementById('btn-ded-confirmar').textContent = acao==='aprovar' ? 'Confirmar aprovação' : 'Confirmar negativa';
+    document.getElementById('btn-ded-confirmar').className = 'btn btn-sm '+(acao==='aprovar'?'btn-rosa':'btn-danger');
+    openModal('modal-decisao-edicao');
+  }
+  window.pedAbrirDecisaoEdicao = pedAbrirDecisaoEdicao;
+
+  function pedAprovarEdicao(solicitacaoId, resposta){
+    if(!pedPodeEditarPedido()){ toast('Você não tem permissão para aprovar edições.'); return; }
+    var s = EDICOES_PENDENTES.find(function(x){ return x.id===solicitacaoId; });
+    if(!s) return;
+    var order = ORDERS.find(function(o){ return o._uuid===s.pedido_id; });
+    if(!order){ toast('Pedido não encontrado.'); return; }
+    var dados = s.dados_propostos||{};
+    var antes = pedSnapshotAtualDoPedido(order);
+
+    sbClient.from('pedidos').update({
+      nome: dados.nome, documento: dados.documento, whatsapp: dados.whatsapp, cidade: dados.cidade,
+      rua: dados.rua, bairro: dados.bairro, forma_pagamento: dados.forma_pagamento, prazo_pagamento: dados.prazo_pagamento,
+      frete: dados.frete, observacoes: dados.observacoes, impressao: dados.impressao, cor_tinta: dados.cor_tinta,
+      arte: dados.arte, valor_estimado: dados.valor_estimado
+    }).eq('id', order._uuid).then(function(resUpd){
+      if(resUpd.error){ toast(traduzirErroBanco(resUpd.error.message)); return; }
+      sbClient.from('itens_pedido').delete().eq('pedido_id', order._uuid).then(function(){
+        var itensParaInserir = (dados.itens||[]).map(function(item){
+          return {
+            pedido_id: order._uuid, produto_ml: parseInt(item.tam),
+            quantidade_caixas: item.tipo==='caixas' ? item.qtd : 0,
+            preco_unitario_cx: item.tipo==='caixas' ? (item.subtotal/(item.qtd||1)) : 0
+          };
+        });
+        sbClient.from('itens_pedido').insert(itensParaInserir).then(function(){
+          var agoraIso = new Date().toISOString();
+          sbClient.from('pedidos').update({ultima_edicao_em: agoraIso, ultima_edicao_por: currentUser._supabaseId}).eq('id', order._uuid).then(function(){
+            sbClient.from('pedidos_edicoes_solicitacoes').update({
+              status:'aprovado', decidido_por: currentUser._supabaseId, decidido_em: agoraIso, resposta_aprovador: resposta||null
+            }).eq('id', s.id).then(function(){
+              registrarLogEdicao(order._uuid, antes, dados, s.id, resposta, function(){
+                order.client=dados.nome; order.doc=dados.documento; order.wapp=dados.whatsapp; order.cidade=dados.cidade;
+                order.rua=dados.rua; order.bairro=dados.bairro; order.pagamento=dados.forma_pagamento; order.prazo=dados.prazo_pagamento;
+                order.frete=dados.frete; order.obs=dados.observacoes; order.impressao=dados.impressao; order.tinta=dados.cor_tinta; order.arte=dados.arte;
+                order.valor=dados.valor_estimado; order.itens=dados.itens;
+                order.qtd = (dados.itens||[]).reduce(function(s2,i){ return s2+(i.tipo==='caixas'?i.qtd:0); },0);
+                order.unid = (dados.itens||[]).reduce(function(s2,i){ return s2+(i.tipo==='caixas'?i.qtd*(UNID_PER_CX[i.tam]||1000):i.qtd); },0);
+                order.prod = dados.itens[0] ? dados.itens[0].tam : '';
+                order.prodDesc = (dados.itens||[]).map(function(i){ return (i.tipo==='caixas'?i.qtd+'cx':i.qtd+'un')+' '+i.tam; }).join(' + ');
+                order.ultimaEdicaoEm = agoraIso;
+                order.edicaoPendente = null;
+                EDICOES_PENDENTES = EDICOES_PENDENTES.filter(function(x){ return x.id!==s.id; });
+                renderOrders();
+                renderEdicoesPendentes();
+                if(typeof renderNotificacoes==='function') renderNotificacoes();
+                toast('✅ Edição aprovada e aplicada ao pedido '+order.id+'.');
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+  window.pedAprovarEdicao = pedAprovarEdicao;
+
+  function pedNegarEdicao(solicitacaoId, resposta){
+    if(!pedPodeEditarPedido()){ toast('Você não tem permissão para decidir sobre edições.'); return; }
+    var s = EDICOES_PENDENTES.find(function(x){ return x.id===solicitacaoId; });
+    if(!s) return;
+    var agoraIso = new Date().toISOString();
+    sbClient.from('pedidos_edicoes_solicitacoes').update({
+      status:'negado', decidido_por: currentUser._supabaseId, decidido_em: agoraIso, resposta_aprovador: resposta||null
+    }).eq('id', s.id).then(function(res){
+      if(res.error){ toast(traduzirErroBanco(res.error.message)); return; }
+      var order = ORDERS.find(function(o){ return o._uuid===s.pedido_id; });
+      if(order) order.edicaoPendente = null;
+      EDICOES_PENDENTES = EDICOES_PENDENTES.filter(function(x){ return x.id!==s.id; });
+      renderOrders();
+      renderEdicoesPendentes();
+      if(typeof renderNotificacoes==='function') renderNotificacoes();
+      toast('Solicitação de edição negada.');
+    });
+  }
+  window.pedNegarEdicao = pedNegarEdicao;
+
+  // Histórico de edições de um pedido (badge "✎ Editado") — consulta o
+  // log direto, agrupando as linhas de cada edição pelo edicao_id.
+  function pedAbrirHistoricoEdicoes(orderId){
+    var order = ORDERS.find(function(o){ return o.id===orderId; });
+    if(!order || !order._uuid) return;
+    document.getElementById('hed-pedido-id').textContent = orderId;
+    document.getElementById('hed-lista').innerHTML = 'Carregando...';
+    openModal('modal-historico-edicoes');
+    if(!sbClient) return;
+    sbClient.from('pedidos_edicoes_log').select('*').eq('pedido_id', order._uuid).order('editado_em', {ascending:false}).then(function(res){
+      if(res.error || !res.data || !res.data.length){
+        document.getElementById('hed-lista').innerHTML = 'Nenhuma edição registrada ainda.';
+        return;
+      }
+      var grupos = {}, ordemGrupos = [];
+      res.data.forEach(function(l){
+        if(!grupos[l.edicao_id]){ grupos[l.edicao_id] = []; ordemGrupos.push(l.edicao_id); }
+        grupos[l.edicao_id].push(l);
+      });
+      document.getElementById('hed-lista').innerHTML = ordemGrupos.map(function(gid){
+        var linhas = grupos[gid];
+        var primeira = linhas[0];
+        var autor = Object.keys(USERS).map(function(k){return USERS[k];}).find(function(u){ return u._supabaseId===primeira.editado_por; });
+        var quando = new Date(primeira.editado_em).toLocaleString('pt-BR');
+        return '<div class="panel" style="margin-bottom:8px;">'+
+          '<div style="font-size:11px;color:var(--text2);margin-bottom:4px;"><b>'+esc(autor?autor.name:'—')+'</b> em '+quando+(primeira.observacao?' — "'+esc(primeira.observacao)+'"':'')+'</div>'+
+          linhas.map(function(l){ return '<div style="font-size:12px;"><b>'+esc(l.campo)+':</b> '+esc(l.valor_anterior)+' → '+esc(l.valor_novo)+'</div>'; }).join('')+
+          '</div>';
+      }).join('');
+    });
+  }
+  window.pedAbrirHistoricoEdicoes = pedAbrirHistoricoEdicoes;
 
   /* ============================================================
      ETIQUETAS DE ENTREGA
@@ -4922,6 +5174,33 @@ document.addEventListener('DOMContentLoaded',function(){
       });
     }
 
+    // 4b) Edições de pedido aguardando aprovação — só quem decide vê
+    // (mesmo grupo que pedPodeEditarPedido). E, pro lado de quem
+    // solicitou, um aviso de que a solicitação dele já foi decidida.
+    if(typeof EDICOES_PENDENTES!=='undefined'){
+      if(typeof pedPodeEditarPedido==='function' && pedPodeEditarPedido()){
+        EDICOES_PENDENTES.forEach(function(s){
+          var order = (typeof ORDERS!=='undefined') ? ORDERS.find(function(o){ return o._uuid===s.pedido_id; }) : null;
+          var solicitante = Object.keys(USERS).map(function(k){return USERS[k];}).find(function(u){ return u._supabaseId===s.solicitado_por; });
+          itens.push({
+            tipo:'edicao', icone:'ti-edit', cor:'#772D83',
+            titulo:'Edição de pedido aguardando aprovação',
+            detalhe:(order?order.id:'—')+' — '+(order?order.client:'')+' · solicitado por '+(solicitante?solicitante.name:'—'),
+            pagina:'pedidos'
+          });
+        });
+      }
+      (typeof EDICOES_DECIDIDAS_NAO_VISTAS!=='undefined' ? EDICOES_DECIDIDAS_NAO_VISTAS : []).filter(function(s){ return !EDICOES_DECISOES_VISTAS[s.id]; }).forEach(function(s){
+        var order = (typeof ORDERS!=='undefined') ? ORDERS.find(function(o){ return o._uuid===s.pedido_id; }) : null;
+        itens.push({
+          tipo:'edicao_decidida', icone: s.status==='aprovado' ? 'ti-check' : 'ti-x', cor: s.status==='aprovado' ? '#1A7A3A' : '#791F1F',
+          titulo: 'Sua solicitação de edição foi ' + (s.status==='aprovado'?'aprovada':'negada'),
+          detalhe: (order?order.id:'—') + (s.resposta_aprovador ? ' — "'+s.resposta_aprovador+'"' : ''),
+          pagina:'pedidos', dismissEdicaoId: s.id
+        });
+      });
+    }
+
     // 4) Follow-up vencido — alimentado por um cache calculado em
     // renderFollowup() (que roda de forma assíncrona, então não dá pra
     // calcular aqui na hora); cada item já vem filtrado pelo mesmo critério
@@ -4953,7 +5232,7 @@ document.addEventListener('DOMContentLoaded',function(){
     var htmlLista = !total
       ? '<div style="padding:24px 16px;text-align:center;color:var(--text3);font-size:12px;font-style:italic;">Nenhuma notificação — tudo em dia 👍</div>'
       : itens.map(function(n){
-          return '<button class="notif-item" data-notif-page="'+n.pagina+'" style="display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;padding:10px 14px;border:none;border-bottom:1px solid var(--border);background:#fff;cursor:pointer;">'+
+          return '<button class="notif-item" data-notif-page="'+n.pagina+'" data-notif-dismiss-edicao="'+(n.dismissEdicaoId||'')+'" style="display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;padding:10px 14px;border:none;border-bottom:1px solid var(--border);background:#fff;cursor:pointer;">'+
             '<i class="ti '+n.icone+'" style="font-size:16px;color:'+n.cor+';flex-shrink:0;margin-top:1px;"></i>'+
             '<div style="min-width:0;"><div style="font-size:12px;font-weight:500;color:var(--text);">'+esc(n.titulo)+'</div><div style="font-size:11px;color:var(--text2);margin-top:1px;">'+esc(n.detalhe)+'</div></div>'+
           '</button>';
@@ -4970,6 +5249,8 @@ document.addEventListener('DOMContentLoaded',function(){
       lista.querySelectorAll('[data-notif-page]').forEach(function(btn){
         btn.addEventListener('click', function(){
           var pagina = this.getAttribute('data-notif-page');
+          var dismissId = this.getAttribute('data-notif-dismiss-edicao');
+          if(dismissId){ EDICOES_DECISOES_VISTAS[dismissId] = true; renderNotificacoes(); }
           document.getElementById('notif-sino-painel').style.display='none';
           document.getElementById('notif-mob-painel').style.display='none';
           var sb = document.querySelector('.sb-btn[data-page="'+pagina+'"]');
@@ -6564,6 +6845,11 @@ document.addEventListener('DOMContentLoaded',function(){
         painelCancel.style.display = (typeof pedPodeAprovarCancelamento==='function' && pedPodeAprovarCancelamento()) ? '' : 'none';
       }
       if(typeof renderCancelamentosPendentes==='function') renderCancelamentosPendentes();
+      var painelEdicoes = document.getElementById('ped-edicoes-painel');
+      if(painelEdicoes){
+        painelEdicoes.style.display = (typeof pedPodeEditarPedido==='function' && pedPodeEditarPedido()) ? '' : 'none';
+      }
+      if(typeof renderEdicoesPendentes==='function') renderEdicoesPendentes();
     }
     if(id === 'producao') renderProdQueue();
     if(id === 'estoque') initEstoque();
@@ -6764,7 +7050,18 @@ document.addEventListener('DOMContentLoaded',function(){
     document.getElementById('np-wapp').value = '';
     document.getElementById('np-cidade').value = '';
     document.getElementById('np-rua').value = '';
+    document.getElementById('np-bairro').value = '';
+    document.getElementById('np-pagamento').selectedIndex = 0;
+    document.getElementById('np-prazo').selectedIndex = 0;
+    document.getElementById('np-frete').selectedIndex = 0;
     document.getElementById('np-obs').value = '';
+    var vendedorSelReset = document.getElementById('np-vendedor');
+    if(vendedorSelReset) vendedorSelReset.disabled = false;
+    var motivoWrapReset = document.getElementById('np-motivo-edicao-wrap');
+    if(motivoWrapReset) motivoWrapReset.style.display = 'none';
+    if(document.getElementById('np-motivo-edicao')) document.getElementById('np-motivo-edicao').value = '';
+    if(document.getElementById('btn-salvar-rascunho')) document.getElementById('btn-salvar-rascunho').style.display = '';
+    document.getElementById('btn-confirmar-pedido').innerHTML = '<i class="ti ti-check" style="font-size:12px;"></i> Confirmar pedido';
     document.getElementById('np-entrada-status').value = 'pago';
     document.getElementById('np-entrada-data').value = '';
     document.getElementById('np-entrada-motivo').value = '';
@@ -6792,10 +7089,25 @@ document.addEventListener('DOMContentLoaded',function(){
   // preenche com os dados já salvos, e ao confirmar faz UPDATE em vez de
   // INSERT. Só chamada para pedidos ainda em status editável (checado em
   // renderOrders antes de mostrar o botão).
+  function npSetImpressaoTintaArte(impressao, tinta, arte){
+    NP_IMPRESSAO = impressao || 'Frente';
+    NP_TINTA = tinta || 'Preta';
+    NP_ARTE = arte || 'Equipe MekMix cria';
+    document.querySelectorAll('[data-imp-set]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-imp-set')===NP_IMPRESSAO); });
+    document.querySelectorAll('[data-tinta-set]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-tinta')===NP_TINTA); });
+    document.querySelectorAll('[data-arte-set]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-arte-set')===NP_ARTE); });
+  }
+
+  // Snapshot do pedido no momento em que a edição é aberta — usado depois
+  // pra montar o diff da auditoria (o que mudou de fato) e pra montar os
+  // dados_propostos de uma solicitação, sem precisar reconsultar o banco.
+  var EDITANDO_PEDIDO_SNAPSHOT = null;
+
   function abrirEdicaoPedido(orderId){
     var order = ORDERS.find(function(o){ return o.id===orderId; });
     if(!order){ toast('Pedido não encontrado.'); return; }
     if(!order._uuid){ toast('Não foi possível localizar este pedido no banco.'); return; }
+    if(order.edicaoPendente){ toast('Este pedido já tem uma solicitação de edição pendente.'); return; }
 
     // Parte do mesmo reset que openNovoPedido já faz, depois sobrescreve
     // com os dados reais do pedido.
@@ -6807,8 +7119,18 @@ document.addEventListener('DOMContentLoaded',function(){
     document.getElementById('np-doc').value = order.doc||'';
     document.getElementById('np-wapp').value = order.wapp||'';
     document.getElementById('np-cidade').value = order.cidade||'';
+    document.getElementById('np-rua').value = order.rua||'';
+    document.getElementById('np-bairro').value = order.bairro||'';
+    document.getElementById('np-obs').value = order.obs||'';
+    if(order.pagamento) document.getElementById('np-pagamento').value = order.pagamento;
+    if(order.prazo) document.getElementById('np-prazo').value = order.prazo;
+    if(order.frete) document.getElementById('np-frete').value = order.frete;
+    npSetImpressaoTintaArte(order.impressao, order.tinta, order.arte);
+    // Vendedor do pedido não é editável por aqui — reatribuir vendedor é
+    // uma ação à parte (mesma permissão usada no chat de clientes), pra
+    // não misturar os dois fluxos.
     var vendedorSel = document.getElementById('np-vendedor');
-    if(vendedorSel && order.vendedor) vendedorSel.value = order.vendedor;
+    if(vendedorSel){ vendedorSel.value = order.vendedor||''; vendedorSel.disabled = true; }
 
     // Reconstrói os itens a partir do pedido já salvo.
     NP_ITEMS = (order.itens||[]).map(function(item, idx){
@@ -6819,28 +7141,104 @@ document.addEventListener('DOMContentLoaded',function(){
     renderItems();
     updateTotals();
 
+    EDITANDO_PEDIDO_SNAPSHOT = {
+      nome: order.client||'', documento: order.doc||'', whatsapp: order.wapp||'', cidade: order.cidade||'',
+      rua: order.rua||'', bairro: order.bairro||'', forma_pagamento: order.pagamento||'', prazo_pagamento: order.prazo||'',
+      frete: order.frete||'', observacoes: order.obs||'', impressao: order.impressao||'', cor_tinta: order.tinta||'',
+      arte: order.arte||'', valor_estimado: order.valor||0,
+      itens: (order.itens||[]).map(function(i){ return {tam:i.tam, tipo:i.tipo, qtd:i.qtd, subtotal:i.subtotal}; })
+    };
+
+    // Campo de motivo: obrigatório pra quem só pode solicitar; opcional
+    // (uma observação livre pro log) pra quem edita direto.
+    var motivoWrap = document.getElementById('np-motivo-edicao-wrap');
+    var motivoLabel = document.getElementById('np-motivo-edicao-label');
+    var motivoInput = document.getElementById('np-motivo-edicao');
+    if(motivoWrap){
+      motivoWrap.style.display = '';
+      motivoInput.value = '';
+      motivoLabel.textContent = pedPodeEditarPedido()
+        ? 'Observação sobre esta edição (opcional)'
+        : 'Motivo da edição — o que precisa mudar e por quê (obrigatório)';
+    }
+    document.getElementById('btn-confirmar-pedido').innerHTML = pedPodeEditarPedido()
+      ? '<i class="ti ti-check" style="font-size:12px;"></i> Salvar edição'
+      : '<i class="ti ti-send" style="font-size:12px;"></i> Enviar solicitação';
+    if(document.getElementById('btn-salvar-rascunho')) document.getElementById('btn-salvar-rascunho').style.display = 'none';
+
     openModal('modal-novo-pedido');
   }
   window.abrirEdicaoPedido = abrirEdicaoPedido;
 
-  // Salva as alterações de um pedido já existente — dados básicos e
-  // itens (quantidade/tamanho podem mudar, o cliente pode pedir mais ou
-  // menos caixas enquanto ainda está em produção). NÃO repete a baixa de
-  // estoque PEPS nem o cálculo de custo — isso já aconteceu na criação
-  // original; editar quantidade aqui só atualiza o registro do pedido em
-  // si, sem re-processar o estoque automaticamente (evita duplicar baixa
-  // ou criar inconsistência sem controle manual).
+  // Monta o objeto com os dados atuais do formulário — usado tanto pra
+  // salvar direto (quem tem permissão) quanto pra montar dados_propostos
+  // de uma solicitação (quem não tem).
+  function coletarDadosFormularioEdicao(){
+    var total = NP_ITEMS.reduce(function(s,i){ return s+i.subtotal; },0);
+    return {
+      nome: (document.getElementById('np-nome').value||'').trim(),
+      documento: (document.getElementById('np-doc').value||'').trim(),
+      whatsapp: document.getElementById('np-wapp').value||'',
+      cidade: document.getElementById('np-cidade').value||'',
+      rua: document.getElementById('np-rua').value||'',
+      bairro: document.getElementById('np-bairro').value||'',
+      forma_pagamento: document.getElementById('np-pagamento').value||'',
+      prazo_pagamento: document.getElementById('np-prazo').value||'',
+      frete: document.getElementById('np-frete').value||'',
+      observacoes: document.getElementById('np-obs').value||'',
+      impressao: NP_IMPRESSAO, cor_tinta: NP_TINTA, arte: NP_ARTE,
+      valor_estimado: total,
+      itens: NP_ITEMS.map(function(i){ return {tam:i.tam, tipo:i.tipo, qtd:i.qtd, subtotal:i.subtotal}; })
+    };
+  }
+
+  // Grava uma linha no log de auditoria por campo que realmente mudou —
+  // solicitacaoId fica null numa edição direta, ou preenchido quando é a
+  // aplicação de uma solicitação aprovada.
+  function registrarLogEdicao(pedidoUuid, antes, depois, solicitacaoId, observacao, callback){
+    var edicaoId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now()+'-'+Math.random());
+    var linhas = [];
+    Object.keys(CAMPOS_EDICAO_LABEL).forEach(function(campo){
+      var vAntes = antes[campo], vDepois = depois[campo];
+      if(String(vAntes||'') !== String(vDepois||'')){
+        linhas.push({
+          edicao_id: edicaoId, pedido_id: pedidoUuid, editado_por: currentUser._supabaseId,
+          campo: CAMPOS_EDICAO_LABEL[campo], valor_anterior: String(vAntes||'—'), valor_novo: String(vDepois||'—'),
+          solicitacao_id: solicitacaoId||null, observacao: observacao||null
+        });
+      }
+    });
+    var itensAntes = JSON.stringify(antes.itens||[]);
+    var itensDepois = JSON.stringify(depois.itens||[]);
+    if(itensAntes !== itensDepois){
+      linhas.push({
+        edicao_id: edicaoId, pedido_id: pedidoUuid, editado_por: currentUser._supabaseId,
+        campo: 'Itens do pedido',
+        valor_anterior: (antes.itens||[]).map(function(i){ return i.qtd+'x '+i.tam; }).join(', ')||'—',
+        valor_novo: (depois.itens||[]).map(function(i){ return i.qtd+'x '+i.tam; }).join(', ')||'—',
+        solicitacao_id: solicitacaoId||null, observacao: observacao||null
+      });
+    }
+    if(!linhas.length){ if(callback) callback(); return; }
+    sbClient.from('pedidos_edicoes_log').insert(linhas).then(function(){ if(callback) callback(); });
+  }
+
+  // Salva as alterações de um pedido já existente — só chamada quando
+  // pedPodeEditarPedido() é verdadeiro (checado antes de chegar aqui, e
+  // também garantido pelo trigger no banco como segunda camada). NÃO
+  // repete a baixa de estoque PEPS nem o cálculo de custo — isso já
+  // aconteceu na criação original, e edição só é permitida antes de
+  // "Em produção" (antes de qualquer baixa acontecer).
   function salvarEdicaoPedido(){
     ['np-nome','np-doc'].forEach(function(id){ marcarCampoInvalido(id, false); });
-    var nome = (document.getElementById('np-nome').value||'').trim();
-    var documento = (document.getElementById('np-doc').value||'').trim();
+    var dados = coletarDadosFormularioEdicao();
     var camposFaltando = [];
-    if(!nome) camposFaltando.push('Nome completo / Razão social');
-    if(!documento) camposFaltando.push('CPF / CNPJ');
+    if(!dados.nome) camposFaltando.push('Nome completo / Razão social');
+    if(!dados.documento) camposFaltando.push('CPF / CNPJ');
     if(camposFaltando.length){
-      if(!nome) marcarCampoInvalido('np-nome', true);
-      if(!documento) marcarCampoInvalido('np-doc', true);
-      rolarAteCampo(!nome ? 'np-nome' : 'np-doc');
+      if(!dados.nome) marcarCampoInvalido('np-nome', true);
+      if(!dados.documento) marcarCampoInvalido('np-doc', true);
+      rolarAteCampo(!dados.nome ? 'np-nome' : 'np-doc');
       toast('⚠️ Preencha: ' + camposFaltando.join(', '));
       return;
     }
@@ -6852,22 +7250,20 @@ document.addEventListener('DOMContentLoaded',function(){
     var order = ORDERS.find(function(o){ return o.id===EDITANDO_PEDIDO_ID; });
     if(!order || !order._uuid){ toast('Não foi possível localizar este pedido no banco.'); return; }
 
-    var total = NP_ITEMS.reduce(function(s,i){ return s+i.subtotal; },0);
-    var vendedorNome = document.getElementById('np-vendedor').value;
-    var vendedorObj = Object.keys(USERS).map(function(k){return USERS[k];}).find(function(u){ return u.name===vendedorNome; });
-
     var btnConfirmar = document.getElementById('btn-confirmar-pedido');
     if(btnConfirmar){ btnConfirmar.disabled = true; }
+    var observacaoLog = (document.getElementById('np-motivo-edicao').value||'').trim();
 
-    var dadosAtualizados = {
-      nome: nome, documento: documento,
-      whatsapp: document.getElementById('np-wapp').value||null,
-      cidade: document.getElementById('np-cidade').value||null,
-      vendedor_id: vendedorObj ? vendedorObj._supabaseId : null,
-      valor_estimado: total
+    // "itens" não é coluna de pedidos (vai pra itens_pedido à parte) —
+    // manda só os campos de verdade da tabela no UPDATE.
+    var dadosParaPedido = {
+      nome: dados.nome, documento: dados.documento, whatsapp: dados.whatsapp, cidade: dados.cidade,
+      rua: dados.rua, bairro: dados.bairro, forma_pagamento: dados.forma_pagamento, prazo_pagamento: dados.prazo_pagamento,
+      frete: dados.frete, observacoes: dados.observacoes, impressao: dados.impressao, cor_tinta: dados.cor_tinta,
+      arte: dados.arte, valor_estimado: dados.valor_estimado
     };
 
-    sbClient.from('pedidos').update(dadosAtualizados).eq('id', order._uuid).then(function(resUpd){
+    sbClient.from('pedidos').update(dadosParaPedido).eq('id', order._uuid).then(function(resUpd){
       if(resUpd.error){ toast(traduzirErroBanco(resUpd.error.message)); if(btnConfirmar) btnConfirmar.disabled=false; return; }
 
       // Substitui os itens: apaga os antigos e insere os novos — mais
@@ -6885,27 +7281,86 @@ document.addEventListener('DOMContentLoaded',function(){
         sbClient.from('itens_pedido').insert(itensParaInserir).then(function(resItens){
           if(resItens.error){ toast('Dados salvos, mas houve erro ao atualizar os itens: '+resItens.error.message); }
 
-          // Atualiza o cache local (ORDERS) sem precisar recarregar tudo do banco
-          order.client = nome; order.doc = documento;
-          order.wapp = document.getElementById('np-wapp').value||'';
-          order.cidade = document.getElementById('np-cidade').value||'';
-          order.vendedor = vendedorNome;
-          order.valor = total;
-          order.itens = NP_ITEMS.map(function(i){ return {tam:i.tam, tipo:i.tipo, qtd:i.qtd, subtotal:i.subtotal}; });
-          order.qtd = NP_ITEMS.reduce(function(s,i){ return s+(i.tipo==='caixas'?i.qtd:0); },0);
-          order.unid = NP_ITEMS.reduce(function(s,i){ return s+i.unidades; },0);
-          order.prod = NP_ITEMS[0] ? NP_ITEMS[0].tam : '';
-          order.prodDesc = NP_ITEMS.map(function(i){ return (i.tipo==='caixas'?i.qtd+'cx':i.qtd+'un')+' '+i.tam; }).join(' + ');
+          var agoraIso = new Date().toISOString();
+          sbClient.from('pedidos').update({ultima_edicao_em: agoraIso, ultima_edicao_por: currentUser._supabaseId}).eq('id', order._uuid).then(function(){
+            registrarLogEdicao(order._uuid, EDITANDO_PEDIDO_SNAPSHOT, dados, null, observacaoLog, function(){
+              // Atualiza o cache local (ORDERS) sem precisar recarregar tudo do banco
+              order.client = dados.nome; order.doc = dados.documento;
+              order.wapp = dados.whatsapp; order.cidade = dados.cidade;
+              order.rua = dados.rua; order.bairro = dados.bairro;
+              order.pagamento = dados.forma_pagamento; order.prazo = dados.prazo_pagamento;
+              order.frete = dados.frete; order.obs = dados.observacoes;
+              order.impressao = dados.impressao; order.tinta = dados.cor_tinta; order.arte = dados.arte;
+              order.valor = dados.valor_estimado;
+              order.itens = dados.itens;
+              order.qtd = NP_ITEMS.reduce(function(s,i){ return s+(i.tipo==='caixas'?i.qtd:0); },0);
+              order.unid = NP_ITEMS.reduce(function(s,i){ return s+i.unidades; },0);
+              order.prod = NP_ITEMS[0] ? NP_ITEMS[0].tam : '';
+              order.prodDesc = NP_ITEMS.map(function(i){ return (i.tipo==='caixas'?i.qtd+'cx':i.qtd+'un')+' '+i.tam; }).join(' + ');
+              order.ultimaEdicaoEm = agoraIso;
 
-          EDITANDO_PEDIDO_ID = null;
-          closeModal('modal-novo-pedido');
-          renderOrders();
-          if(btnConfirmar) btnConfirmar.disabled = false;
-          toast('✅ Pedido '+order.id+' atualizado!');
+              EDITANDO_PEDIDO_ID = null;
+              EDITANDO_PEDIDO_SNAPSHOT = null;
+              closeModal('modal-novo-pedido');
+              renderOrders();
+              if(btnConfirmar) btnConfirmar.disabled = false;
+              toast('✅ Pedido '+order.id+' atualizado!');
+            });
+          });
         });
       });
     });
   }
+
+  // Envia uma SOLICITAÇÃO de edição (quem não tem pode_editar_pedido) —
+  // não toca em pedidos/itens_pedido, só registra a proposta pendente.
+  function solicitarEdicaoPedido(){
+    ['np-nome','np-doc'].forEach(function(id){ marcarCampoInvalido(id, false); });
+    var dados = coletarDadosFormularioEdicao();
+    var camposFaltando = [];
+    if(!dados.nome) camposFaltando.push('Nome completo / Razão social');
+    if(!dados.documento) camposFaltando.push('CPF / CNPJ');
+    if(camposFaltando.length){
+      if(!dados.nome) marcarCampoInvalido('np-nome', true);
+      if(!dados.documento) marcarCampoInvalido('np-doc', true);
+      rolarAteCampo(!dados.nome ? 'np-nome' : 'np-doc');
+      toast('⚠️ Preencha: ' + camposFaltando.join(', '));
+      return;
+    }
+    if(!NP_ITEMS.length){ toast('Adicione pelo menos um produto!'); return; }
+    var motivo = (document.getElementById('np-motivo-edicao').value||'').trim();
+    if(!motivo){
+      marcarCampoInvalido('np-motivo-edicao', true);
+      rolarAteCampo('np-motivo-edicao');
+      toast('⚠️ Explique o motivo da edição — é obrigatório pra quem não tem edição direta liberada.');
+      return;
+    }
+    if(!sbClient){ toast('Sem conexão com o banco.'); return; }
+
+    var order = ORDERS.find(function(o){ return o.id===EDITANDO_PEDIDO_ID; });
+    if(!order || !order._uuid){ toast('Não foi possível localizar este pedido no banco.'); return; }
+    if(order.edicaoPendente){ toast('Este pedido já tem uma solicitação de edição pendente.'); return; }
+
+    var btnConfirmar = document.getElementById('btn-confirmar-pedido');
+    if(btnConfirmar){ btnConfirmar.disabled = true; }
+
+    sbClient.from('pedidos_edicoes_solicitacoes').insert({
+      pedido_id: order._uuid, solicitado_por: currentUser._supabaseId,
+      motivo: motivo, dados_propostos: dados, status: 'pendente'
+    }).select().single().then(function(res){
+      if(res.error){ toast(traduzirErroBanco(res.error.message)); if(btnConfirmar) btnConfirmar.disabled=false; return; }
+      order.edicaoPendente = res.data;
+      EDITANDO_PEDIDO_ID = null;
+      EDITANDO_PEDIDO_SNAPSHOT = null;
+      closeModal('modal-novo-pedido');
+      renderOrders();
+      if(typeof renderEdicoesPendentes==='function') renderEdicoesPendentes();
+      if(typeof renderNotificacoes==='function') renderNotificacoes();
+      if(btnConfirmar) btnConfirmar.disabled = false;
+      toast('✅ Solicitação de edição enviada — aguardando aprovação de um gestor.');
+    });
+  }
+  window.solicitarEdicaoPedido = solicitarEdicaoPedido;
 
   // Popula o select de combinações de caixa pronta disponíveis (com
   // quantidade > 0) — usado quando o vendedor escolhe "Caixa pronta" como
@@ -7080,9 +7535,13 @@ document.addEventListener('DOMContentLoaded',function(){
   }
 
   function confirmarPedido(rascunho) {
-    // Se está em modo de edição, usa o fluxo separado de UPDATE — não
-    // passa pela criação de pedido novo (número, baixa de estoque, etc.)
-    if(EDITANDO_PEDIDO_ID){ salvarEdicaoPedido(); return; }
+    // Se está em modo de edição, usa o fluxo separado de UPDATE (ou de
+    // solicitação, se o usuário não tiver pode_editar_pedido) — não passa
+    // pela criação de pedido novo (número, baixa de estoque, etc.)
+    if(EDITANDO_PEDIDO_ID){
+      if(pedPodeEditarPedido()) salvarEdicaoPedido(); else solicitarEdicaoPedido();
+      return;
+    }
 
     // Limpa marcações de erro anteriores antes de validar de novo
     ['np-nome','np-doc'].forEach(function(id){ marcarCampoInvalido(id, false); });
@@ -7141,8 +7600,15 @@ document.addEventListener('DOMContentLoaded',function(){
         documento: documento,
         whatsapp: document.getElementById('np-wapp').value||null,
         cidade: document.getElementById('np-cidade').value||null,
+        rua: document.getElementById('np-rua').value||null,
+        bairro: document.getElementById('np-bairro').value||null,
         vendedor_id: vendedorObj ? vendedorObj._supabaseId : null,
         valor_estimado: total,
+        forma_pagamento: document.getElementById('np-pagamento').value||null,
+        prazo_pagamento: document.getElementById('np-prazo').value||null,
+        frete: document.getElementById('np-frete').value||null,
+        observacoes: document.getElementById('np-obs').value||null,
+        impressao: NP_IMPRESSAO, cor_tinta: NP_TINTA, arte: NP_ARTE,
         entrada_paga: entradaStatus==='pago',
         entrada_data_prevista: entradaStatus==='previsto' ? (document.getElementById('np-entrada-data').value||null) : null,
         entrada_motivo_adiamento: entradaStatus==='previsto' ? (document.getElementById('np-entrada-motivo').value||null) : null,
@@ -7257,6 +7723,16 @@ document.addEventListener('DOMContentLoaded',function(){
     else pedNegarCancelamento(pedDecisaoCtx.orderId, obs);
     closeModal('modal-pcd');
     pedDecisaoCtx = null;
+  });
+
+  var btnDedConfirmar = document.getElementById('btn-ded-confirmar');
+  if(btnDedConfirmar) btnDedConfirmar.addEventListener('click', function(){
+    if(!pedDecisaoEdicaoCtx) return;
+    var resposta = document.getElementById('ded-resposta').value||'';
+    if(pedDecisaoEdicaoCtx.acao==='aprovar') pedAprovarEdicao(pedDecisaoEdicaoCtx.solicitacaoId, resposta);
+    else pedNegarEdicao(pedDecisaoEdicaoCtx.solicitacaoId, resposta);
+    closeModal('modal-decisao-edicao');
+    pedDecisaoEdicaoCtx = null;
   });
 
   var btnSolicitarCancelamento = document.getElementById('btn-solicitar-cancelamento');
@@ -10936,6 +11412,12 @@ function renderHorAuditoria(){
         </div>
       </div>
 
+      <!-- Só aparece em modo de edição (abrirEdicaoPedido mostra/esconde e ajusta o texto) -->
+      <div class="fg" id="np-motivo-edicao-wrap" style="display:none;margin-top:14px;">
+        <label id="np-motivo-edicao-label">Motivo da edição</label>
+        <textarea id="np-motivo-edicao" rows="2" placeholder="O que precisa mudar neste pedido e por quê..."></textarea>
+      </div>
+
     </div>
     <div class="modal-footer" style="position:sticky;bottom:0;background:#fff;">
       <button class="btn" data-close="modal-novo-pedido">Cancelar</button>
@@ -10966,6 +11448,17 @@ function renderHorAuditoria(){
   </div>
   <div class="form-group"><label class="form-label">Observação (opcional)</label><textarea class="form-textarea" id="pcd-observacao" rows="2" placeholder="Alguma observação sobre esta decisão..."></textarea></div>
 </div><div class="modal-footer"><button class="btn" data-close="modal-pcd">Cancelar</button><button class="btn btn-sm btn-rosa" id="btn-pcd-confirmar">Confirmar</button></div></div></div>
+
+<div class="modal-overlay" id="modal-decisao-edicao"><div class="modal"><div class="modal-head"><span class="modal-title" id="ded-modal-title">Decidir edição de pedido</span><button class="modal-close" data-close="modal-decisao-edicao">×</button></div><div class="modal-body">
+  <div class="form-group"><label class="form-label">Pedido</label><div style="font-size:13px;font-weight:500;" id="ded-resumo">—</div></div>
+  <div class="form-group"><label class="form-label">Motivo informado por quem solicitou</label><div style="font-size:12px;color:var(--text2);font-style:italic;" id="ded-motivo-original">—</div></div>
+  <div class="form-group"><label class="form-label">O que muda</label><div style="font-size:12px;color:var(--text2);" id="ded-diff">—</div></div>
+  <div class="form-group"><label class="form-label">Resposta (opcional)</label><textarea class="form-textarea" id="ded-resposta" rows="2" placeholder="Alguma observação sobre esta decisão..."></textarea></div>
+</div><div class="modal-footer"><button class="btn" data-close="modal-decisao-edicao">Cancelar</button><button class="btn btn-sm btn-rosa" id="btn-ded-confirmar">Confirmar</button></div></div></div>
+
+<div class="modal-overlay" id="modal-historico-edicoes"><div class="modal"><div class="modal-head"><span class="modal-title">Histórico de edições — <span id="hed-pedido-id"></span></span><button class="modal-close" data-close="modal-historico-edicoes">×</button></div><div class="modal-body">
+  <div id="hed-lista" style="font-size:12px;color:var(--text2);">Carregando...</div>
+</div><div class="modal-footer"><button class="btn" data-close="modal-historico-edicoes">Fechar</button></div></div></div>
 
 <div class="modal-overlay" id="modal-editar-etiqueta"><div class="modal"><div class="modal-head"><span class="modal-title">Editar dados da etiqueta</span><button class="modal-close" data-close="modal-editar-etiqueta">×</button></div><div class="modal-body">
   <div class="form-group"><label class="form-label">Cliente</label><input class="form-input" id="etq-ed-cliente"/></div>
