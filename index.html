@@ -6672,6 +6672,7 @@ document.addEventListener('DOMContentLoaded',function(){
       ['usr-exportar-clientes','usr-perm-item-exportarclientes','podeExportarClientes'],
       ['usr-gerenciar-estoque','usr-perm-item-estoque','podeGerenciarEstoque'],
       ['usr-alterar-status-pedido','usr-perm-item-statuspedido','podeAlterarStatusPedido'],
+      ['usr-editar-pedido','usr-perm-item-editarpedido','podeEditarPedido'],
       ['usr-ver-financeiro','usr-perm-item-verfinanceiro','podeVerFinanceiro'],
       ['usr-exportar-financeiro','usr-perm-item-exportarfinanceiro','podeExportarFinanceiro'],
       ['usr-ver-notas-fiscais','usr-perm-item-vernf','podeVerNotasFiscais'],
@@ -6748,6 +6749,7 @@ document.addEventListener('DOMContentLoaded',function(){
       pode_exportar_clientes: lerPermissao('usr-exportar-clientes','podeExportarClientes'),
       pode_gerenciar_estoque: lerPermissao('usr-gerenciar-estoque','podeGerenciarEstoque'),
       pode_alterar_status_pedido: lerPermissao('usr-alterar-status-pedido','podeAlterarStatusPedido'),
+      pode_editar_pedido: lerPermissao('usr-editar-pedido','podeEditarPedido'),
       pode_ver_financeiro: lerPermissao('usr-ver-financeiro','podeVerFinanceiro'),
       pode_exportar_financeiro: lerPermissao('usr-exportar-financeiro','podeExportarFinanceiro'),
       pode_ver_notas_fiscais: lerPermissao('usr-ver-notas-fiscais','podeVerNotasFiscais'),
@@ -11788,9 +11790,14 @@ function renderHorAuditoria(){
         <div style="font-size:11px;color:var(--text2);margin-bottom:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
           <i class="ti ti-lock" style="font-size:12px;"></i> Também definidas apenas por Admin Geral ou Admin Master. A visualização de Pedidos e Fila de Produção já é liberada para todos automaticamente — esta permissão controla só a AÇÃO de alterar status e reordenar.
         </div>
-        <label class="usr-perm-item" id="usr-perm-item-statuspedido" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 8px;border-radius:6px;border:1px solid var(--border);transition:background .15s,border-color .15s;">
+        <label class="usr-perm-item" id="usr-perm-item-statuspedido" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 8px;border-radius:6px;border:1px solid var(--border);margin-bottom:6px;transition:background .15s,border-color .15s;">
           <input type="checkbox" id="usr-alterar-status-pedido" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#E31787;"/>
           <span style="flex:1;">Pode alterar status de pedidos e reordenar a Fila de Produção</span>
+          <i class="ti ti-check" style="font-size:14px;color:#E31787;display:none;"></i>
+        </label>
+        <label class="usr-perm-item" id="usr-perm-item-editarpedido" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;padding:6px 8px;border-radius:6px;border:1px solid var(--border);transition:background .15s,border-color .15s;">
+          <input type="checkbox" id="usr-editar-pedido" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:#E31787;"/>
+          <span style="flex:1;">Pode editar pedidos diretamente (antes de irem para produção), sem precisar de aprovação — sem isso, a pessoa só pode solicitar a edição para um gestor aprovar</span>
           <i class="ti ti-check" style="font-size:14px;color:#E31787;display:none;"></i>
         </label>
       </div>
