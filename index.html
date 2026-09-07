@@ -3584,7 +3584,7 @@ document.addEventListener('DOMContentLoaded',function(){
       // explicitamente aqui (não só isAdmin) como proteção extra: mesmo
       // que currentUser não esteja 100% populado no primeiro instante da
       // renderização, qualquer um desses três já libera a visão completa.
-      var vejoTudo = currentUser.isAdmin || currentUser.isAdminGeral || currentUser.isAdminMaster;
+      var vejoTudo = currentUser.isAdmin || currentUser.isAdminGeral || currentUser.isAdminMaster || currentUser.podeVerTodosClientes || currentUser.podeEditarPedido;
       if(!vejoTudo && o.vendedor !== currentUser.name) return false;
       if(statusF && o.status !== statusF) return false;
       if(vendF && o.vendedor !== vendF) return false;
