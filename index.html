@@ -3648,9 +3648,18 @@ document.addEventListener('DOMContentLoaded',function(){
       // legados, de antes do redesenho do fluxo.)
       var statusEditaveis = ['Novo lead','Orçamento enviado','Arte pendente','Pedido aprovado','Elaboração da arte'];
       var temEdicaoPendente = !!o.edicaoPendente;
+      // Quando já existe uma edição pendente nesse pedido: quem PODE
+      // aprovar (pedPodeEditarPedido) vê o relógio clicável, que abre
+      // direto a revisão da solicitação — sem isso, a única forma de
+      // chegar lá era o painel "Edições aguardando aprovação" no topo da
+      // página, o que não ficava óbvio. Quem não pode aprovar (inclusive
+      // quem solicitou) só vê o indicador, sem ação.
+      var podeRevisarEdicao = temEdicaoPendente && typeof pedPodeEditarPedido==='function' && pedPodeEditarPedido();
       var btnEditar = (statusEditaveis.indexOf(o.status)>=0 && !emFluxoCancelamento)
         ? (temEdicaoPendente
-            ? '<button class="btn btn-sm" style="font-size:10px;padding:3px 7px;opacity:.6;" disabled title="Edição aguardando aprovação"><i class="ti ti-clock" style="font-size:10px;"></i></button>'
+            ? (podeRevisarEdicao
+                ? '<button class="btn btn-sm" style="font-size:10px;padding:3px 7px;" onclick="pedAbrirDecisaoEdicao(\''+o.edicaoPendente.id+'\')" title="Revisar solicitação de edição"><i class="ti ti-clock" style="font-size:10px;"></i></button>'
+                : '<button class="btn btn-sm" style="font-size:10px;padding:3px 7px;opacity:.6;" disabled title="Edição aguardando aprovação"><i class="ti ti-clock" style="font-size:10px;"></i></button>')
             : '<button class="btn btn-sm" style="font-size:10px;padding:3px 7px;" onclick="abrirEdicaoPedido(\''+o.id+'\')" title="Editar pedido"><i class="ti ti-edit" style="font-size:10px;"></i></button>')
         : '';
       var badgeEditado = o.ultimaEdicaoEm
@@ -4133,7 +4142,7 @@ document.addEventListener('DOMContentLoaded',function(){
     return linhas.length ? linhas.join('') : '<i>Nenhuma mudança detectada.</i>';
   }
 
-  function pedSolicitarCancelamento(orderId, motivo){
+  function pedSolicitarCancelamento(orderId, motivo, autoAprovar){
     var order = ORDERS.find(function(o){ return o.id === orderId; });
     if(!order) return false;
     if(!motivo || !motivo.trim()){ toast('Informe o motivo do cancelamento.'); return false; }
@@ -4158,6 +4167,16 @@ document.addEventListener('DOMContentLoaded',function(){
       };
       order.status = 'Cancelamento solicitado';
       order.pill = 'p-follow';
+      // Quem já tem a permissão de aprovar cancelamento não precisa
+      // esperar a si mesmo: encadeia direto pra aprovação, sem deixar o
+      // pedido visível como "Cancelamento solicitado" — pro usuário é uma
+      // única ação ("Cancelar pedido"), mesmo passando pelas duas
+      // gravações no banco por baixo (reaproveita toda a lógica de
+      // estorno/refugo de estoque já existente em pedAprovarCancelamento).
+      if(autoAprovar && pedPodeAprovarCancelamento()){
+        pedAprovarCancelamento(orderId, motivo.trim(), 'devolver');
+        return;
+      }
       renderOrders();
       if(typeof renderProdQueue==='function') renderProdQueue();
       if(typeof renderCancelamentosPendentes==='function') renderCancelamentosPendentes();
@@ -4437,6 +4456,19 @@ document.addEventListener('DOMContentLoaded',function(){
     scOrderIdAtual = orderId;
     document.getElementById('sc-resumo').textContent = order.client+' · '+(order.prodDesc||order.prod)+' · R$'+order.valor.toLocaleString('pt-BR');
     document.getElementById('sc-motivo').value = '';
+    // Admin Geral/Master e quem tem podeReatribuirVendedor já SÃO quem
+    // aprovaria a solicitação — não faz sentido pedir autorização a si
+    // mesmo. Pra essas contas, o cancelamento é direto e imediato; o
+    // texto do modal muda pra deixar isso claro, mas o motivo continua
+    // sendo pedido (fica registrado no histórico do pedido).
+    var cancelaDireto = pedPodeAprovarCancelamento();
+    document.getElementById('sc-modal-title').textContent = cancelaDireto ? 'Cancelar pedido' : 'Solicitar cancelamento de pedido';
+    document.getElementById('sc-aviso').innerHTML = cancelaDireto
+      ? '<i class="ti ti-alert-triangle" style="font-size:12px;"></i> Esta ação cancela o pedido imediatamente — não passa por aprovação.'
+      : '<i class="ti ti-info-circle" style="font-size:12px;"></i> O pedido não é cancelado agora — sua solicitação vai para o Admin Geral e o gerente comercial decidirem.';
+    document.getElementById('btn-solicitar-cancelamento').innerHTML = cancelaDireto
+      ? '<i class="ti ti-x" style="font-size:12px;"></i> Cancelar pedido'
+      : '<i class="ti ti-x" style="font-size:12px;"></i> Enviar solicitação';
     openModal('modal-solicitar-cancelamento');
   }
   window.pedAbrirSolicitarCancelamento = pedAbrirSolicitarCancelamento;
@@ -4481,8 +4513,7 @@ document.addEventListener('DOMContentLoaded',function(){
         '<div style="color:var(--text2);font-size:11px;margin-top:2px;">Solicitado por <b>'+esc(solicitante?solicitante.name:'—')+'</b></div>'+
         '<div style="color:var(--text2);font-size:11px;margin-top:2px;font-style:italic;">"'+esc(s.motivo)+'"</div></div>'+
         '<div style="display:flex;gap:6px;align-items:flex-start;">'+
-        '<button class="btn btn-sm btn-rosa" onclick="pedAbrirDecisaoEdicao(\''+s.id+'\',\'aprovar\')"><i class="ti ti-check" style="font-size:11px;"></i> Aprovar</button>'+
-        '<button class="btn btn-sm btn-danger" onclick="pedAbrirDecisaoEdicao(\''+s.id+'\',\'negar\')"><i class="ti ti-x" style="font-size:11px;"></i> Negar</button>'+
+        '<button class="btn btn-sm btn-rosa" onclick="pedAbrirDecisaoEdicao(\''+s.id+'\')"><i class="ti ti-eye" style="font-size:11px;"></i> Revisar</button>'+
         '</div></div></div>';
     }).join('');
   }
@@ -4497,19 +4528,21 @@ document.addEventListener('DOMContentLoaded',function(){
     };
   }
 
-  var pedDecisaoEdicaoCtx = null; // {solicitacaoId, acao:'aprovar'|'negar'}
-  function pedAbrirDecisaoEdicao(solicitacaoId, acao){
+  var pedDecisaoEdicaoCtx = null; // {solicitacaoId}
+  // Modal único de revisão: mostra o pedido, o motivo, o diff completo do
+  // que mudaria, e deixa quem está aprovando escolher Aprovar ou Negar ali
+  // mesmo (com resposta opcional) — sem precisar decidir antes de ver os
+  // detalhes.
+  function pedAbrirDecisaoEdicao(solicitacaoId){
     var s = EDICOES_PENDENTES.find(function(x){ return x.id===solicitacaoId; });
     if(!s) return;
     var order = ORDERS.find(function(o){ return o._uuid===s.pedido_id; });
-    pedDecisaoEdicaoCtx = {solicitacaoId:solicitacaoId, acao:acao};
-    document.getElementById('ded-modal-title').textContent = (acao==='aprovar'?'Aprovar':'Negar')+' edição — '+(order?order.id:'');
+    pedDecisaoEdicaoCtx = {solicitacaoId:solicitacaoId};
+    document.getElementById('ded-modal-title').textContent = 'Revisar edição — '+(order?order.id:'');
     document.getElementById('ded-resumo').textContent = order ? (order.client+' · '+(order.prodDesc||order.prod)+' · R$'+order.valor.toLocaleString('pt-BR')) : '';
     document.getElementById('ded-motivo-original').textContent = s.motivo||'';
     document.getElementById('ded-diff').innerHTML = order ? montarDiffTexto(pedSnapshotAtualDoPedido(order), s.dados_propostos||{}) : '—';
     document.getElementById('ded-resposta').value = '';
-    document.getElementById('btn-ded-confirmar').textContent = acao==='aprovar' ? 'Confirmar aprovação' : 'Confirmar negativa';
-    document.getElementById('btn-ded-confirmar').className = 'btn btn-sm '+(acao==='aprovar'?'btn-rosa':'btn-danger');
     openModal('modal-decisao-edicao');
   }
   window.pedAbrirDecisaoEdicao = pedAbrirDecisaoEdicao;
@@ -7731,8 +7764,16 @@ document.addEventListener('DOMContentLoaded',function(){
   if(btnDedConfirmar) btnDedConfirmar.addEventListener('click', function(){
     if(!pedDecisaoEdicaoCtx) return;
     var resposta = document.getElementById('ded-resposta').value||'';
-    if(pedDecisaoEdicaoCtx.acao==='aprovar') pedAprovarEdicao(pedDecisaoEdicaoCtx.solicitacaoId, resposta);
-    else pedNegarEdicao(pedDecisaoEdicaoCtx.solicitacaoId, resposta);
+    pedAprovarEdicao(pedDecisaoEdicaoCtx.solicitacaoId, resposta);
+    closeModal('modal-decisao-edicao');
+    pedDecisaoEdicaoCtx = null;
+  });
+
+  var btnDedNegar = document.getElementById('btn-ded-negar');
+  if(btnDedNegar) btnDedNegar.addEventListener('click', function(){
+    if(!pedDecisaoEdicaoCtx) return;
+    var resposta = document.getElementById('ded-resposta').value||'';
+    pedNegarEdicao(pedDecisaoEdicaoCtx.solicitacaoId, resposta);
     closeModal('modal-decisao-edicao');
     pedDecisaoEdicaoCtx = null;
   });
@@ -7740,7 +7781,7 @@ document.addEventListener('DOMContentLoaded',function(){
   var btnSolicitarCancelamento = document.getElementById('btn-solicitar-cancelamento');
   if(btnSolicitarCancelamento) btnSolicitarCancelamento.addEventListener('click', function(){
     var motivo = document.getElementById('sc-motivo').value||'';
-    if(pedSolicitarCancelamento(scOrderIdAtual, motivo)) closeModal('modal-solicitar-cancelamento');
+    if(pedSolicitarCancelamento(scOrderIdAtual, motivo, pedPodeAprovarCancelamento())) closeModal('modal-solicitar-cancelamento');
   });
 
   var btnAddItem = document.getElementById('btn-add-item');
@@ -11429,12 +11470,12 @@ function renderHorAuditoria(){
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-solicitar-cancelamento"><div class="modal"><div class="modal-head"><span class="modal-title">Solicitar cancelamento de pedido</span><button class="modal-close" data-close="modal-solicitar-cancelamento">×</button></div><div class="modal-body">
-  <div style="font-size:11px;color:var(--text2);margin-bottom:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
+<div class="modal-overlay" id="modal-solicitar-cancelamento"><div class="modal"><div class="modal-head"><span class="modal-title" id="sc-modal-title">Solicitar cancelamento de pedido</span><button class="modal-close" data-close="modal-solicitar-cancelamento">×</button></div><div class="modal-body">
+  <div style="font-size:11px;color:var(--text2);margin-bottom:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;" id="sc-aviso">
     <i class="ti ti-info-circle" style="font-size:12px;"></i> O pedido não é cancelado agora — sua solicitação vai para o Admin Geral e o gerente comercial decidirem.
   </div>
   <div class="form-group"><label class="form-label">Pedido</label><div style="font-size:13px;font-weight:500;" id="sc-resumo">—</div></div>
-  <div class="form-group"><label class="form-label">Motivo do cancelamento *</label><textarea class="form-textarea" id="sc-motivo" rows="3" placeholder="Explique por que o cliente está desistindo..."></textarea></div>
+  <div class="form-group"><label class="form-label" id="sc-motivo-label">Motivo do cancelamento *</label><textarea class="form-textarea" id="sc-motivo" rows="3" placeholder="Explique por que o cliente está desistindo..."></textarea></div>
 </div><div class="modal-footer"><button class="btn" data-close="modal-solicitar-cancelamento">Voltar</button><button class="btn btn-danger" id="btn-solicitar-cancelamento"><i class="ti ti-x" style="font-size:12px;"></i> Enviar solicitação</button></div></div></div>
 
 <div class="modal-overlay" id="modal-pcd"><div class="modal"><div class="modal-head"><span class="modal-title" id="pcd-modal-title">Decidir cancelamento</span><button class="modal-close" data-close="modal-pcd">×</button></div><div class="modal-body">
@@ -11456,7 +11497,7 @@ function renderHorAuditoria(){
   <div class="form-group"><label class="form-label">Motivo informado por quem solicitou</label><div style="font-size:12px;color:var(--text2);font-style:italic;" id="ded-motivo-original">—</div></div>
   <div class="form-group"><label class="form-label">O que muda</label><div style="font-size:12px;color:var(--text2);" id="ded-diff">—</div></div>
   <div class="form-group"><label class="form-label">Resposta (opcional)</label><textarea class="form-textarea" id="ded-resposta" rows="2" placeholder="Alguma observação sobre esta decisão..."></textarea></div>
-</div><div class="modal-footer"><button class="btn" data-close="modal-decisao-edicao">Cancelar</button><button class="btn btn-sm btn-rosa" id="btn-ded-confirmar">Confirmar</button></div></div></div>
+</div><div class="modal-footer"><button class="btn" data-close="modal-decisao-edicao">Cancelar</button><button class="btn btn-sm btn-danger" id="btn-ded-negar"><i class="ti ti-x" style="font-size:11px;"></i> Negar</button><button class="btn btn-sm btn-rosa" id="btn-ded-confirmar"><i class="ti ti-check" style="font-size:11px;"></i> Aprovar</button></div></div></div>
 
 <div class="modal-overlay" id="modal-historico-edicoes"><div class="modal"><div class="modal-head"><span class="modal-title">Histórico de edições — <span id="hed-pedido-id"></span></span><button class="modal-close" data-close="modal-historico-edicoes">×</button></div><div class="modal-body">
   <div id="hed-lista" style="font-size:12px;color:var(--text2);">Carregando...</div>
