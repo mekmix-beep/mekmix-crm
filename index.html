@@ -3473,14 +3473,22 @@ document.addEventListener('DOMContentLoaded',function(){
             estoqueBaixado: !!p.estoque_baixado,
             custoTotal: p.custo_total || 0,
             ultimaEdicaoEm: p.ultima_edicao_em||null,
-            edicaoPendente: null // preenchido por carregarEdicoesPendentesDoBanco logo em seguida
+            ultimaEdicaoPorId: p.ultima_edicao_por||null,
+            ultimaEdicaoPorNome: '', // resolvido logo abaixo, junto com o vendedor
+            edicaoPendente: null, // preenchido por carregarEdicoesPendentesDoBanco logo em seguida
+            ultimaDecisaoEdicao: null // idem — última solicitação já decidida (aprovada ou negada) desse pedido
           });
         });
-        // Resolve nome do vendedor a partir do cache USERS, quando já carregado
+        // Resolve nome do vendedor e de quem fez a última edição aprovada,
+        // a partir do cache USERS, quando já carregado.
         ORDERS.forEach(function(o){
           if(o.vendedorId){
             var v = Object.keys(USERS).map(function(k){return USERS[k];}).find(function(u){ return u._supabaseId===o.vendedorId; });
             if(v) o.vendedor = v.name;
+          }
+          if(o.ultimaEdicaoPorId){
+            var ed = Object.keys(USERS).map(function(k){return USERS[k];}).find(function(u){ return u._supabaseId===o.ultimaEdicaoPorId; });
+            if(ed) o.ultimaEdicaoPorNome = ed.name;
           }
         });
 
@@ -3514,15 +3522,24 @@ document.addEventListener('DOMContentLoaded',function(){
     sbClient.from('pedidos_edicoes_solicitacoes').select('*').order('solicitado_em', {ascending:false}).then(function(res){
       EDICOES_PENDENTES = [];
       EDICOES_DECIDIDAS_NAO_VISTAS = [];
-      ORDERS.forEach(function(o){ o.edicaoPendente = null; });
+      ORDERS.forEach(function(o){ o.edicaoPendente = null; o.ultimaDecisaoEdicao = null; });
       if(!res.error && res.data){
         res.data.forEach(function(s){
           var order = ORDERS.find(function(o){ return o._uuid===s.pedido_id; });
           if(s.status==='pendente'){
             if(order) order.edicaoPendente = s;
             EDICOES_PENDENTES.push(s);
-          } else if(s.solicitado_por===currentUser._supabaseId && !s.visto_pelo_solicitante && !EDICOES_DECISOES_VISTAS[s.id]){
-            EDICOES_DECIDIDAS_NAO_VISTAS.push(s);
+          } else {
+            // Guarda, por pedido, a solicitação decidida mais recente
+            // (aprovada OU negada) — usada pra mostrar na lista de Pedidos
+            // quem autorizou a edição, ou que a solicitação foi negada e o
+            // pedido foi mantido como estava. res.data já vem ordenado por
+            // solicitado_em desc, então a primeira decidida que achamos
+            // pra cada pedido já é a mais recente.
+            if(order && !order.ultimaDecisaoEdicao) order.ultimaDecisaoEdicao = s;
+            if(s.solicitado_por===currentUser._supabaseId && !s.visto_pelo_solicitante && !EDICOES_DECISOES_VISTAS[s.id]){
+              EDICOES_DECIDIDAS_NAO_VISTAS.push(s);
+            }
           }
         });
       }
@@ -3662,8 +3679,23 @@ document.addEventListener('DOMContentLoaded',function(){
                 : '<button class="btn btn-sm" style="font-size:10px;padding:3px 7px;opacity:.6;" disabled title="Edição aguardando aprovação"><i class="ti ti-clock" style="font-size:10px;"></i></button>')
             : '<button class="btn btn-sm" style="font-size:10px;padding:3px 7px;" onclick="abrirEdicaoPedido(\''+o.id+'\')" title="Editar pedido"><i class="ti ti-edit" style="font-size:10px;"></i></button>')
         : '';
-      var badgeEditado = o.ultimaEdicaoEm
-        ? '<button class="pill" style="background:#EDE3F5;color:#772D83;font-size:9px;border:none;cursor:pointer;" onclick="pedAbrirHistoricoEdicoes(\''+o.id+'\')" title="Ver histórico de edições">✎ Editado</button>'
+      // "↩ Pedido mantido" quando a última solicitação de edição desse
+      // pedido foi negada e isso é mais recente que a última aprovação
+      // (se não houver nenhuma aprovação depois dela — compara as datas,
+      // não só se ultimaEdicaoEm existe, pra não esconder uma negativa
+      // mais recente atrás de uma aprovação antiga).
+      var negadaMaisRecenteQueAprovacao = o.ultimaDecisaoEdicao && o.ultimaDecisaoEdicao.status==='negado' &&
+        (!o.ultimaEdicaoEm || new Date(o.ultimaDecisaoEdicao.decidido_em) > new Date(o.ultimaEdicaoEm));
+      // "✎ Editado por <nome>" quando dá pra saber quem autorizou (edição
+      // direta ou aprovação de uma solicitação); some o nome se por algum
+      // motivo não resolveu (ex: usuário removido depois), cai pro texto
+      // genérico de antes. Não mostra junto com "Pedido mantido" quando
+      // essa negativa é o evento mais recente do pedido.
+      var badgeEditado = (o.ultimaEdicaoEm && !negadaMaisRecenteQueAprovacao)
+        ? '<button class="pill" style="background:#EDE3F5;color:#772D83;font-size:9px;border:none;cursor:pointer;" onclick="pedAbrirHistoricoEdicoes(\''+o.id+'\')" title="Ver histórico de edições">✎ Editado'+(o.ultimaEdicaoPorNome?' por '+esc(o.ultimaEdicaoPorNome):'')+'</button>'
+        : '';
+      var badgePedidoMantido = (!temEdicaoPendente && negadaMaisRecenteQueAprovacao)
+        ? '<button class="pill" style="background:#FCEBEB;color:#791F1F;font-size:9px;border:none;cursor:pointer;" onclick="pedAbrirHistoricoEdicoes(\''+o.id+'\')" title="Última solicitação de edição foi negada">↩ Pedido mantido</button>'
         : '';
       var badgeEdicaoPendente = temEdicaoPendente
         ? '<span class="pill" style="background:#FAEEDA;color:#633806;font-size:9px;">✎ Edição pendente</span>'
@@ -3678,7 +3710,7 @@ document.addEventListener('DOMContentLoaded',function(){
       return '<div class="order-row">' +
         '<div class="order-num" style="cursor:pointer;" onclick="abrirDetalhePedido(\''+o.id+'\')" title="Ver detalhes do pedido">' + o.id + '<div style="font-size:10px;color:var(--text3);">' + o.data + '</div></div>' +
         '<div class="order-client" style="min-width:0;cursor:pointer;" onclick="abrirDetalhePedido(\''+o.id+'\')" title="Ver detalhes do pedido">' +
-          '<div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + o.client + ' ' + alertaEstoque + badgeRascunho + badgeEditado + badgeEdicaoPendente + '</div>' +
+          '<div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + o.client + ' ' + alertaEstoque + badgeRascunho + badgeEditado + badgePedidoMantido + badgeEdicaoPendente + '</div>' +
           '<div style="font-size:10px;color:var(--text2);">' + o.prod + ' · ' + o.qtd + 'cx · ' + o.unid.toLocaleString('pt-BR') + 'un</div>' +
         '</div>' +
         (currentUser.isAdmin ? '<div style="font-size:11px;color:var(--text2);width:50px;flex-shrink:0;">' + o.vendedor + '</div>' : '') +
@@ -4587,7 +4619,10 @@ document.addEventListener('DOMContentLoaded',function(){
                 order.prod = dados.itens[0] ? dados.itens[0].tam : '';
                 order.prodDesc = (dados.itens||[]).map(function(i){ return (i.tipo==='caixas'?i.qtd+'cx':i.qtd+'un')+' '+i.tam; }).join(' + ');
                 order.ultimaEdicaoEm = agoraIso;
+                order.ultimaEdicaoPorId = currentUser._supabaseId;
+                order.ultimaEdicaoPorNome = currentUser.name;
                 order.edicaoPendente = null;
+                order.ultimaDecisaoEdicao = Object.assign({}, s, {status:'aprovado', resposta_aprovador: resposta||null});
                 EDICOES_PENDENTES = EDICOES_PENDENTES.filter(function(x){ return x.id!==s.id; });
                 renderOrders();
                 renderEdicoesPendentes();
@@ -4612,15 +4647,56 @@ document.addEventListener('DOMContentLoaded',function(){
     }).eq('id', s.id).then(function(res){
       if(res.error){ toast(traduzirErroBanco(res.error.message)); return; }
       var order = ORDERS.find(function(o){ return o._uuid===s.pedido_id; });
-      if(order) order.edicaoPendente = null;
+      if(order){
+        order.edicaoPendente = null;
+        order.ultimaDecisaoEdicao = Object.assign({}, s, {status:'negado', decidido_por: currentUser._supabaseId, decidido_em: agoraIso, resposta_aprovador: resposta||null});
+      }
       EDICOES_PENDENTES = EDICOES_PENDENTES.filter(function(x){ return x.id!==s.id; });
       renderOrders();
       renderEdicoesPendentes();
       if(typeof renderNotificacoes==='function') renderNotificacoes();
-      toast('Solicitação de edição negada.');
+      toast('Solicitação de edição negada. Pedido mantido como estava.');
     });
   }
   window.pedNegarEdicao = pedNegarEdicao;
+
+  // ── AVISO DE DECISÃO (pro lado de quem solicitou) ──
+  // Popup mostrando a resposta completa do gestor sobre uma solicitação já
+  // decidida (aprovada ou negada), com um botão explícito "Dar ciência" —
+  // só ao clicar nele é que a notificação de fato some (local + banco,
+  // via Migração 3 — visto_pelo_solicitante).
+  function pedAbrirAvisoDecisaoEdicao(solicitacaoId){
+    var s = (typeof EDICOES_DECIDIDAS_NAO_VISTAS!=='undefined' ? EDICOES_DECIDIDAS_NAO_VISTAS : []).find(function(x){ return x.id===solicitacaoId; });
+    if(!s){ // já não está mais na lista (ex: dado ciência em outra aba) — nada a mostrar
+      if(typeof EDICOES_DECISOES_VISTAS!=='undefined') EDICOES_DECISOES_VISTAS[solicitacaoId] = true;
+      return;
+    }
+    var order = (typeof ORDERS!=='undefined') ? ORDERS.find(function(o){ return o._uuid===s.pedido_id; }) : null;
+    var aprovador = Object.keys(USERS).map(function(k){return USERS[k];}).find(function(u){ return u._supabaseId===s.decidido_por; });
+    pedAvisoDecisaoCtx = solicitacaoId;
+    document.getElementById('avd-modal-title').textContent = s.status==='aprovado' ? 'Sua solicitação foi aprovada' : 'Sua solicitação foi negada';
+    document.getElementById('avd-resumo').textContent = order ? (order.id+' — '+order.client+' · '+(order.prodDesc||order.prod)) : '—';
+    document.getElementById('avd-motivo').textContent = s.motivo||'—';
+    document.getElementById('avd-resposta').textContent = s.resposta_aprovador ? s.resposta_aprovador : (s.status==='aprovado' ? 'Nenhuma observação adicional — aprovado sem ressalvas.' : 'Nenhuma observação adicional.');
+    document.getElementById('avd-quem-quando').textContent = (aprovador?aprovador.name:'Gestor') + (s.decidido_em ? ' · '+new Date(s.decidido_em).toLocaleString('pt-BR') : '');
+    openModal('modal-aviso-decisao-edicao');
+  }
+  window.pedAbrirAvisoDecisaoEdicao = pedAbrirAvisoDecisaoEdicao;
+  var pedAvisoDecisaoCtx = null;
+
+  function pedDarCienciaDecisaoEdicao(solicitacaoId){
+    EDICOES_DECISOES_VISTAS[solicitacaoId] = true;
+    EDICOES_DECIDIDAS_NAO_VISTAS = EDICOES_DECIDIDAS_NAO_VISTAS.filter(function(x){ return x.id!==solicitacaoId; });
+    if(typeof renderNotificacoes==='function') renderNotificacoes();
+    // Persiste no banco (Migração 3) pra não voltar a notificar em outro
+    // login/dispositivo — se a policy ainda não tiver sido aplicada, o
+    // update falha silenciosamente e só fica a marca em memória desta
+    // sessão (mesmo comportamento de antes).
+    if(sbClient){
+      sbClient.from('pedidos_edicoes_solicitacoes').update({visto_pelo_solicitante:true}).eq('id', solicitacaoId).then(function(){});
+    }
+  }
+  window.pedDarCienciaDecisaoEdicao = pedDarCienciaDecisaoEdicao;
 
   // Histórico de edições de um pedido (badge "✎ Editado") — consulta o
   // log direto, agrupando as linhas de cada edição pelo edicao_id.
@@ -4631,26 +4707,53 @@ document.addEventListener('DOMContentLoaded',function(){
     document.getElementById('hed-lista').innerHTML = 'Carregando...';
     openModal('modal-historico-edicoes');
     if(!sbClient) return;
-    sbClient.from('pedidos_edicoes_log').select('*').eq('pedido_id', order._uuid).order('editado_em', {ascending:false}).then(function(res){
-      if(res.error || !res.data || !res.data.length){
-        document.getElementById('hed-lista').innerHTML = 'Nenhuma edição registrada ainda.';
-        return;
-      }
-      var grupos = {}, ordemGrupos = [];
-      res.data.forEach(function(l){
-        if(!grupos[l.edicao_id]){ grupos[l.edicao_id] = []; ordemGrupos.push(l.edicao_id); }
-        grupos[l.edicao_id].push(l);
+    // Histórico completo do pedido: aprovações (com o diff campo a campo,
+    // vindo de pedidos_edicoes_log) E negativas (vindas direto de
+    // pedidos_edicoes_solicitacoes, que não geram linha de log nenhuma —
+    // só mudam de status) juntas numa única linha do tempo, pra quem
+    // solicitou e quem aprova poderem consultar depois, não só no instante
+    // da notificação.
+    sbClient.from('pedidos_edicoes_log').select('*').eq('pedido_id', order._uuid).order('editado_em', {ascending:false}).then(function(resLog){
+      sbClient.from('pedidos_edicoes_solicitacoes').select('*').eq('pedido_id', order._uuid).eq('status','negado').order('decidido_em', {ascending:false}).then(function(resNeg){
+        var eventos = [];
+        if(!resLog.error && resLog.data && resLog.data.length){
+          var grupos = {}, ordemGrupos = [];
+          resLog.data.forEach(function(l){
+            if(!grupos[l.edicao_id]){ grupos[l.edicao_id] = []; ordemGrupos.push(l.edicao_id); }
+            grupos[l.edicao_id].push(l);
+          });
+          ordemGrupos.forEach(function(gid){
+            var linhas = grupos[gid];
+            var primeira = linhas[0];
+            eventos.push({quando: primeira.editado_em, tipo:'aprovado', autorId: primeira.editado_por, observacao: primeira.observacao, linhas: linhas});
+          });
+        }
+        if(!resNeg.error && resNeg.data){
+          resNeg.data.forEach(function(s){
+            eventos.push({quando: s.decidido_em, tipo:'negado', autorId: s.decidido_por, motivo: s.motivo, resposta: s.resposta_aprovador});
+          });
+        }
+        if(!eventos.length){
+          document.getElementById('hed-lista').innerHTML = 'Nenhuma edição registrada ainda.';
+          return;
+        }
+        eventos.sort(function(a,b){ return new Date(b.quando) - new Date(a.quando); });
+        document.getElementById('hed-lista').innerHTML = eventos.map(function(ev){
+          var autor = Object.keys(USERS).map(function(k){return USERS[k];}).find(function(u){ return u._supabaseId===ev.autorId; });
+          var quando = ev.quando ? new Date(ev.quando).toLocaleString('pt-BR') : '—';
+          if(ev.tipo==='aprovado'){
+            return '<div class="panel" style="margin-bottom:8px;">'+
+              '<div style="font-size:11px;color:#772D83;margin-bottom:4px;">✎ Edição aprovada por <b>'+esc(autor?autor.name:'—')+'</b> em '+quando+(ev.observacao?' — "'+esc(ev.observacao)+'"':'')+'</div>'+
+              ev.linhas.map(function(l){ return '<div style="font-size:12px;"><b>'+esc(l.campo)+':</b> '+esc(l.valor_anterior)+' → '+esc(l.valor_novo)+'</div>'; }).join('')+
+              '</div>';
+          }
+          return '<div class="panel" style="margin-bottom:8px;">'+
+            '<div style="font-size:11px;color:#791F1F;margin-bottom:4px;">↩ Solicitação negada por <b>'+esc(autor?autor.name:'—')+'</b> em '+quando+'</div>'+
+            '<div style="font-size:12px;font-style:italic;color:var(--text2);margin-bottom:2px;">Motivo solicitado: "'+esc(ev.motivo||'—')+'"</div>'+
+            (ev.resposta ? '<div style="font-size:12px;"><b>Resposta do gestor:</b> '+esc(ev.resposta)+'</div>' : '')+
+            '</div>';
+        }).join('');
       });
-      document.getElementById('hed-lista').innerHTML = ordemGrupos.map(function(gid){
-        var linhas = grupos[gid];
-        var primeira = linhas[0];
-        var autor = Object.keys(USERS).map(function(k){return USERS[k];}).find(function(u){ return u._supabaseId===primeira.editado_por; });
-        var quando = new Date(primeira.editado_em).toLocaleString('pt-BR');
-        return '<div class="panel" style="margin-bottom:8px;">'+
-          '<div style="font-size:11px;color:var(--text2);margin-bottom:4px;"><b>'+esc(autor?autor.name:'—')+'</b> em '+quando+(primeira.observacao?' — "'+esc(primeira.observacao)+'"':'')+'</div>'+
-          linhas.map(function(l){ return '<div style="font-size:12px;"><b>'+esc(l.campo)+':</b> '+esc(l.valor_anterior)+' → '+esc(l.valor_novo)+'</div>'; }).join('')+
-          '</div>';
-      }).join('');
     });
   }
   window.pedAbrirHistoricoEdicoes = pedAbrirHistoricoEdicoes;
@@ -5283,9 +5386,16 @@ document.addEventListener('DOMContentLoaded',function(){
         btn.addEventListener('click', function(){
           var pagina = this.getAttribute('data-notif-page');
           var dismissId = this.getAttribute('data-notif-dismiss-edicao');
-          if(dismissId){ EDICOES_DECISOES_VISTAS[dismissId] = true; renderNotificacoes(); }
           document.getElementById('notif-sino-painel').style.display='none';
           document.getElementById('notif-mob-painel').style.display='none';
+          // Notificação de decisão de edição: não marca como vista no
+          // clique — abre o popup com a resposta completa do gestor, e só
+          // some de verdade quando a pessoa clicar em "Dar ciência" ali
+          // dentro (ver pedAbrirAvisoDecisaoEdicao/pedDarCienciaDecisaoEdicao).
+          if(dismissId && typeof pedAbrirAvisoDecisaoEdicao==='function'){
+            pedAbrirAvisoDecisaoEdicao(dismissId);
+            return;
+          }
           var sb = document.querySelector('.sb-btn[data-page="'+pagina+'"]');
           goPage(pagina, sb ? sb.querySelector('.sb-btn-lbl').textContent : pagina);
         });
@@ -7782,6 +7892,14 @@ document.addEventListener('DOMContentLoaded',function(){
   if(btnSolicitarCancelamento) btnSolicitarCancelamento.addEventListener('click', function(){
     var motivo = document.getElementById('sc-motivo').value||'';
     if(pedSolicitarCancelamento(scOrderIdAtual, motivo, pedPodeAprovarCancelamento())) closeModal('modal-solicitar-cancelamento');
+  });
+
+  var btnAvdCiente = document.getElementById('btn-avd-ciente');
+  if(btnAvdCiente) btnAvdCiente.addEventListener('click', function(){
+    if(!pedAvisoDecisaoCtx) return;
+    pedDarCienciaDecisaoEdicao(pedAvisoDecisaoCtx);
+    closeModal('modal-aviso-decisao-edicao');
+    pedAvisoDecisaoCtx = null;
   });
 
   var btnAddItem = document.getElementById('btn-add-item');
@@ -11502,6 +11620,13 @@ function renderHorAuditoria(){
 <div class="modal-overlay" id="modal-historico-edicoes"><div class="modal"><div class="modal-head"><span class="modal-title">Histórico de edições — <span id="hed-pedido-id"></span></span><button class="modal-close" data-close="modal-historico-edicoes">×</button></div><div class="modal-body">
   <div id="hed-lista" style="font-size:12px;color:var(--text2);">Carregando...</div>
 </div><div class="modal-footer"><button class="btn" data-close="modal-historico-edicoes">Fechar</button></div></div></div>
+
+<div class="modal-overlay" id="modal-aviso-decisao-edicao"><div class="modal"><div class="modal-head"><span class="modal-title" id="avd-modal-title">Decisão sobre sua solicitação de edição</span><button class="modal-close" data-close="modal-aviso-decisao-edicao">×</button></div><div class="modal-body">
+  <div class="form-group"><label class="form-label">Pedido</label><div style="font-size:13px;font-weight:500;" id="avd-resumo">—</div></div>
+  <div class="form-group"><label class="form-label">Seu motivo original</label><div style="font-size:12px;color:var(--text2);font-style:italic;" id="avd-motivo">—</div></div>
+  <div class="form-group"><label class="form-label">Resposta do gestor</label><div style="font-size:12px;color:var(--text);" id="avd-resposta">Nenhuma observação adicional.</div></div>
+  <div style="font-size:10px;color:var(--text3);" id="avd-quem-quando"></div>
+</div><div class="modal-footer"><button class="btn btn-rosa" id="btn-avd-ciente"><i class="ti ti-check" style="font-size:12px;"></i> Dar ciência</button></div></div></div>
 
 <div class="modal-overlay" id="modal-editar-etiqueta"><div class="modal"><div class="modal-head"><span class="modal-title">Editar dados da etiqueta</span><button class="modal-close" data-close="modal-editar-etiqueta">×</button></div><div class="modal-body">
   <div class="form-group"><label class="form-label">Cliente</label><input class="form-input" id="etq-ed-cliente"/></div>
