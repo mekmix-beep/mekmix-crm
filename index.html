@@ -125,6 +125,10 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;}
 .conv-preview{font-size:11px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;}
 .conv-foot{display:flex;align-items:center;justify-content:space-between;margin-top:5px;}
 .vend-pill{font-size:10px;padding:2px 6px;border-radius:20px;background:#f0f0f2;color:#666;}
+.vend-pill-aguardando{font-size:10px;padding:2px 8px;border-radius:20px;background:#FF7A1A;color:#fff;font-weight:700;animation:pulseAguardando 1.8s ease-in-out infinite;}
+@keyframes pulseAguardando{0%,100%{opacity:1;}50%{opacity:.5;}}
+.conv-btn.conv-aguardando{background:#FFF6ED;border-left:3px solid #FF7A1A;}
+.conv-btn.conv-aguardando.sel{background:#FFEBD6;}
 .unread{background:var(--rosa);color:#fff;font-size:10px;min-width:17px;height:17px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 3px;}
 .col2{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--white);}
 .chat-head{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;}
@@ -161,7 +165,7 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;}
 .qr-lbl{font-size:10px;color:var(--text3);white-space:nowrap;align-self:center;flex-shrink:0;}
 .qr-btn-item{font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);white-space:nowrap;background:var(--white);color:var(--text2);}
 .input-row{display:flex;align-items:center;gap:6px;padding:8px 12px;}
-.msg-input{flex:1;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:16px;color:var(--text);outline:none;background:var(--white);}
+.msg-input{flex:1;min-width:0;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:16px;color:var(--text);outline:none;background:var(--white);}
 .msg-input:focus{border-color:var(--rosa);}
 .icon-btn{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);background:var(--white);color:var(--text2);flex-shrink:0;}
 .icon-btn.rec-on{background:var(--rosa);border-color:var(--rosa);color:#fff;}
@@ -251,7 +255,7 @@ input,textarea,select{font-family:inherit;-webkit-appearance:none;}
   .col1.mob-on,.col2.mob-on,.col3.mob-on{display:flex;}
   .metrics{grid-template-columns:repeat(2,1fr);}
   .report-stats{grid-template-columns:repeat(2,1fr);}
-  .chat-actions .hide-mob{display:none;}
+  .chat-actions .hide-mob,.input-row .hide-mob{display:none;}
 }
 @media(min-width:769px){
   .col1,.col2,.col3{display:flex !important;}
@@ -626,7 +630,7 @@ input, textarea { cursor: text; }
 </div>
 <div class="app" id="app">
   <div class="sidebar">
-    <div class="sb-logo"><div class="sb-logo-ico">MM</div><div><div class="sb-logo-text">MekMix CRM</div><div style="color:rgba(255,255,255,.5);font-size:10px;" id="sb-role-lbl">Admin</div></div></div>
+    <div class="sb-logo"><div class="sb-logo-ico">MM</div><div><div class="sb-logo-text" id="sb-logo-name">MekMix CRM</div><div style="color:rgba(255,255,255,.5);font-size:10px;" id="sb-role-lbl">Admin</div></div></div>
     <div style="padding:10px 14px 0;position:relative;">
       <button id="btn-notif-sino" style="width:100%;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 10px;color:#fff;cursor:pointer;font-size:12px;">
         <i class="ti ti-bell" style="font-size:16px;"></i>
@@ -641,7 +645,7 @@ input, textarea { cursor: text; }
     <div style="padding-top:6px;">
       <div class="sb-sec">Principal</div>
       <button class="sb-btn" data-page="dashboard"><i class="ti ti-home"></i><span class="sb-btn-lbl">Início</span></button>
-      <button class="sb-btn active" data-page="chats"><i class="ti ti-message-circle"></i><span class="sb-btn-lbl">Chats ao vivo</span><span class="sb-badge">8</span></button>
+      <button class="sb-btn active" data-page="chats"><i class="ti ti-message-circle"></i><span class="sb-btn-lbl">Chats ao vivo</span><span class="sb-badge" id="sb-chats-badge" style="display:none;">0</span></button>
       <button class="sb-btn" data-page="chatinterno"><i class="ti ti-messages"></i><span class="sb-btn-lbl">Chat interno</span></button>
       <button class="sb-btn" data-page="kanban"><i class="ti ti-layout-kanban"></i><span class="sb-btn-lbl">Kanban</span></button>
       <button class="sb-btn" data-page="contatos"><i class="ti ti-users"></i><span class="sb-btn-lbl">Contatos</span></button>
@@ -723,9 +727,21 @@ input, textarea { cursor: text; }
           <div class="chat-body" id="chat-body"></div>
           <div class="chat-footer">
             <div class="qr-row" id="qr-row"><span class="qr-lbl">Rápidas:</span></div>
+            <div id="atd-anexo-preview" style="display:none;padding:6px 4px;background:#FAF6FB;border-radius:8px;margin-bottom:6px;font-size:11px;align-items:center;gap:8px;">
+              <i class="ti ti-paperclip" style="font-size:13px;color:#772583;"></i>
+              <span id="atd-anexo-preview-nome" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+              <button id="atd-anexo-cancelar" style="background:none;border:none;color:#791F1F;cursor:pointer;font-size:14px;">×</button>
+            </div>
+            <div id="atd-gravando-audio" style="display:none;padding:6px 4px;background:#FCEBEB;border-radius:8px;margin-bottom:6px;font-size:11px;align-items:center;gap:8px;">
+              <i class="ti ti-microphone" style="font-size:13px;color:#791F1F;"></i>
+              <span>Gravando áudio... <span id="atd-audio-timer">0:00</span></span>
+              <button id="atd-audio-cancelar" style="background:none;border:none;color:#791F1F;cursor:pointer;font-size:11px;margin-left:auto;">Cancelar</button>
+              <button id="atd-audio-parar" class="btn btn-sm btn-rosa" style="padding:2px 8px;">Enviar</button>
+            </div>
+            <input type="file" id="atd-file-input" style="display:none;" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"/>
             <div class="input-row">
               <button class="icon-btn hide-mob"><i class="ti ti-mood-smile" style="font-size:15px;"></i></button>
-              <button class="icon-btn hide-mob"><i class="ti ti-paperclip" style="font-size:15px;"></i></button>
+              <button class="icon-btn" id="atd-btn-attach"><i class="ti ti-paperclip" style="font-size:15px;"></i></button>
               <input type="text" class="msg-input" id="msg-input" placeholder="Mensagem..."/>
               <button class="icon-btn" id="btn-rec"><i class="ti ti-microphone" style="font-size:15px;"></i></button>
               <button class="icon-btn send-btn" id="btn-send"><i class="ti ti-send" style="font-size:15px;"></i></button>
@@ -757,7 +773,7 @@ input, textarea { cursor: text; }
             <select class="sel" id="sel-status"><option>Novo lead</option><option>Orçamento enviado</option><option>Arte pendente</option><option>Em produção</option><option>Entregue</option><option>Follow-up 30d</option></select>
           </div>
           <div class="col3-sec"><div class="col3-lbl">Etiquetas</div>
-            <div class="tag-row" id="c3-tags"><span class="pill p-novo">Novo lead</span><button class="pill" style="background:#f0f0f2;color:#666;border:none;" id="btn-add-tag">+ Adicionar</button></div>
+            <div class="tag-row" id="c3-tags"><button class="pill" style="background:#f0f0f2;color:#666;border:none;" id="btn-add-tag">+ Adicionar</button></div>
           </div>
           <div class="col3-sec"><div class="col3-lbl">Histórico de pedidos</div><div id="c3-hist"></div></div>
           <div class="col3-sec"><div class="col3-lbl">Data de entrega (follow-up 30d)</div><input type="date" class="sel"/></div>
@@ -892,7 +908,7 @@ input, textarea { cursor: text; }
             </div>
             <input type="file" id="ci-file-input" style="display:none;" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"/>
             <div class="input-row">
-              <button class="icon-btn hide-mob" id="ci-btn-attach"><i class="ti ti-paperclip" style="font-size:15px;"></i></button>
+              <button class="icon-btn" id="ci-btn-attach"><i class="ti ti-paperclip" style="font-size:15px;"></i></button>
               <input type="text" class="msg-input" id="ci-msg-input" placeholder="Mensagem..." disabled/>
               <button class="icon-btn" id="ci-btn-mic"><i class="ti ti-microphone" style="font-size:15px;"></i></button>
               <button class="icon-btn send-btn" id="ci-btn-send" disabled><i class="ti ti-send" style="font-size:15px;"></i></button>
@@ -1872,7 +1888,7 @@ input, textarea { cursor: text; }
 
     <div class="mob-nav"><div class="mob-nav-row">
       <button class="mob-nav-btn" data-mob-page="dashboard" data-mob-title="Início"><i class="ti ti-home"></i><span>Início</span></button>
-      <button class="mob-nav-btn active" data-mob-page="chats" data-mob-title="Chats"><i class="ti ti-message-circle"></i><span>Chats</span><span class="mob-badge">8</span></button>
+      <button class="mob-nav-btn active" data-mob-page="chats" data-mob-title="Chats"><i class="ti ti-message-circle"></i><span>Chats</span><span class="mob-badge" id="mob-chats-badge" style="display:none;">0</span></button>
       <button class="mob-nav-btn" data-mob-page="kanban" data-mob-title="Kanban"><i class="ti ti-layout-kanban"></i><span>Kanban</span></button>
       <button class="mob-nav-btn" data-mob-page="contatos" data-mob-title="Contatos"><i class="ti ti-users"></i><span>Contatos</span></button>
       <button class="mob-nav-btn" data-mob-page="followup" data-mob-title="Follow-up"><i class="ti ti-bell"></i><span>Follow-up</span><span class="mob-badge">3</span></button>
@@ -2192,7 +2208,7 @@ var USERS={};
 // durante o instante em que os dados ainda estão a caminho (comum logo
 // após F5, antes do carregamento assíncrono terminar).
 var DADOS_INICIAIS_CARREGADOS = false;
-var currentUser=null,currentPage='chats',mobState='list',resolveOn=false,recOn=false,currentKey='AC',editTplIdx=-1;
+var currentUser=null,currentPage='chats',mobState='list',resolveOn=false,recOn=false,currentKey=null,editTplIdx=-1;
 
 var TEMPLATES=[];
 
@@ -2298,16 +2314,24 @@ function initScriptVendas(){
   }
 }
 
-// O Chat ao vivo (integração com WhatsApp/Instagram/Facebook) ainda não
-// está conectado a nenhum serviço real — depende da verificação da
-// Business Manager e da decisão de API oficial, como já registrado em
-// outras partes do projeto. Por enquanto fica vazio de propósito, para
-// não passar a impressão de que já existe atendimento real acontecendo.
-var CONVDATA={};
-var CONVLIST=[];
+// ============================================================
+// CHATS AO VIVO — atendimento via WhatsApp, ligado de verdade ao banco
+// (tabelas atendimento_conversas / atendimento_mensagens). Um serviço à
+// parte (Node.js + Baileys, rodando 24h no Railway) é quem efetivamente
+// fala com o WhatsApp: ele grava as mensagens recebidas direto nessas
+// tabelas, e fica de olho em mensagens com status_envio='pendente' pra
+// mandar de verdade as que os vendedores escrevem por aqui. Esta tela só
+// lê e escreve nessas tabelas — não há nenhuma automação de resposta.
+// ============================================================
+var ATD_CONVERSAS={}; // chave: id da conversa (uuid) -> {...campos da conversa, msgs:[...]}
+var ATD_LISTA=[]; // ids das conversas, na ordem de exibição (mensagem mais recente primeiro)
+var atdConversaAtual=null;
+var atdRealtimeConversas=null;
+var atdRealtimeMensagens=null;
+var atdAnexoPendente=null; // {file, tipo:'imagem'|'documento'}
+var atdGravacao=null; // {mediaRecorder, chunks, timerInterval, segundos, stream}
 
 var PRICES={'330ml':{1:409,3:369},'400ml':{1:489,3:459},'500ml':{1:539,3:489},'770ml':{1:449,3:429}};
-var WAVE=[8,12,18,14,22,16,10,20,15,12,18,22,10,16,14,20,8,18,12,16];
 
 function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function now(){var d=new Date();return d.getHours()+':'+('0'+d.getMinutes()).slice(-2);}
@@ -2415,7 +2439,16 @@ function entrarComPerfil(userId, telefoneFallback, callback){
     // .chat-layout definidas no arquivo) pode aparecer sobreposto por um
     // instante, ou permanecer assim se algo abaixo travar.
     goPage('dashboard','Início');
-    applyRole();renderConvList();openConv('AC');
+    applyRole();
+    atdCarregarConversas(function(){
+      renderConvList();
+      atdAssinarRealtimeConversas();
+    });
+    // Liga a escuta em tempo real do Chat Interno já no login — assim
+    // mensagens de colegas chegam mesmo que a pessoa esteja em outra
+    // conversa ou em outra página do CRM no momento (antes só avisava se a
+    // conversa estivesse aberta na hora exata do envio).
+    if(typeof ciAssinarRealtimeGlobal==='function') ciAssinarRealtimeGlobal();
     tplCarregarDoBanco(function(){ renderTemplates(); renderQR(); });
     // Carrega os dados reais do banco (pedidos, estoque, histórico de
     // movimentações) antes de montar o dashboard — sem isso, o painel
@@ -2443,6 +2476,12 @@ function entrarComPerfil(userId, telefoneFallback, callback){
       // window.nomeDaFuncao=... feita logo depois de cada definição.
       if(typeof window.carregarEstoqueDoBanco==='function' && typeof window.carregarEstoqueLogDoBanco==='function' && typeof window.carregarPedidosDoBanco==='function' && typeof window.equipeCarregarTodos==='function'){
         window.equipeCarregarTodos(function(){
+          // USERS já populado — agora dá pra mostrar o nome de cada
+          // vendedor nos pills da lista de chats (antes, enquanto USERS
+          // ainda não tinha carregado, a lista já tinha sido montada com
+          // o _supabaseId cru no lugar do nome).
+          if(typeof renderConvList==='function') renderConvList();
+          if(typeof atdPopularSelectsVendedor==='function') atdPopularSelectsVendedor();
           window.carregarEstoqueDoBanco(function(){
             window.carregarEstoqueLogDoBanco(function(){
               window.carregarPedidosDoBanco(function(){
@@ -2525,6 +2564,11 @@ function applyRole(){
   document.getElementById('sb-name').textContent=currentUser.name;
   document.getElementById('sb-role').textContent=currentUser.role;
   document.getElementById('sb-role-lbl').textContent=currentUser.role;
+  // O topo da barra lateral mostrava sempre "MekMix CRM" (texto fixo),
+  // mesmo já logado — agora mostra o primeiro nome de quem está logado,
+  // igual ao cargo logo abaixo (que já era dinâmico).
+  var primeiroNome=(currentUser.name||'').trim().split(' ')[0];
+  document.getElementById('sb-logo-name').textContent=primeiroNome||currentUser.name;
   var av=document.getElementById('sb-av');av.textContent=currentUser.av;av.style.background=currentUser.color;
   document.querySelectorAll('.admin-only').forEach(function(el){el.style.display=currentUser.isAdmin?'':'none';});
   // "Atribuir vendedor" segue permissão própria, não o admin-only genérico:
@@ -2584,55 +2628,199 @@ function logout(){
 // Gisella) — só vê as conversas de todos os vendedores se tiver recebido a
 // permissão explícita "podeVerTodosClientes" do Admin Geral. Sem essa
 // permissão, cada um vê só os próprios clientes + os ainda não atribuídos.
+// Essa regra já é aplicada pelo próprio banco (RLS, funções atende_chats()/
+// ve_todos_chats()) — aqui só decide o que MOSTRAR na tela (pill do
+// vendedor), não o que é permitido ler.
 function horUsuarioVeTodosClientes(){
   return currentUser && (currentUser.isAdminGeral || currentUser.podeVerTodosClientes);
 }
 
+var ATD_PIPELINE_PILL={'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Entregue':'p-entregue','Follow-up 30d':'p-follow'};
+
+function atdNomePorSupabaseId(id){
+  if(!id) return null;
+  var chave = Object.keys(USERS).find(function(k){ return USERS[k]._supabaseId===id; });
+  return chave ? USERS[chave].name : null;
+}
+function atdCorPorTelefone(tel){
+  var cores=[{bg:'#FBEAF0',c:'#72243E'},{bg:'#EEEDFE',c:'#3C3489'},{bg:'#E1F5EE',c:'#085041'},{bg:'#FAEEDA',c:'#633806'},{bg:'#E0F0FF',c:'#1A5A9A'},{bg:'#FCEBEB',c:'#791F1F'}];
+  var s=(tel||'0').toString();var soma=0;for(var i=0;i<s.length;i++)soma+=s.charCodeAt(i);
+  return cores[soma%cores.length];
+}
+function atdIniciais(nome){
+  var n=(nome||'').trim();if(!n)return'?';
+  var partes=n.split(/\s+/);return partes.length>1?(partes[0][0]+partes[1][0]).toUpperCase():n.slice(0,2).toUpperCase();
+}
+function atdCanalInfo(canal){
+  if(canal==='instagram')return{chBg:'#E1306C',chIcon:'ti-brand-instagram',txt:'Instagram'};
+  if(canal==='facebook')return{chBg:'#1877F2',chIcon:'ti-brand-facebook',txt:'Facebook'};
+  return{chBg:'#25D366',chIcon:'ti-brand-whatsapp',txt:'WhatsApp'};
+}
+function atdFormatarTelefone(tel){
+  var d=(tel||'').replace(/\D/g,'');if(!d)return'';
+  var semDDI=d.length>=12&&d.slice(0,2)==='55'?d.slice(2):d;
+  if(semDDI.length===11)return'('+semDDI.slice(0,2)+') '+semDDI.slice(2,7)+'-'+semDDI.slice(7);
+  if(semDDI.length===10)return'('+semDDI.slice(0,2)+') '+semDDI.slice(2,6)+'-'+semDDI.slice(6);
+  return'+'+d;
+}
+function atdHoraCurta(iso){
+  if(!iso)return'';
+  var d=new Date(iso),agora=new Date();
+  return d.toDateString()===agora.toDateString()?d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+}
+function atdHoraMsg(iso){return iso?new Date(iso).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'agora';}
+function atdHistoricoPorTelefone(telefone){
+  var orders=window._ORDERS?window._ORDERS():[];
+  var tel=(telefone||'').replace(/\D/g,'');
+  return orders.filter(function(o){return(o.wapp||'').replace(/\D/g,'')===tel;})
+    .sort(function(a,b){return(b.data||'').localeCompare(a.data||'');})
+    .map(function(o){return{prod:o.prodDesc||o.prod,data:o.data,vend:o.vendedor,valor:'R$ '+(o.valor||0).toLocaleString('pt-BR',{minimumFractionDigits:2}),status:o.status,cidade:o.cidade};});
+}
+
+// Carrega as conversas reais do banco (a visibilidade já vem filtrada pelo
+// RLS — cada vendedor só recebe o que tem permissão de ver).
+function atdCarregarConversas(callback){
+  if(!sbClient){if(callback)callback();return;}
+  sbClient.from('atendimento_conversas').select('*').order('ultima_mensagem_em',{ascending:false,nullsFirst:false}).then(function(res){
+    if(!res.error&&res.data){
+      ATD_LISTA=res.data.map(function(c){atdAplicarConversaAtualizada(c,true);return c.id;});
+    }
+    if(callback)callback();
+  });
+}
+
+// Centraliza a atualização de UMA conversa (usado tanto no carregamento
+// inicial quanto no realtime de INSERT/UPDATE). semReordenar evita
+// reordenar a lista toda vez que isso é chamado em lote no carregamento.
+function atdAplicarConversaAtualizada(c,semReordenar){
+  var nova=!ATD_CONVERSAS[c.id];
+  if(nova)ATD_CONVERSAS[c.id]={msgs:[],carregouMsgs:false};
+  var a=ATD_CONVERSAS[c.id];
+  a.id=c.id;a.telefone=c.telefone;a.nomeContato=c.nome_contato;a.canal=c.canal;
+  a.clienteId=c.cliente_id;a.vendedorId=c.vendedor_atual_id;a.pipelineStatus=c.pipeline_status;
+  a.atendimentoStatus=c.atendimento_status;a.tags=c.tags||[];a.preview=c.ultima_mensagem_preview;
+  a.ultimaEm=c.ultima_mensagem_em;a.criadaEm=c.criada_em;
+  if(!semReordenar){
+    if(nova)ATD_LISTA.push(c.id);
+    ATD_LISTA.sort(function(x,y){
+      var tx=ATD_CONVERSAS[x].ultimaEm?new Date(ATD_CONVERSAS[x].ultimaEm).getTime():0;
+      var ty=ATD_CONVERSAS[y].ultimaEm?new Date(ATD_CONVERSAS[y].ultimaEm).getTime():0;
+      return ty-tx;
+    });
+    renderConvList();
+    if(currentKey===c.id)atdAtualizarPainelDetalhes(a);
+  }
+  return a;
+}
+
+function atdAssinarRealtimeConversas(){
+  if(!sbClient)return;
+  if(atdRealtimeConversas)sbClient.removeChannel(atdRealtimeConversas);
+  atdRealtimeConversas=sbClient.channel('atendimento_conversas_live')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'atendimento_conversas'},function(payload){atdAplicarConversaAtualizada(payload.new);})
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'atendimento_conversas'},function(payload){atdAplicarConversaAtualizada(payload.new);})
+    .subscribe();
+}
+
 function renderConvList(filter,search){
-  var list=document.getElementById('conv-list');list.innerHTML='';var shown=0;
-  CONVLIST.forEach(function(c){
-    var d=CONVDATA[c.key];
-    if(!horUsuarioVeTodosClientes()&&d.vendedor!==currentUser.name&&d.vendedor!=='—')return;
-    if(search){var s=search.toLowerCase();if(d.name.toLowerCase().indexOf(s)<0&&d.wapp.indexOf(s)<0&&d.cidade.toLowerCase().indexOf(s)<0)return;}
-    if(filter&&filter!=='todos'){
-      if(filter==='meus'&&d.vendedor!==currentUser.name)return;
-      if(filter==='sem'&&d.vendedor!=='—')return;
-      if(filter==='wa'&&d.canalTxt!=='WhatsApp')return;
-      if(filter==='ig'&&d.canalTxt!=='Instagram')return;
-      if(filter==='fb'&&d.canalTxt!=='Facebook')return;
+  var list=document.getElementById('conv-list');if(!list)return;
+  list.innerHTML='';var shown=0,aguardando=0;
+  var filtroAtivo=filter!==undefined?filter:(document.querySelector('.fbtn.active')?document.querySelector('.fbtn.active').getAttribute('data-filter'):'todos');
+  var termo=(search!==undefined?search:(document.getElementById('conv-search')?document.getElementById('conv-search').value:''))||'';
+  ATD_LISTA.forEach(function(id){
+    var d=ATD_CONVERSAS[id];if(!d)return;
+    var semVendedor=!d.vendedorId;
+    if(semVendedor&&(d.atendimentoStatus||'aberto')!=='resolvido')aguardando++;
+    var nomeExibicao=d.nomeContato||atdFormatarTelefone(d.telefone)||d.telefone;
+    if(termo){
+      var s=termo.toLowerCase();
+      if(nomeExibicao.toLowerCase().indexOf(s)<0&&(d.telefone||'').indexOf(s.replace(/\D/g,''))<0)return;
+    }
+    var canal=(d.canal||'whatsapp').toLowerCase();
+    if(filtroAtivo&&filtroAtivo!=='todos'){
+      if(filtroAtivo==='meus'&&d.vendedorId!==currentUser._supabaseId)return;
+      if(filtroAtivo==='sem'&&!semVendedor)return;
+      if(filtroAtivo==='wa'&&canal!=='whatsapp')return;
+      if(filtroAtivo==='ig'&&canal!=='instagram')return;
+      if(filtroAtivo==='fb'&&canal!=='facebook')return;
     }
     shown++;
+    var cor=atdCorPorTelefone(d.telefone);
+    var canalInfo=atdCanalInfo(canal);
+    var pillClasse=ATD_PIPELINE_PILL[d.pipelineStatus]||'p-novo';
+    var nomeVendedor=d.vendedorId?atdNomePorSupabaseId(d.vendedorId):null;
+    var vendHtml=semVendedor
+      ?'<span class="vend-pill-aguardando">⚠ Sem atendimento</span>'
+      :(horUsuarioVeTodosClientes()?'<span class="vend-pill">'+esc(nomeVendedor||'—')+'</span>':'');
     var btn=document.createElement('button');
-    btn.className='conv-btn'+(c.key===currentKey?' sel':'');
-    btn.setAttribute('data-key',c.key);
-    btn.innerHTML='<div class="conv-av" style="background:'+d.bg+';color:'+d.color+';">'+d.init+'<span class="ch-badge" style="background:'+c.chBg+';"><i class="ti '+c.chIcon+'" style="font-size:7px;color:#fff;"></i></span></div><div class="conv-body"><div class="conv-top"><span class="conv-name">'+d.name+'</span><span class="conv-time">'+c.time+'</span></div><div class="conv-preview">'+c.preview+'</div><div class="conv-foot"><span class="pill '+c.pill+'">'+c.pillTxt+'</span>'+(c.pill2?'<span class="pill '+c.pill2+'" style="margin-left:4px;">'+c.pill2Txt+'</span>':'')+(c.unread?'<span class="unread">'+c.unread+'</span>':'')+(c.vend&&horUsuarioVeTodosClientes()?'<span class="vend-pill">'+c.vend+'</span>':(!c.vend?'<span class="vend-pill" style="background:#f0f0f2;color:#888;">Sem vendedor</span>':''))+'</div></div>';
+    btn.className='conv-btn'+(id===currentKey?' sel':'')+(semVendedor?' conv-aguardando':'');
+    btn.setAttribute('data-key',id);
+    btn.innerHTML='<div class="conv-av" style="background:'+cor.bg+';color:'+cor.c+';">'+atdIniciais(nomeExibicao)+
+      '<span class="ch-badge" style="background:'+canalInfo.chBg+';"><i class="ti '+canalInfo.chIcon+'" style="font-size:7px;color:#fff;"></i></span></div>'+
+      '<div class="conv-body"><div class="conv-top"><span class="conv-name">'+esc(nomeExibicao)+'</span><span class="conv-time">'+atdHoraCurta(d.ultimaEm)+'</span></div>'+
+      '<div class="conv-preview">'+esc(d.preview||'')+'</div>'+
+      '<div class="conv-foot"><span class="pill '+pillClasse+'">'+esc(d.pipelineStatus||'Novo lead')+'</span>'+vendHtml+'</div></div>';
     list.appendChild(btn);
   });
-  document.getElementById('conv-count').textContent=shown+' abertos';
+  document.getElementById('conv-count').textContent=shown+' abert'+(shown===1?'o':'os');
+  ['sb-chats-badge','mob-chats-badge'].forEach(function(id){
+    var badge=document.getElementById(id);
+    if(badge){if(aguardando>0){badge.style.display='';badge.textContent=aguardando;}else{badge.style.display='none';}}
+  });
 }
 
 // ── OPEN CONV ──
 function openConv(key){
-  currentKey=key;var d=CONVDATA[key];if(!d)return;
+  currentKey=key;var d=ATD_CONVERSAS[key];if(!d)return;
   document.querySelectorAll('.conv-btn').forEach(function(b){b.classList.remove('sel');});
   var sel=document.querySelector('.conv-btn[data-key="'+key+'"]');if(sel)sel.classList.add('sel');
-  var chAv=document.getElementById('ch-av');chAv.textContent=d.init;chAv.style.background=d.bg;chAv.style.color=d.color;
-  document.getElementById('ch-name').textContent=d.name;
-  document.getElementById('ch-sub').textContent=d.sub;
-  var c3av=document.getElementById('c3-av');c3av.textContent=d.init;c3av.style.background=d.bg;c3av.style.color=d.color;
-  document.getElementById('c3-name').textContent=d.name;
-  document.getElementById('c3-sub').textContent=d.cidade;
-  document.getElementById('c3-wapp').textContent=d.wapp;
-  document.getElementById('c3-canal').innerHTML=d.canalHtml;
-  document.getElementById('c3-cidade').textContent=d.cidade;
-  document.getElementById('c3-vendedor').textContent=d.vendedor;
-  var st=document.getElementById('c3-status');st.className='pill '+d.pill;st.textContent=d.status;
-  document.getElementById('c3-nota').value=d.nota;
-  renderHistCol3(d.hist);renderMsgs(d.msgs);
-  document.getElementById('transfer-client').textContent=d.name;
-  document.getElementById('pdf-cliente').value=d.name;
-  updatePDF();
+  atdAtualizarPainelDetalhes(d);
+  document.getElementById('chat-body').innerHTML='<div style="text-align:center;color:var(--text3);font-size:12px;font-style:italic;padding:30px 20px;">Carregando mensagens...</div>';
+  atdCarregarMensagens(key,function(){
+    renderMsgs(d.msgs);
+    atdAssinarRealtimeMensagens(key);
+  });
   if(window.innerWidth<=768){mobState='chat';updateMobView();}
+}
+
+// Preenche cabeçalho do chat + painel de detalhes (col3) a partir de uma
+// conversa já carregada em ATD_CONVERSAS — chamado tanto ao abrir quanto
+// quando o realtime atualiza a conversa que já está aberta na tela.
+function atdAtualizarPainelDetalhes(d){
+  var nomeExibicao=d.nomeContato||atdFormatarTelefone(d.telefone)||d.telefone;
+  var cor=atdCorPorTelefone(d.telefone);
+  var canal=(d.canal||'whatsapp').toLowerCase();
+  var canalInfo=atdCanalInfo(canal);
+  var nomeVendedor=d.vendedorId?(atdNomePorSupabaseId(d.vendedorId)||'—'):'— Sem atribuição';
+  var hist=atdHistoricoPorTelefone(d.telefone);
+  var cidade=hist.length?(hist[0].cidade||''):'';
+
+  var chAv=document.getElementById('ch-av');chAv.textContent=atdIniciais(nomeExibicao);chAv.style.background=cor.bg;chAv.style.color=cor.c;
+  document.getElementById('ch-name').textContent=nomeExibicao;
+  document.getElementById('ch-sub').textContent=canalInfo.txt+(d.atendimentoStatus==='resolvido'?' · resolvido':'');
+  var c3av=document.getElementById('c3-av');c3av.textContent=atdIniciais(nomeExibicao);c3av.style.background=cor.bg;c3av.style.color=cor.c;
+  document.getElementById('c3-name').textContent=nomeExibicao;
+  document.getElementById('c3-sub').textContent=cidade;
+  document.getElementById('c3-wapp').textContent=atdFormatarTelefone(d.telefone);
+  document.getElementById('c3-canal').innerHTML='<i class="ti '+canalInfo.chIcon+'" style="font-size:12px;color:'+canalInfo.chBg+';"></i> '+canalInfo.txt;
+  document.getElementById('c3-cidade').textContent=cidade||'—';
+  document.getElementById('c3-vendedor').textContent=nomeVendedor;
+  var st=document.getElementById('c3-status');st.className='pill '+(ATD_PIPELINE_PILL[d.pipelineStatus]||'p-novo');st.textContent=d.pipelineStatus||'Novo lead';
+  var selStatus=document.getElementById('sel-status');if(selStatus)selStatus.value=d.pipelineStatus||'Novo lead';
+  var selVend=document.getElementById('sel-vendedor');if(selVend)selVend.value=d.vendedorId||'';
+  document.getElementById('c3-nota').value='';
+  var tagsRow=document.getElementById('c3-tags');
+  var btnAddTag=document.getElementById('btn-add-tag');
+  tagsRow.innerHTML='';
+  (d.tags||[]).forEach(function(tag){var span=document.createElement('span');span.className='pill p-orc';span.textContent=tag;tagsRow.appendChild(span);});
+  tagsRow.appendChild(btnAddTag);
+  var btnResolve=document.getElementById('btn-resolve');
+  if(d.atendimentoStatus==='resolvido'){btnResolve.innerHTML='<i class="ti ti-rotate-clockwise" style="font-size:12px;"></i> Reabrir';btnResolve.style.background='#085041';btnResolve.style.borderColor='#085041';}
+  else{btnResolve.innerHTML='<i class="ti ti-check" style="font-size:12px;"></i> Resolver';btnResolve.style.background='#E31787';btnResolve.style.borderColor='#E31787';}
+  renderHistCol3(hist);
+  document.getElementById('transfer-client').textContent=nomeExibicao;
+  document.getElementById('pdf-cliente').value=nomeExibicao;
+  updatePDF();
 }
 
 function renderHistCol3(hist){
@@ -2641,19 +2829,120 @@ function renderHistCol3(hist){
   el.innerHTML=hist.map(function(h){return '<div class="hist-item"><div class="hist-prod">'+h.prod+'</div><div class="hist-meta">'+h.data+' · '+h.vend+'</div><div class="hist-val">'+h.valor+' <span class="pill '+(h.status==='Entregue'?'p-entregue':'p-prod')+'" style="font-size:9px;">'+h.status+'</span></div></div>';}).join('');
 }
 
-function renderMsgs(msgs){
-  var body=document.getElementById('chat-body');
-  body.innerHTML='<div class="date-sep">Hoje, 24 de junho</div>';
-  var bars=WAVE.map(function(h){return '<span style="height:'+h+'px;"></span>';}).join('');
-  msgs.forEach(function(m){
-    if(m.t==='note'){var n=document.createElement('div');n.className='note-bubble';n.innerHTML='<div class="note-lbl"><i class="ti ti-lock" style="font-size:11px;"></i> Nota interna — '+esc(m.w)+'</div>'+esc(m.m);body.appendChild(n);}
-    else if(m.t==='audio'){var a=document.createElement('div');a.className='msg msg-in';a.innerHTML='<div class="audio-wrap"><button class="audio-play" onclick="togglePlay(this)"><i class="ti ti-player-play" style="font-size:12px;color:#fff;"></i></button><div class="audio-wave">'+bars+'</div><span style="font-size:10px;color:#aaa;">0:34</span></div><div class="msg-meta">'+m.h+'</div>';body.appendChild(a);}
-    else{var div=document.createElement('div');div.className='msg msg-'+m.t;var html='';if(m.t==='in'&&m.s)html+='<div class="msg-sender">'+esc(m.s)+'</div>';html+='<div class="msg-bubble">'+esc(m.m).replace(/\n/g,'<br>')+'</div><div class="msg-meta">'+(m.t==='out'?m.h+' · '+esc(m.w||''):m.h)+'</div>';div.innerHTML=html;body.appendChild(div);}
-  });
-  body.scrollTop=body.scrollHeight;
+function atdMapearLinhaMensagem(m){
+  return{id:m.id,direcao:m.direcao,tipo:m.tipo,conteudo:m.conteudo,midiaUrl:m.midia_url,midiaMime:m.midia_mime,
+    midiaNome:m.midia_nome_original,statusEnvio:m.status_envio,erro:m.erro,remetenteId:m.remetente_vendedor_id,
+    criadaEm:m.criada_em,urlLocal:null};
 }
 
-function togglePlay(btn){var ic=btn.querySelector('i');if(!ic)return;ic.className=ic.className.indexOf('play')>-1?'ti ti-player-pause':'ti ti-player-play';ic.style.fontSize='12px';ic.style.color='#fff';}
+function renderMsgs(msgs){
+  var body=document.getElementById('chat-body');
+  body.innerHTML='';
+  if(!msgs||!msgs.length){
+    body.innerHTML='<div style="text-align:center;color:var(--text3);font-size:12px;font-style:italic;padding:30px 20px;">Nenhuma mensagem ainda.</div>';
+    return;
+  }
+  var diaAnterior=null;
+  msgs.forEach(function(m,idx){
+    var diaMsg=m.criadaEm?new Date(m.criadaEm).toLocaleDateString('pt-BR',{day:'2-digit',month:'long'}):'';
+    if(diaMsg&&diaMsg!==diaAnterior){
+      var sep=document.createElement('div');sep.className='date-sep';sep.textContent=diaMsg;body.appendChild(sep);diaAnterior=diaMsg;
+    }
+    body.appendChild(atdRenderBolha(m,idx));
+  });
+  body.scrollTop=body.scrollHeight;
+  atdCarregarUrlsAssinadas(msgs,body);
+}
+
+function atdRenderBolha(m,idx){
+  if(m.direcao==='nota'){
+    var n=document.createElement('div');n.className='note-bubble';
+    var nomeNota=atdNomePorSupabaseId(m.remetenteId)||(currentUser?currentUser.name:'');
+    n.innerHTML='<div class="note-lbl"><i class="ti ti-lock" style="font-size:11px;"></i> Nota interna — '+esc(nomeNota)+' · '+atdHoraMsg(m.criadaEm)+'</div>'+esc(m.conteudo||'');
+    return n;
+  }
+  var out=m.direcao==='saida';
+  var div=document.createElement('div');div.className='msg '+(out?'msg-out':'msg-in');
+  div.setAttribute('data-msg-idx',idx);
+  var conteudoHtml;
+  if(m.tipo==='imagem'){
+    conteudoHtml='<div>'+(m.urlLocal?'<img src="'+esc(m.urlLocal)+'" style="max-width:220px;border-radius:8px;display:block;"/>':'<div style="width:200px;height:110px;background:#eee;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#999;font-size:11px;">'+(m.enviando?'Enviando...':'Carregando...')+'</div>')+(m.conteudo?'<div style="margin-top:4px;">'+esc(m.conteudo)+'</div>':'')+'</div>';
+  }else if(m.tipo==='audio'){
+    conteudoHtml=m.urlLocal?'<audio controls src="'+esc(m.urlLocal)+'" style="max-width:220px;height:36px;"></audio>':'<div style="font-size:11px;color:var(--text3);">🎤 '+(m.enviando?'Enviando...':'Carregando áudio...')+'</div>';
+  }else if(m.tipo==='documento'){
+    conteudoHtml='<div style="display:flex;align-items:center;gap:8px;"><i class="ti ti-file-text" style="font-size:20px;"></i>'+(m.urlLocal?'<a href="'+esc(m.urlLocal)+'" target="_blank" style="color:inherit;text-decoration:underline;">'+esc(m.midiaNome||'arquivo')+'</a>':'<span>'+esc(m.midiaNome||(m.enviando?'Enviando...':'arquivo'))+'</span>')+'</div>';
+  }else if(m.tipo==='video'){
+    conteudoHtml=m.urlLocal?'<video controls src="'+esc(m.urlLocal)+'" style="max-width:220px;border-radius:8px;"></video>':'<div style="font-size:11px;color:var(--text3);">🎞 '+(m.enviando?'Enviando...':'Carregando vídeo...')+'</div>';
+  }else{
+    conteudoHtml=esc(m.conteudo||'').replace(/\n/g,'<br>');
+  }
+  var metaExtra;
+  if(out){
+    var nomeVend=atdNomePorSupabaseId(m.remetenteId)||(m.remetenteId===(currentUser&&currentUser._supabaseId)?currentUser.name:'');
+    var statusTxt=m.statusEnvio==='falha'?' · <span style="color:#C0392B;cursor:pointer;" data-retry-msg="'+idx+'" title="Clique pra tentar enviar de novo">⚠ falhou, tentar de novo</span>':
+      (m.statusEnvio==='enviado'?' · ✓ enviado':(m.statusEnvio==='pendente'?' · enviando...':''));
+    metaExtra=atdHoraMsg(m.criadaEm)+(nomeVend?' · '+esc(nomeVend):'')+statusTxt;
+  }else{
+    metaExtra=atdHoraMsg(m.criadaEm);
+  }
+  div.innerHTML='<div class="msg-bubble">'+conteudoHtml+'</div><div class="msg-meta">'+metaExtra+'</div>';
+  return div;
+}
+
+// Bucket "atendimento-midia" é privado — toda mídia precisa de uma URL
+// assinada (válida por 1h) pra poder ser exibida/tocada no navegador.
+function atdCarregarUrlsAssinadas(msgs,body){
+  if(!sbClient)return;
+  msgs.forEach(function(m,idx){
+    if(m.urlLocal||!m.midiaUrl||m.tipo==='texto')return;
+    sbClient.storage.from('atendimento-midia').createSignedUrl(m.midiaUrl,3600).then(function(res){
+      if(res.error)return;
+      m.urlLocal=res.data.signedUrl;
+      var el=body.querySelector('[data-msg-idx="'+idx+'"]');
+      if(!el)return;
+      el.replaceWith(atdRenderBolha(m,idx));
+    });
+  });
+}
+
+function atdCarregarMensagens(conversaId,callback){
+  var conv=ATD_CONVERSAS[conversaId];
+  if(!conv||!sbClient){if(callback)callback();return;}
+  sbClient.from('atendimento_mensagens').select('*').eq('conversa_id',conversaId).order('criada_em',{ascending:true}).then(function(res){
+    if(!res.error&&res.data)conv.msgs=res.data.map(atdMapearLinhaMensagem);
+    conv.carregouMsgs=true;
+    if(callback)callback();
+  });
+}
+
+// Realtime por conversa: mensagens novas (de entrada, do próprio cliente)
+// aparecem na hora, e atualizações de status_envio (a ponte confirmando
+// envio/falha) refletem na bolha certa sem precisar recarregar a tela.
+function atdAssinarRealtimeMensagens(conversaId){
+  if(!sbClient)return;
+  if(atdRealtimeMensagens)sbClient.removeChannel(atdRealtimeMensagens);
+  atdRealtimeMensagens=sbClient.channel('atendimento_mensagens_'+conversaId)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'atendimento_mensagens',filter:'conversa_id=eq.'+conversaId},function(payload){
+      if(currentKey!==conversaId)return;
+      if(payload.new.remetente_vendedor_id&&currentUser&&payload.new.remetente_vendedor_id===currentUser._supabaseId)return; // já foi adicionado localmente ao enviar
+      var conv=ATD_CONVERSAS[conversaId];if(!conv)return;
+      conv.msgs.push(atdMapearLinhaMensagem(payload.new));
+      renderMsgs(conv.msgs);
+    })
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'atendimento_mensagens',filter:'conversa_id=eq.'+conversaId},function(payload){
+      if(currentKey!==conversaId)return;
+      var conv=ATD_CONVERSAS[conversaId];if(!conv)return;
+      var idx=-1;
+      for(var i=0;i<conv.msgs.length;i++){if(conv.msgs[i].id===payload.new.id){idx=i;break;}}
+      if(idx>=0){
+        var urlAntiga=conv.msgs[idx].urlLocal;
+        conv.msgs[idx]=atdMapearLinhaMensagem(payload.new);
+        conv.msgs[idx].urlLocal=urlAntiga;
+        renderMsgs(conv.msgs);
+      }
+    })
+    .subscribe();
+}
 
 // ── TEMPLATES ──
 function renderTemplates(){
@@ -2731,11 +3020,13 @@ function updatePDF(){
 
 // ── HIST MODAL ──
 function openHistModal(key){
-  var d=CONVDATA[key];if(!d)return;
-  document.getElementById('hist-title').textContent='Histórico — '+d.name;
+  var d=ATD_CONVERSAS[key];if(!d)return;
+  var nomeExibicao=d.nomeContato||atdFormatarTelefone(d.telefone)||d.telefone;
+  var hist=atdHistoricoPorTelefone(d.telefone);
+  document.getElementById('hist-title').textContent='Histórico — '+nomeExibicao;
   var body=document.getElementById('hist-body');
-  if(!d.hist||!d.hist.length){body.innerHTML='<p style="color:#aaa;font-style:italic;">Nenhum pedido anterior.</p>';}
-  else{body.innerHTML='<div style="margin-bottom:12px;font-size:12px;color:#666;">'+d.cidade+' · '+d.wapp+'</div>'+d.hist.map(function(h){return '<div class="panel" style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:13px;font-weight:600;">'+h.prod+'</div><div style="font-size:11px;color:#666;margin-top:2px;">'+h.data+' · '+h.vend+'</div></div><div style="text-align:right;"><div style="font-size:14px;font-weight:600;color:#E31787;">'+h.valor+'</div><span class="pill '+(h.status==='Entregue'?'p-entregue':'p-prod')+'">'+h.status+'</span></div></div></div>';}).join('');}
+  if(!hist.length){body.innerHTML='<p style="color:#aaa;font-style:italic;">Nenhum pedido anterior.</p>';}
+  else{body.innerHTML='<div style="margin-bottom:12px;font-size:12px;color:#666;">'+(hist[0].cidade||'')+' · '+atdFormatarTelefone(d.telefone)+'</div>'+hist.map(function(h){return '<div class="panel" style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:13px;font-weight:600;">'+h.prod+'</div><div style="font-size:11px;color:#666;margin-top:2px;">'+h.data+' · '+h.vend+'</div></div><div style="text-align:right;"><div style="font-size:14px;font-weight:600;color:#E31787;">'+h.valor+'</div><span class="pill '+(h.status==='Entregue'?'p-entregue':'p-prod')+'">'+h.status+'</span></div></div></div>';}).join('');}
   openModal('modal-hist');
 }
 
@@ -2787,13 +3078,171 @@ function updateMobView(){
 function mobBack(){if(mobState==='detail')mobState='chat';else if(mobState==='chat')mobState='list';updateMobView();}
 
 // ── SEND MSG ──
+// Só grava em atendimento_mensagens com status_envio='pendente' — quem
+// manda de verdade pro WhatsApp é a ponte (Node.js/Baileys) rodando no
+// Railway, que fica de olho nesse status e atualiza para 'enviado'/'falha'
+// depois. Daqui, a UI já mostra a mensagem na hora (otimista) e atualiza
+// sozinha quando a resposta da ponte chega (realtime de UPDATE).
 function sendMsg(){
-  var inp=document.getElementById('msg-input');var text=(inp.value||'').trim();if(!text)return;
-  var body=document.getElementById('chat-body');
-  var div=document.createElement('div');div.className='msg msg-out';
-  div.innerHTML='<div class="msg-bubble">'+esc(text).replace(/\n/g,'<br>')+'</div><div class="msg-meta">'+now()+' · '+currentUser.name+'</div>';
-  body.appendChild(div);inp.value='';body.scrollTop=body.scrollHeight;
+  if(!currentKey){toast('Selecione uma conversa primeiro.');return;}
+  if(atdAnexoPendente){
+    var pend=atdAnexoPendente;atdAnexoPendente=null;
+    document.getElementById('atd-anexo-preview').style.display='none';
+    atdEnviarAnexo(pend.file,pend.tipo);
+    return;
+  }
+  var inp=document.getElementById('msg-input');
+  var texto=(inp.value||'').trim();
+  if(!texto)return;
+  inp.value='';
+  atdEnviarTexto(texto);
 }
+
+function atdEnviarTexto(texto){
+  var conv=ATD_CONVERSAS[currentKey];
+  if(!conv||!sbClient){toast('Conversa ainda não está pronta, aguarde.');return;}
+  var msgTemp={direcao:'saida',tipo:'texto',conteudo:texto,statusEnvio:'pendente',criadaEm:new Date().toISOString(),remetenteId:currentUser._supabaseId};
+  conv.msgs.push(msgTemp);
+  renderMsgs(conv.msgs);
+  sbClient.from('atendimento_mensagens').insert({
+    conversa_id:conv.id,direcao:'saida',tipo:'texto',conteudo:texto,
+    status_envio:'pendente',remetente_vendedor_id:currentUser._supabaseId
+  }).select().single().then(function(res){
+    if(res.error){msgTemp.statusEnvio='falha';msgTemp.erro=res.error.message;renderMsgs(conv.msgs);toast('Erro ao enviar: '+res.error.message);return;}
+    var urlLocal=msgTemp.urlLocal;
+    Object.assign(msgTemp,atdMapearLinhaMensagem(res.data));
+    msgTemp.urlLocal=urlLocal;
+    renderMsgs(conv.msgs);
+  });
+}
+
+// Anexo (imagem/documento): sobe pro bucket atendimento-midia, caminho
+// "telefone/timestamp_nomedoarquivo" — mesmo padrão que a ponte usa pras
+// mídias recebidas, então tudo fica organizado por cliente no bucket.
+function atdEnviarAnexo(file,tipo){
+  var conv=ATD_CONVERSAS[currentKey];
+  if(!conv||!sbClient){toast('Conversa ainda não está pronta, aguarde.');return;}
+  if(file.size>15*1024*1024){toast('Arquivo muito grande — limite de 15MB.');return;}
+  var urlLocal=tipo==='imagem'?URL.createObjectURL(file):null;
+  var msgTemp={direcao:'saida',tipo:tipo,conteudo:null,midiaNome:file.name,midiaMime:file.type,urlLocal:urlLocal,enviando:true,statusEnvio:'pendente',criadaEm:new Date().toISOString(),remetenteId:currentUser._supabaseId};
+  conv.msgs.push(msgTemp);
+  renderMsgs(conv.msgs);
+  var nomeSeguro=file.name.replace(/[^a-zA-Z0-9.\-_]/g,'_');
+  var caminho=(conv.telefone||'sem-telefone')+'/'+Date.now()+'_'+nomeSeguro;
+  sbClient.storage.from('atendimento-midia').upload(caminho,file,{contentType:file.type||'application/octet-stream'}).then(function(resUpload){
+    if(resUpload.error){msgTemp.statusEnvio='falha';msgTemp.enviando=false;toast('Erro ao enviar arquivo: '+resUpload.error.message);renderMsgs(conv.msgs);return;}
+    sbClient.from('atendimento_mensagens').insert({
+      conversa_id:conv.id,direcao:'saida',tipo:tipo,midia_url:caminho,midia_mime:file.type||null,
+      midia_nome_original:file.name,status_envio:'pendente',remetente_vendedor_id:currentUser._supabaseId
+    }).select().single().then(function(res){
+      msgTemp.enviando=false;
+      if(res.error){msgTemp.statusEnvio='falha';msgTemp.erro=res.error.message;toast('Arquivo subiu, mas a mensagem pode não ter sido salva: '+res.error.message);renderMsgs(conv.msgs);return;}
+      Object.assign(msgTemp,atdMapearLinhaMensagem(res.data));
+      msgTemp.urlLocal=urlLocal;
+      renderMsgs(conv.msgs);
+    });
+  });
+}
+
+// Áudio: grava direto no navegador (webm/opus) — a conversão pro formato
+// de nota de voz do WhatsApp (ogg/opus) é feita pela ponte, não aqui.
+function atdIniciarGravacaoAudio(){
+  if(!currentKey){toast('Escolha uma conversa primeiro.');return;}
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){toast('Seu navegador não permite gravar áudio aqui.');return;}
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+    var chunks=[];
+    var mediaRecorder=new MediaRecorder(stream);
+    mediaRecorder.ondataavailable=function(e){if(e.data.size>0)chunks.push(e.data);};
+    var segundos=0;
+    var timerInterval=setInterval(function(){
+      segundos++;
+      var min=Math.floor(segundos/60),seg=segundos%60;
+      document.getElementById('atd-audio-timer').textContent=min+':'+(seg<10?'0':'')+seg;
+    },1000);
+    atdGravacao={mediaRecorder:mediaRecorder,chunks:chunks,timerInterval:timerInterval,segundos:function(){return segundos;},stream:stream};
+    mediaRecorder.start();
+    document.getElementById('atd-gravando-audio').style.display='flex';
+    document.getElementById('msg-input').disabled=true;
+    document.getElementById('btn-rec').classList.add('rec-on');
+  }).catch(function(){toast('Não foi possível acessar o microfone. Verifique a permissão do navegador.');});
+}
+
+function atdFinalizarGravacaoAudio(enviar){
+  if(!atdGravacao)return;
+  clearInterval(atdGravacao.timerInterval);
+  var segundosGravados=atdGravacao.segundos();
+  var mediaRecorder=atdGravacao.mediaRecorder,chunks=atdGravacao.chunks,stream=atdGravacao.stream;
+  mediaRecorder.onstop=function(){
+    stream.getTracks().forEach(function(t){t.stop();});
+    document.getElementById('atd-gravando-audio').style.display='none';
+    document.getElementById('msg-input').disabled=false;
+    document.getElementById('btn-rec').classList.remove('rec-on');
+    atdGravacao=null;
+    if(enviar&&chunks.length&&segundosGravados>0){
+      atdEnviarAudio(new Blob(chunks,{type:'audio/webm'}));
+    }
+  };
+  mediaRecorder.stop();
+}
+
+function atdEnviarAudio(blob){
+  var conv=ATD_CONVERSAS[currentKey];
+  if(!conv||!sbClient){toast('Conversa ainda não está pronta, aguarde.');return;}
+  var urlLocal=URL.createObjectURL(blob);
+  var msgTemp={direcao:'saida',tipo:'audio',urlLocal:urlLocal,enviando:true,statusEnvio:'pendente',criadaEm:new Date().toISOString(),remetenteId:currentUser._supabaseId};
+  conv.msgs.push(msgTemp);
+  renderMsgs(conv.msgs);
+  var caminho=(conv.telefone||'sem-telefone')+'/'+Date.now()+'_audio.webm';
+  sbClient.storage.from('atendimento-midia').upload(caminho,blob,{contentType:'audio/webm'}).then(function(resUpload){
+    if(resUpload.error){msgTemp.statusEnvio='falha';msgTemp.enviando=false;toast('Erro ao enviar áudio: '+resUpload.error.message);renderMsgs(conv.msgs);return;}
+    sbClient.from('atendimento_mensagens').insert({
+      conversa_id:conv.id,direcao:'saida',tipo:'audio',midia_url:caminho,midia_mime:'audio/webm',
+      status_envio:'pendente',remetente_vendedor_id:currentUser._supabaseId
+    }).select().single().then(function(res){
+      msgTemp.enviando=false;
+      if(res.error){msgTemp.statusEnvio='falha';msgTemp.erro=res.error.message;toast('Áudio subiu, mas a mensagem pode não ter sido salva: '+res.error.message);renderMsgs(conv.msgs);return;}
+      Object.assign(msgTemp,atdMapearLinhaMensagem(res.data));
+      msgTemp.urlLocal=urlLocal;
+      renderMsgs(conv.msgs);
+    });
+  });
+}
+
+// Reenvia uma mensagem que falhou: só zera o status pra 'pendente' de
+// novo — a ponte está sempre escutando esse status e tenta mandar assim
+// que ele mudar.
+function atdTentarDeNovo(idx){
+  var conv=ATD_CONVERSAS[currentKey];
+  if(!conv||!conv.msgs[idx]||!conv.msgs[idx].id)return;
+  var msg=conv.msgs[idx];
+  msg.statusEnvio='pendente';msg.erro=null;
+  renderMsgs(conv.msgs);
+  sbClient.from('atendimento_mensagens').update({status_envio:'pendente',erro:null}).eq('id',msg.id).then(function(res){
+    if(res.error)toast('Não foi possível reenviar: '+res.error.message);
+  });
+}
+
+// Popula os selects de vendedor usados na aba Chats (atribuição e
+// transferência) só com quem tem o módulo "chats" — os mesmos que o
+// banco considera em atende_chats().
+function atdPopularSelectsVendedor(){
+  var opcoes=Object.keys(USERS).filter(function(k){
+    var u=USERS[k];return u._supabaseId&&(u.isAdmin||(u.modulos||[]).indexOf('chats')>=0);
+  }).map(function(k){return USERS[k];});
+  var selVend=document.getElementById('sel-vendedor');
+  if(selVend){
+    var atual=selVend.value;
+    selVend.innerHTML='<option value="">— Sem atribuição</option>'+opcoes.map(function(u){return '<option value="'+u._supabaseId+'">'+esc(u.name)+'</option>';}).join('');
+    selVend.value=atual;
+  }
+  var selTransfer=document.getElementById('transfer-to');
+  if(selTransfer){
+    var atualT=selTransfer.value;
+    selTransfer.innerHTML=opcoes.map(function(u){return '<option value="'+u._supabaseId+'">'+esc(u.name)+'</option>';}).join('');
+    if(atualT)selTransfer.value=atualT;
+  }
+}
+window.atdPopularSelectsVendedor=atdPopularSelectsVendedor;
 
 // ── BROADCAST ──
 function updateBC(){
@@ -3108,41 +3557,96 @@ document.addEventListener('DOMContentLoaded',function(){
   // Chat actions
   document.getElementById('btn-send').addEventListener('click',sendMsg);
   document.getElementById('msg-input').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
-  document.getElementById('btn-rec').addEventListener('click',function(){recOn=!recOn;var ic=this.querySelector('i');if(recOn){this.classList.add('rec-on');ic.className='ti ti-player-stop';}else{this.classList.remove('rec-on');ic.className='ti ti-microphone';}ic.style.fontSize='15px';});
-  document.getElementById('btn-resolve').addEventListener('click',function(){resolveOn=!resolveOn;if(resolveOn){this.innerHTML='<i class="ti ti-rotate-clockwise" style="font-size:12px;"></i> Reabrir';this.style.background='#085041';this.style.borderColor='#085041';}else{this.innerHTML='<i class="ti ti-check" style="font-size:12px;"></i> Resolver';this.style.background='#E31787';this.style.borderColor='#E31787';}});
+
+  // Anexo (imagem/documento)
+  var atdFileInput=document.getElementById('atd-file-input');
+  document.getElementById('atd-btn-attach').addEventListener('click',function(){
+    if(!currentKey){toast('Escolha uma conversa primeiro.');return;}
+    atdFileInput.click();
+  });
+  atdFileInput.addEventListener('change',function(){
+    var file=this.files[0];if(!file)return;
+    if(file.size>15*1024*1024){toast('Arquivo muito grande — limite de 15MB.');this.value='';return;}
+    atdAnexoPendente={file:file,tipo:file.type.indexOf('image/')===0?'imagem':'documento'};
+    document.getElementById('atd-anexo-preview-nome').textContent=file.name;
+    document.getElementById('atd-anexo-preview').style.display='flex';
+    this.value='';
+  });
+  document.getElementById('atd-anexo-cancelar').addEventListener('click',function(){
+    atdAnexoPendente=null;
+    document.getElementById('atd-anexo-preview').style.display='none';
+  });
+
+  // Áudio
+  document.getElementById('btn-rec').addEventListener('click',atdIniciarGravacaoAudio);
+  document.getElementById('atd-audio-parar').addEventListener('click',function(){atdFinalizarGravacaoAudio(true);});
+  document.getElementById('atd-audio-cancelar').addEventListener('click',function(){atdFinalizarGravacaoAudio(false);});
+
+  // Reenviar mensagem com falha (delegado, porque as bolhas são recriadas a cada render)
+  document.getElementById('chat-body').addEventListener('click',function(e){
+    var el=e.target.closest('[data-retry-msg]');
+    if(el)atdTentarDeNovo(parseInt(el.getAttribute('data-retry-msg')));
+  });
+
+  // Resolver / reabrir atendimento
+  document.getElementById('btn-resolve').addEventListener('click',function(){
+    var conv=ATD_CONVERSAS[currentKey];if(!conv||!sbClient)return;
+    var novoStatus=conv.atendimentoStatus==='resolvido'?'aberto':'resolvido';
+    sbClient.from('atendimento_conversas').update({atendimento_status:novoStatus}).eq('id',conv.id).then(function(res){
+      if(res.error){toast('Erro ao atualizar: '+res.error.message);return;}
+      toast(novoStatus==='resolvido'?'Atendimento marcado como resolvido.':'Atendimento reaberto.');
+      // a própria tela já reflete sozinha via realtime de UPDATE em atendimento_conversas
+    });
+  });
   document.getElementById('btn-detail').addEventListener('click',function(){if(window.innerWidth<=768){mobState='detail';updateMobView();}});
 
-  // Transfer
+  // Transfer — reatribui vendedor_atual_id e deixa um registro (nota interna) do motivo
   document.getElementById('btn-transfer').addEventListener('click',function(){openModal('modal-transfer');});
   document.getElementById('btn-confirm-transfer').addEventListener('click',function(){
-    var to=document.getElementById('transfer-to').value;
-    var body=document.getElementById('chat-body');
-    var sys=document.createElement('div');sys.className='sys-msg';sys.textContent='Conversa transferida para '+to;
-    body.appendChild(sys);body.scrollTop=body.scrollHeight;
-    toast('Conversa transferida para '+to+'!');closeModal('modal-transfer');
+    var conv=ATD_CONVERSAS[currentKey];if(!conv||!sbClient)return;
+    var selTo=document.getElementById('transfer-to');
+    var paraId=selTo.value,paraNome=selTo.options[selTo.selectedIndex]?selTo.options[selTo.selectedIndex].text:'';
+    var motivo=(document.querySelector('#modal-transfer textarea')||{}).value||'';
+    if(!paraId){toast('Escolha para quem transferir.');return;}
+    sbClient.from('atendimento_conversas').update({vendedor_atual_id:paraId}).eq('id',conv.id).then(function(res){
+      if(res.error){toast('Erro ao transferir: '+res.error.message);return;}
+      sbClient.from('atendimento_mensagens').insert({
+        conversa_id:conv.id,direcao:'nota',tipo:'texto',
+        conteudo:'Conversa transferida para '+paraNome+(motivo?' — Motivo: '+motivo:''),
+        status_envio:'enviado',remetente_vendedor_id:currentUser._supabaseId
+      }).then(function(){ atdCarregarMensagens(conv.id,function(){ if(currentKey===conv.id) renderMsgs(conv.msgs); }); });
+      toast('Conversa transferida para '+paraNome+'!');closeModal('modal-transfer');
+    });
   });
 
   // PDF
   document.getElementById('btn-pdf').addEventListener('click',function(){updatePDF();openModal('modal-pdf');});
   ['pdf-cliente','pdf-tam','pdf-qtd','pdf-tinta','pdf-imp','pdf-arte'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',updatePDF);});
   document.getElementById('btn-pdf-chat').addEventListener('click',function(){
-    var body=document.getElementById('chat-body');
-    var div=document.createElement('div');div.className='msg msg-out';
+    if(!currentKey){toast('Selecione uma conversa primeiro.');return;}
     var total=document.getElementById('pdf-prev-total').textContent;
     var prod=document.getElementById('pdf-prev-prod').textContent;
-    div.innerHTML='<div class="msg-bubble">📄 Orçamento MekMix<br>'+esc(prod)+'<br>'+esc(total)+'<br>📅 12 dias úteis</div><div class="msg-meta" style="text-align:right;">'+now()+' · '+currentUser.name+'</div>';
-    body.appendChild(div);body.scrollTop=body.scrollHeight;
+    var texto='📄 Orçamento MekMix\n'+prod+'\n'+total+'\n📅 12 dias úteis';
+    atdEnviarTexto(texto);
     closeModal('modal-pdf');toast('Orçamento enviado no chat!');
   });
   document.getElementById('btn-pdf-dl').addEventListener('click',function(){toast('PDF gerado! Na versão com servidor será baixado automaticamente.');closeModal('modal-pdf');});
 
-  // Col3 save note
+  // Col3 save note — vira uma mensagem direcao='nota' na própria conversa
+  // (a ponte já sabe ignorar esse tipo e nunca manda pro WhatsApp de verdade).
   document.getElementById('btn-save-note').addEventListener('click',function(){
     var nota=(document.getElementById('c3-nota').value||'').trim();if(!nota)return;
-    var body=document.getElementById('chat-body');
-    var note=document.createElement('div');note.className='note-bubble';
-    note.innerHTML='<div class="note-lbl"><i class="ti ti-lock" style="font-size:11px;"></i> Nota interna — '+currentUser.name+' · '+now()+'</div>'+esc(nota);
-    body.appendChild(note);body.scrollTop=body.scrollHeight;toast('Nota salva!');
+    var conv=ATD_CONVERSAS[currentKey];if(!conv||!sbClient){toast('Selecione uma conversa primeiro.');return;}
+    document.getElementById('c3-nota').value='';
+    sbClient.from('atendimento_mensagens').insert({
+      conversa_id:conv.id,direcao:'nota',tipo:'texto',conteudo:nota,
+      status_envio:'enviado',remetente_vendedor_id:currentUser._supabaseId
+    }).select().single().then(function(res){
+      if(res.error){toast('Erro ao salvar nota: '+res.error.message);return;}
+      conv.msgs.push(atdMapearLinhaMensagem(res.data));
+      if(currentKey===conv.id)renderMsgs(conv.msgs);
+      toast('Nota salva!');
+    });
   });
 
   // Col3 hist btn
@@ -3153,15 +3657,32 @@ document.addEventListener('DOMContentLoaded',function(){
     btn.addEventListener('click',function(){openHistModal(this.getAttribute('data-hist'));});
   });
 
-  // Status / vendedor
-  document.getElementById('sel-vendedor').addEventListener('change',function(){document.getElementById('c3-vendedor').textContent=this.value;});
+  // Status / vendedor — gravam direto em atendimento_conversas; a tela
+  // (lista + painel) se atualiza sozinha pelo realtime de UPDATE.
+  document.getElementById('sel-vendedor').addEventListener('change',function(){
+    var conv=ATD_CONVERSAS[currentKey];if(!conv||!sbClient)return;
+    var novoId=this.value||null;
+    sbClient.from('atendimento_conversas').update({vendedor_atual_id:novoId}).eq('id',conv.id).then(function(res){
+      if(res.error){toast('Erro ao atribuir vendedor: '+res.error.message);return;}
+      toast(novoId?'Atendimento atribuído.':'Atendimento desatribuído.');
+    });
+  });
   document.getElementById('sel-status').addEventListener('change',function(){
-    var map={'Novo lead':'p-novo','Orçamento enviado':'p-orc','Arte pendente':'p-arte','Em produção':'p-prod','Entregue':'p-entregue','Follow-up 30d':'p-follow'};
-    var s=document.getElementById('c3-status');s.className='pill '+(map[this.value]||'p-novo');s.textContent=this.value;
+    var conv=ATD_CONVERSAS[currentKey];if(!conv||!sbClient)return;
+    var novoStatus=this.value;
+    sbClient.from('atendimento_conversas').update({pipeline_status:novoStatus}).eq('id',conv.id).then(function(res){
+      if(res.error)toast('Erro ao atualizar status: '+res.error.message);
+    });
   });
   document.getElementById('btn-add-tag').addEventListener('click',function(){
-    var tag=prompt('Nome da etiqueta:');if(!tag)return;
-    var row=document.getElementById('c3-tags');var span=document.createElement('span');span.className='pill p-orc';span.textContent=tag;row.insertBefore(span,this);
+    var tag=(prompt('Nome da etiqueta:')||'').trim();if(!tag)return;
+    var conv=ATD_CONVERSAS[currentKey];if(!conv||!sbClient)return;
+    var novasTags=(conv.tags||[]).concat([tag]);
+    sbClient.from('atendimento_conversas').update({tags:novasTags}).eq('id',conv.id).then(function(res){
+      if(res.error){toast('Erro ao adicionar etiqueta: '+res.error.message);return;}
+      conv.tags=novasTags;
+      if(currentKey===conv.id)atdAtualizarPainelDetalhes(conv);
+    });
   });
 
   // Templates
@@ -6485,7 +7006,7 @@ document.addEventListener('DOMContentLoaded',function(){
     var naFila  = pqueue || [];
     var fatMes  = orders.filter(function(o){ return o.status === 'Entregue'; })
                         .reduce(function(s,o){ return s + (o.valor||0); }, 0);
-    var chatsN  = Object.keys(CONVDATA||{}).length;
+    var chatsN  = ATD_LISTA.filter(function(id){ var c=ATD_CONVERSAS[id]; return c && (c.atendimentoStatus||'aberto')!=='resolvido'; }).length;
     var followN = document.querySelectorAll('.follow-item').length;
     var el = function(id){ return document.getElementById(id); };
     if(el('dash-chats'))     el('dash-chats').textContent     = chatsN;
@@ -6600,6 +7121,13 @@ document.addEventListener('DOMContentLoaded',function(){
   // o cache local USERS antes de desenhar a lista.
   function equipeCarregarTodos(callback){
     if(!sbClient){ callback(); return; }
+    // select('*') direto em "perfis" só traz todo mundo pra quem é admin —
+    // a regra de segurança do banco restringe quem não é admin a enxergar
+    // só o próprio cadastro. Por isso, depois do select cheio, complementa
+    // com diretorio_colaboradores() (liberada pra qualquer colaborador
+    // logado, só com os campos básicos) para preencher quem ainda não
+    // estiver em USERS — sem isso, alguém sem admin via a lista de colegas
+    // (Chat Interno, atribuição de vendedor, etc.) sempre vazia ou incompleta.
     sbClient.from('perfis').select('*').then(function(res){
       if(!res.error && res.data){
         res.data.forEach(function(perfil){
@@ -6607,8 +7135,18 @@ document.addEventListener('DOMContentLoaded',function(){
           if(loginKey) USERS[loginKey] = perfilParaUser(perfil);
         });
       }
-      callback();
-      popularTodosSelectsDeVendedor();
+      sbClient.rpc('diretorio_colaboradores').then(function(resDir){
+        if(!resDir.error && resDir.data){
+          resDir.data.forEach(function(perfil){
+            var loginKey = (perfil.login || '').replace(/\D/g,'');
+            // Só preenche quem ainda não veio no select cheio acima — nunca
+            // substitui um cadastro já completo por uma versão reduzida.
+            if(loginKey && !USERS[loginKey]) USERS[loginKey] = perfilParaUser(perfil);
+          });
+        }
+        callback();
+        popularTodosSelectsDeVendedor();
+      });
     });
   }
   window.equipeCarregarTodos = equipeCarregarTodos;
@@ -9914,7 +10452,7 @@ function horAccInicializarTodos(){
    ============================================================ */
 var CI_CONVERSAS = {}; // chave: login do colega, valor: {msgs:[...], conversaId:uuid}
 var ciConversaAtual = null;
-var ciRealtimeChannel = null;
+var ciRealtimeGlobalChannel = null;
 
 function ciGetConversa(loginColega){
   if(!CI_CONVERSAS[loginColega]) CI_CONVERSAS[loginColega] = {msgs:[], conversaId:null};
@@ -9937,9 +10475,14 @@ function ciEncontrarOuCriarConversa(loginColega, callback){
   // ainda não tem o _supabaseId populado corretamente no momento do clique.
   function comColegaGarantido(prosseguir){
     if(USERS[loginColega] && USERS[loginColega]._supabaseId){ prosseguir(); return; }
-    sbClient.from('perfis').select('*').eq('login', loginColega).single().then(function(res){
-      if(res.error || !res.data){ toast('Não foi possível localizar este colaborador no banco.'); callback(null); return; }
-      USERS[loginColega] = perfilParaUser(res.data);
+    // Busca direta em "perfis" por login só funciona pra quem é admin (a
+    // regra de segurança do banco bloqueia ver o cadastro de outra pessoa
+    // senão) — por isso usa diretorio_colaboradores(), liberada pra
+    // qualquer colaborador logado, e procura o login nela.
+    sbClient.rpc('diretorio_colaboradores').then(function(res){
+      var encontrado = !res.error && res.data ? res.data.find(function(p){ return p.login===loginColega; }) : null;
+      if(!encontrado){ toast('Não foi possível localizar este colaborador no banco.'); callback(null); return; }
+      USERS[loginColega] = perfilParaUser(encontrado);
       prosseguir();
     });
   }
@@ -9980,6 +10523,11 @@ function ciCriarConversaNova(meuId, colegaId, loginColega, callback){
     ]).then(function(res2){
       if(res2.error){ toast('Erro ao adicionar participantes: '+res2.error.message); callback(null); return; }
       ciGetConversa(loginColega).conversaId = conversaId;
+      // Essa conversa é novinha — o filtro da assinatura global de Realtime
+      // (ciAssinarRealtimeGlobal) foi montado antes dela existir, então
+      // precisa ser refeito agora pra incluir esse id, senão mensagens
+      // recebidas aqui só apareceriam depois de recarregar a página.
+      if(typeof ciAssinarRealtimeGlobal==='function') ciAssinarRealtimeGlobal();
       callback(conversaId);
     });
   });
@@ -10173,9 +10721,12 @@ function ciAbrirConversa(loginColega){
     document.getElementById('ci-msg-input').disabled = false;
     document.getElementById('ci-btn-send').disabled = false;
     if(!conversaId){ renderCiMensagens(); return; }
+    // Não precisa mais assinar o Realtime aqui — ciAssinarRealtimeGlobal()
+    // (chamada uma vez no login) já cobre TODAS as conversas do usuário,
+    // incluindo essa, então uma mensagem nova aparece mesmo que a pessoa
+    // esteja em outra conversa ou em outra página do CRM no momento.
     ciCarregarMensagens(conversaId, function(){
       renderCiMensagens();
-      ciAssinarRealtime(conversaId, loginColega);
     });
   });
 }
@@ -10201,31 +10752,58 @@ function ciCarregarMensagens(conversaId, callback){
   });
 }
 
-// Realtime: assina a tabela "mensagens" filtrando por esta conversa, para
-// que mensagens novas apareçam sem precisar recarregar a página. Cancela
-// a assinatura anterior ao trocar de conversa, para não acumular listeners.
-function ciAssinarRealtime(conversaId, loginColega){
-  if(!sbClient) return;
-  if(ciRealtimeChannel) sbClient.removeChannel(ciRealtimeChannel);
-  ciRealtimeChannel = sbClient.channel('mensagens-'+conversaId)
-    .on('postgres_changes', {event:'INSERT', schema:'public', table:'mensagens', filter:'conversa_id=eq.'+conversaId}, function(payload){
-      if(ciConversaAtual!==loginColega) return; // usuário já trocou de conversa
-      var m = payload.new;
-      if(m.autor_id===currentUser._supabaseId) return; // já foi adicionado localmente ao enviar
-      var autorObj = Object.keys(USERS).map(function(k){return {key:k, u:USERS[k]};}).find(function(x){ return x.u._supabaseId===m.autor_id; });
-      ciGetConversa(loginColega).msgs.push({
-        autor: autorObj ? autorObj.key : m.autor_id,
-        texto: m.texto||'',
-        hora: new Date(m.criado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),
-        tipo: m.tipo||'texto',
-        storagePath: m.storage_path||null,
-        duracaoSeg: m.duracao_audio_seg||null
-      });
-      renderCiMensagens();
-      renderCiConvList(document.getElementById('ci-conv-search').value);
-    })
-    .subscribe();
+// Realtime do Chat Interno — UMA ÚNICA assinatura, feita no login, cobrindo
+// TODAS as conversas em que o colaborador logado participa (filtro
+// conversa_id IN (...)), em vez de uma assinatura por conversa aberta.
+//
+// Por quê: a versão antiga só avisava de mensagem nova enquanto a pessoa
+// estava com aquela conversa específica aberta na tela — se ela estivesse
+// em outra conversa, em outra página do CRM, ou tivesse acabado de logar
+// e ainda não clicado em ninguém, a mensagem ficava "invisível" até ela
+// abrir manualmente aquele chat (foi exatamente o que aconteceu com a
+// mensagem da Karla pro Maykon: ela SALVOU certinho no banco, só não
+// apareceu pro Maykon porque ele não estava com essa conversa aberta no
+// momento). Com a assinatura global, a prévia na lista lateral e, se a
+// conversa estiver aberta, o próprio chat, atualizam na hora de qualquer
+// jeito.
+//
+// Importante: o filtro restringe aos IDs de conversa que o PRÓPRIO usuário
+// participa (buscados em conversas_participantes, sempre permitido pela
+// regra de segurança). Sem esse filtro, o canal receberia o INSERT de
+// qualquer conversa do sistema, inclusive as privadas de outras pessoas —
+// o Realtime do Supabase não aplica sozinho a política de segurança da
+// tabela nos eventos que ele distribui.
+function ciAssinarRealtimeGlobal(){
+  if(!sbClient || !currentUser || !currentUser._supabaseId) return;
+  sbClient.from('conversas_participantes').select('conversa_id').eq('colaborador_id', currentUser._supabaseId).then(function(res){
+    if(res.error || !res.data || !res.data.length) return;
+    var ids = res.data.map(function(r){ return r.conversa_id; });
+    if(ciRealtimeGlobalChannel) sbClient.removeChannel(ciRealtimeGlobalChannel);
+    ciRealtimeGlobalChannel = sbClient.channel('ci-global-'+currentUser._supabaseId)
+      .on('postgres_changes', {event:'INSERT', schema:'public', table:'mensagens', filter:'conversa_id=in.('+ids.join(',')+')'}, function(payload){
+        var m = payload.new;
+        if(m.autor_id===currentUser._supabaseId) return; // já foi adicionado localmente ao enviar
+        var autorObj = Object.keys(USERS).map(function(k){return {key:k, u:USERS[k]};}).find(function(x){ return x.u._supabaseId===m.autor_id; });
+        if(!autorObj) return; // autor ainda não carregado em USERS — vai aparecer normalmente ao abrir a conversa
+        var loginColega = autorObj.key;
+        var conv = ciGetConversa(loginColega);
+        conv.conversaId = m.conversa_id; // garante o id mesmo que essa conversa nunca tenha sido aberta nesta sessão
+        conv.msgs.push({
+          autor: loginColega,
+          texto: m.texto||'',
+          hora: new Date(m.criado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),
+          tipo: m.tipo||'texto',
+          storagePath: m.storage_path||null,
+          duracaoSeg: m.duracao_audio_seg||null
+        });
+        if(ciConversaAtual===loginColega) renderCiMensagens();
+        var campoBusca = document.getElementById('ci-conv-search');
+        if(typeof renderCiConvList==='function') renderCiConvList(campoBusca ? campoBusca.value : '');
+      })
+      .subscribe();
+  });
 }
+window.ciAssinarRealtimeGlobal = ciAssinarRealtimeGlobal;
 
 // Gera uma URL assinada temporária (1h) para exibir o arquivo — os buckets
 // são privados, então não dá para linkar direto sem essa assinatura.
@@ -10262,6 +10840,10 @@ function renderCiMensagens(){
   var body = document.getElementById('ci-chat-body');
   if(!body || !ciConversaAtual) return;
   var conv = ciGetConversa(ciConversaAtual);
+  // Guarda qual conversa estava sendo renderizada agora — as URLs assinadas
+  // dos anexos chegam depois, de forma assíncrona, e se a pessoa já tiver
+  // trocado de conversa nesse meio tempo não podemos mais mexer no scroll.
+  var loginColegaDaRenderizacao = ciConversaAtual;
   if(!conv.msgs.length){
     body.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:12px;font-style:italic;padding:30px 20px;">Nenhuma mensagem ainda. Diga oi 👋</div>';
     return;
@@ -10310,9 +10892,21 @@ function renderCiMensagens(){
       m.urlLocal = url; // cache para não re-assinar toda hora
       var el = body.querySelector('[data-msg-idx="'+idx+'"]');
       if(!el) return;
-      if(m.tipo==='imagem'){ el.innerHTML = '<img src="'+url+'" style="max-width:220px;border-radius:8px;display:block;"/><button class="msg-download-btn" onclick="ciBaixarAnexo(\''+esc(url)+'\', \''+esc(m.texto||'imagem.jpg')+'\')" title="Baixar imagem"><i class="ti ti-download" style="font-size:12px;"></i> Baixar</button>'; }
+      if(m.tipo==='imagem'){
+        el.innerHTML = '<img src="'+url+'" style="max-width:220px;border-radius:8px;display:block;"/><button class="msg-download-btn" onclick="ciBaixarAnexo(\''+esc(url)+'\', \''+esc(m.texto||'imagem.jpg')+'\')" title="Baixar imagem"><i class="ti ti-download" style="font-size:12px;"></i> Baixar</button>';
+        // A imagem só tem a altura real depois de carregar — sem isso, o
+        // scroll para o final (feito logo abaixo, no innerHTML ainda com
+        // a altura do placeholder "Carregando...") ficava alguns pixels
+        // acima do fim de verdade assim que a imagem aparecia.
+        var imgEl = el.querySelector('img');
+        if(imgEl) imgEl.addEventListener('load', function(){ if(ciConversaAtual===loginColegaDaRenderizacao) body.scrollTop = body.scrollHeight; });
+      }
       else if(m.tipo==='audio'){ el.innerHTML = '<audio controls src="'+url+'" style="max-width:220px;height:36px;"></audio><button class="msg-download-btn" onclick="ciBaixarAnexo(\''+esc(url)+'\', \'audio.webm\')" title="Baixar áudio"><i class="ti ti-download" style="font-size:12px;"></i> Baixar</button>'; }
       else if(m.tipo==='arquivo'){ el.innerHTML = '<i class="ti ti-file-text" style="font-size:20px;"></i><a href="'+url+'" target="_blank" style="color:inherit;text-decoration:underline;">'+esc(m.texto)+'</a><button class="msg-download-btn" onclick="ciBaixarAnexo(\''+esc(url)+'\', \''+esc(m.texto||'arquivo')+'\')" title="Baixar arquivo"><i class="ti ti-download" style="font-size:12px;"></i></button>'; }
+      // Qualquer anexo que termine de carregar enquanto a conversa ainda
+      // está aberta empurra o scroll de volta pro final — cobre o caso de
+      // várias fotos/áudios "aparecendo" em sequência ao abrir a conversa.
+      if(ciConversaAtual===loginColegaDaRenderizacao) body.scrollTop = body.scrollHeight;
     });
   });
 }
