@@ -2610,6 +2610,13 @@ function applyRole(){
     }
     sec.style.display = hasVisible ? '' : 'none';
   });
+  // O menu lateral tem rolagem própria (overflow-y:auto) — em alguns
+  // perfis, dependendo de quais botões ficam escondidos/visíveis acima,
+  // ele podia abrir já rolado pra baixo (às vezes por causa de foco
+  // residual em algum botão). Força sempre abrir do topo, pra ficar
+  // consistente em qualquer perfil.
+  var barraLateral = document.querySelector('.sidebar');
+  if(barraLateral) barraLateral.scrollTop = 0;
 }
 
 function logout(){
