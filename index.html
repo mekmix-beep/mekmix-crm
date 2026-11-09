@@ -668,6 +668,7 @@ input, textarea { cursor: text; }
       <button class="sb-btn" data-page="estoque"><i class="ti ti-package"></i><span class="sb-btn-lbl">Estoque</span><span class="sb-badge" id="sb-estoque-badge" style="display:none;">0</span></button>
       <button class="sb-btn" data-page="caixasprontas"><i class="ti ti-box-seam"></i><span class="sb-btn-lbl">Caixas Prontas</span></button>
       <button class="sb-btn" data-page="historicopedidos"><i class="ti ti-history"></i><span class="sb-btn-lbl">Histórico de Pedidos</span></button>
+      <button class="sb-btn" data-page="tabelaprecos"><i class="ti ti-tags"></i><span class="sb-btn-lbl">Tabela de Preços</span></button>
       <button class="sb-btn admin-only desktop-only" data-page="relatorio"><i class="ti ti-chart-bar"></i><span class="sb-btn-lbl">Relatórios</span></button>
       <button class="sb-btn admin-only desktop-only" data-page="broadcast"><i class="ti ti-send"></i><span class="sb-btn-lbl">Broadcast</span></button>
       <button class="sb-btn" data-page="templates"><i class="ti ti-template"></i><span class="sb-btn-lbl">Templates</span></button>
@@ -1258,7 +1259,7 @@ input, textarea { cursor: text; }
             <div class="acc-body" id="acc-body-est-abrir"><div class="acc-body-inner">
               <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">Use quando abrir uma caixa fechada para retirar apenas alguns pacotes. O sistema baixa 1 caixa e credita os pacotes avulsos no estoque.</div>
               <div class="stock-inp-row">
-                <div class="stock-field"><label>Tamanho (ml)</label><input type="number" id="abrir-tam" min="1" placeholder="Ex: 500" list="lista-tamanhos-conhecidos"/></div>
+                <div class="stock-field"><label>Tamanho (ml)</label><input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" id="abrir-tam" min="1" placeholder="Ex: 500" list="lista-tamanhos-conhecidos"/></div>
                 <div class="stock-field"><label>Pacotes na caixa</label><input type="number" id="abrir-total" min="1" placeholder="Ex: 25"/></div>
                 <div class="stock-field"><label>Pacotes usados agora</label><input type="number" id="abrir-usados" min="0" placeholder="0"/></div>
                 <div class="stock-field"><label>Motivo</label><input type="text" id="abrir-motivo" placeholder="Ex: Amostra cliente"/></div>
@@ -1275,7 +1276,7 @@ input, textarea { cursor: text; }
             </div>
             <div class="acc-body" id="acc-body-est-baixa"><div class="acc-body-inner">
               <div class="stock-inp-row">
-                <div class="stock-field"><label>Tamanho (ml)</label><input type="number" id="baixa-tam" min="1" placeholder="Ex: 500" list="lista-tamanhos-conhecidos"/></div>
+                <div class="stock-field"><label>Tamanho (ml)</label><input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" id="baixa-tam" min="1" placeholder="Ex: 500" list="lista-tamanhos-conhecidos"/></div>
                 <div class="stock-field"><label>Caixas</label><input type="number" id="baixa-caixas" min="0" placeholder="0"/></div>
                 <div class="stock-field"><label>Unidades avulsas</label><input type="number" id="baixa-unid" min="0" placeholder="0"/></div>
                 <div class="stock-field"><label>Motivo</label><input type="text" id="baixa-motivo" placeholder="Ex: Amostras, descarte..."/></div>
@@ -1293,7 +1294,7 @@ input, textarea { cursor: text; }
             <div class="acc-body" id="acc-body-est-ajuste"><div class="acc-body-inner">
               <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">Use quando a contagem física não bate com o sistema — não é uma venda nem uma compra, é uma correção do número real em estoque. Fica registrado separadamente no histórico para não confundir com movimentações comerciais.</div>
               <div class="stock-inp-row">
-                <div class="stock-field"><label>Tamanho (ml)</label><input type="number" id="ajuste-tam" min="1" placeholder="Ex: 500" list="lista-tamanhos-conhecidos"/></div>
+                <div class="stock-field"><label>Tamanho (ml)</label><input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" id="ajuste-tam" min="1" placeholder="Ex: 500" list="lista-tamanhos-conhecidos"/></div>
                 <div class="stock-field"><label>Tipo de ajuste</label><select id="ajuste-tipo"><option value="somar">Somar ao estoque (achei a mais)</option><option value="subtrair">Subtrair do estoque (achei a menos)</option></select></div>
                 <div class="stock-field"><label>Caixas</label><input type="number" id="ajuste-caixas" min="0" placeholder="0"/></div>
                 <div class="stock-field"><label>Unidades avulsas</label><input type="number" id="ajuste-unid" min="0" placeholder="0"/></div>
@@ -1396,6 +1397,17 @@ input, textarea { cursor: text; }
             <tr><td colspan="8" style="text-align:center;color:var(--text3);padding:20px;">Carregando...</td></tr>
           </tbody></table></div>
         </div>
+      </div>
+
+      <!-- TABELA DE PREÇOS -->
+      <div id="page-tabelaprecos" class="page">
+        <div class="page-title">Tabela de Preços
+          <button class="btn btn-sm admin-only" style="margin-left:auto;" onclick="tpAbrirNovoTamanho()"><i class="ti ti-plus" style="font-size:12px;"></i> Novo tamanho</button>
+        </div>
+        <div class="panel" style="font-size:11px;color:var(--text2);margin-bottom:12px;">
+          <i class="ti ti-info-circle" style="font-size:12px;"></i> Preço por caixa, de acordo com a faixa de quantidade. Tamanhos sem preço próprio (300, 400, 500, 700ml) usam automaticamente o preço do tamanho equivalente com preço cadastrado (330, 440, 550, 770ml) na hora do pedido — a baixa de estoque continua sempre no tamanho exato escolhido.
+        </div>
+        <div id="tp-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;">Carregando...</div>
       </div>
 
       <!-- ETIQUETAS DE ENTREGA -->
@@ -2029,7 +2041,7 @@ input, textarea { cursor: text; }
 <!-- MODAL: NOVA COMBINAÇÃO DE CAIXA PRONTA -->
 <div class="modal-overlay" id="modal-cp-nova"><div class="modal"><div class="modal-head"><span class="modal-title">Nova combinação de caixa pronta</span><button class="modal-close" data-close="modal-cp-nova">×</button></div><div class="modal-body">
   <div class="form-grid-2">
-    <div class="form-group"><label class="form-label">Tamanho (ml) *</label><input class="form-input" type="number" id="cp-tamanho" min="1" placeholder="Ex: 500" list="lista-tamanhos-conhecidos"/></div>
+    <div class="form-group"><label class="form-label">Tamanho (ml) *</label><input class="form-input" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" id="cp-tamanho" min="1" placeholder="Ex: 500" list="lista-tamanhos-conhecidos"/></div>
     <div class="form-group"><label class="form-label">Quantidade inicial (caixas)</label><input class="form-input" type="number" id="cp-qtd-inicial" min="0" placeholder="0"/></div>
   </div>
   <div class="form-group"><label class="form-label">Arte (logo) *</label><input class="form-input" id="cp-arte" placeholder="Ex: Logo Empresa X"/></div>
@@ -2053,7 +2065,7 @@ input, textarea { cursor: text; }
 <div class="modal-overlay" id="modal-refugo-novo"><div class="modal"><div class="modal-head"><span class="modal-title">Adicionar ao Estoque de Refugo</span><button class="modal-close" data-close="modal-refugo-novo">×</button></div><div class="modal-body">
   <div style="font-size:11px;color:var(--text2);margin-bottom:10px;background:#FFF7ED;border:1px solid #FDBA74;border-radius:8px;padding:8px 12px;">Use para copos com defeito (amassados, tortos) acumulados até fechar uma caixa. Para cancelamento pós-produção, o refugo já é gerado automaticamente ao aprovar o cancelamento.</div>
   <div class="form-grid-2">
-    <div class="form-group"><label class="form-label">Tamanho (ml) *</label><input class="form-input" type="number" id="refugo-tamanho" min="1" placeholder="Ex: 500" list="lista-tamanhos-conhecidos"/></div>
+    <div class="form-group"><label class="form-label">Tamanho (ml) *</label><input class="form-input" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" id="refugo-tamanho" min="1" placeholder="Ex: 500" list="lista-tamanhos-conhecidos"/></div>
     <div class="form-group"><label class="form-label">Quantidade (caixas) *</label><input class="form-input" type="number" id="refugo-qtd" min="1" placeholder="0"/></div>
   </div>
   <div class="form-group"><label class="form-label">Arte (se souber)</label><input class="form-input" id="refugo-arte" placeholder="Opcional — pode ser genérico/misturado"/></div>
@@ -2524,6 +2536,19 @@ function entrarComPerfil(userId, telefoneFallback, callback){
       }
     }
     carregarDadosIniciaisComRetry(10);
+    // Tabela de Preços — carregamento à parte do chain principal acima
+    // (não é pré-requisito de nada ali, e um atraso aqui não pode travar
+    // o resto do login).
+    function carregarPrecosComRetry(tentativas){
+      if(typeof window.carregarTabelaPrecosDoBanco==='function'){
+        window.carregarTabelaPrecosDoBanco(function(){
+          if(currentPage==='tabelaprecos' && typeof window.tpRenderPage==='function') window.tpRenderPage();
+        });
+      } else if(tentativas>0){
+        setTimeout(function(){ carregarPrecosComRetry(tentativas-1); }, 200);
+      }
+    }
+    carregarPrecosComRetry(10);
     if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
     if(callback) callback(true, null);
   });
@@ -2595,6 +2620,10 @@ function applyRole(){
     // Financeiro sem ser Admin de nada mais).
     if(page==='financeiro' && (currentUser.podeVerFinanceiro || currentUser.isAdminGeral || currentUser.isAdminMaster)) visivel = true;
     if(page==='notasfiscais' && (currentUser.podeVerNotasFiscais || currentUser.isAdminGeral || currentUser.isAdminMaster)) visivel = true;
+    // Tabela de Preços é de consulta livre pra todo mundo — só os botões
+    // de editar/adicionar/excluir dentro da página (classe admin-only)
+    // ficam restritos a admin.
+    if(page==='tabelaprecos') visivel = true;
     btn.style.display = visivel ? '' : 'none';
   });
   // Separação Mobile x Desktop: módulos de gestão pesada (Fila de produção,
@@ -3068,6 +3097,7 @@ function goPage(id,title){
   var sb=document.querySelector('.sb-btn[data-page="'+id+'"]');if(sb)sb.classList.add('active');
   if(id==='horario' && typeof renderHorarioPage==='function') renderHorarioPage();
   if(id==='chatinterno' && typeof renderChatInternoPage==='function') renderChatInternoPage();
+  if(id==='tabelaprecos' && typeof tpRenderPage==='function') tpRenderPage();
   if(isMob){
     document.getElementById('mob-title').textContent=title||id;
     document.getElementById('mob-back').style.visibility='hidden';
@@ -3289,7 +3319,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // Fix: mover páginas novas para dentro do content-area
   (function(){
     var ca = document.querySelector('.content-area');
-    ['page-pedidos','page-producao','page-etiquetas','page-estoque','page-caixasprontas','page-historicopedidos','page-clientes','page-acoes','page-financeiro','page-notasfiscais','page-script','page-followup','page-horario','page-chatinterno','page-relatorio','page-broadcast','page-templates','page-whatsapp','page-equipe','page-config'].forEach(function(id){
+    ['page-pedidos','page-producao','page-etiquetas','page-estoque','page-caixasprontas','page-historicopedidos','page-tabelaprecos','page-clientes','page-acoes','page-financeiro','page-notasfiscais','page-script','page-followup','page-horario','page-chatinterno','page-relatorio','page-broadcast','page-templates','page-whatsapp','page-equipe','page-config'].forEach(function(id){
       var el = document.getElementById(id);
       if(el && el.parentElement && !el.parentElement.classList.contains('content-area')){
         ca.appendChild(el);
@@ -4122,6 +4152,129 @@ document.addEventListener('DOMContentLoaded',function(){
     });
   }
   window.carregarEstoqueLogDoBanco = carregarEstoqueLogDoBanco;
+
+  // Carrega produtos + tabela_precos e monta PRODUTOS/PRECO_FAIXAS (ver
+  // acima, perto de calcItemPrice) — alimenta a tela Tabela de Preços, o
+  // preço automático do Novo Pedido e a lista fechada de tamanhos.
+  function carregarTabelaPrecosDoBanco(callback){
+    if(!sbClient){ if(callback) callback(); return; }
+    sbClient.from('produtos').select('*').then(function(resP){
+      if(!resP.error && resP.data){
+        resP.data.forEach(function(p){
+          PRODUTOS[p.ml+'ml'] = {id: p.id, unidades_por_caixa: p.unidades_por_caixa, preco_avulso: p.preco_avulso, ativo: p.ativo, descricao: p.descricao};
+        });
+      }
+      sbClient.from('tabela_precos').select('*').then(function(resT){
+        if(!resT.error && resT.data){
+          var porProduto = {};
+          resT.data.forEach(function(t){ (porProduto[t.produto_id] = porProduto[t.produto_id] || []).push(t); });
+          Object.keys(PRODUTOS).forEach(function(key){
+            var faixas = (porProduto[PRODUTOS[key].id] || []).map(function(t){ return {min: t.faixa_min, max: t.faixa_max, preco: t.preco}; });
+            faixas.sort(function(a,b){ return a.min - b.min; });
+            PRECO_FAIXAS[key] = faixas;
+          });
+        }
+        if(typeof estAtualizarListaTamanhosConhecidos==='function') estAtualizarListaTamanhosConhecidos();
+        if(callback) callback();
+      });
+    });
+  }
+  window.carregarTabelaPrecosDoBanco = carregarTabelaPrecosDoBanco;
+
+  // ── TABELA DE PREÇOS (tela) ──
+  function tpRenderPage(){
+    var grid = document.getElementById('tp-grid'); if(!grid) return;
+    var tamanhos = Object.keys(PRODUTOS).sort(function(a,b){ return parseInt(a)-parseInt(b); });
+    if(!tamanhos.length){ grid.innerHTML = '<div style="color:var(--text3);font-style:italic;">Carregando...</div>'; return; }
+    var souAdmin = currentUser && currentUser.isAdmin;
+    grid.innerHTML = tamanhos.map(function(tam){
+      var p = PRODUTOS[tam];
+      var faixas = PRECO_FAIXAS[tam] || [];
+      var f12 = faixas.filter(function(f){ return f.min===1; })[0] || {preco:null};
+      var f34 = faixas.filter(function(f){ return f.min===3; })[0] || {preco:null};
+      var f5 = faixas.filter(function(f){ return f.min===5; })[0] || {preco:null};
+      var dis = souAdmin ? '' : 'disabled';
+      return '<div class="panel" data-tp-card="'+p.id+'">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
+          '<div style="font-size:15px;font-weight:700;color:var(--rosa);">Caixa '+tam+'</div>' +
+          '<button class="admin-only" data-tp-del="'+p.id+'" style="border:none;background:none;color:#c0392b;cursor:pointer;font-size:18px;line-height:1;" title="Excluir tamanho">&times;</button>' +
+        '</div>' +
+        '<label style="font-size:11px;color:var(--text2);">Un. por caixa</label>' +
+        '<input type="number" min="1" data-tp-field="unidades_por_caixa" value="'+(p.unidades_por_caixa||'')+'" '+dis+' class="form-input" style="margin-bottom:8px;"/>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px;">' +
+          '<div><label style="font-size:10px;color:var(--text2);">1–2 cx</label><input type="number" data-tp-field="f12" value="'+(f12.preco!=null?f12.preco:'')+'" '+dis+' class="form-input"/></div>' +
+          '<div><label style="font-size:10px;color:var(--text2);">3–4 cx</label><input type="number" data-tp-field="f34" value="'+(f34.preco!=null?f34.preco:'')+'" '+dis+' class="form-input"/></div>' +
+          '<div><label style="font-size:10px;color:var(--text2);">5+ cx</label><input type="number" data-tp-field="f5" value="'+(f5.preco!=null?f5.preco:'')+'" '+dis+' class="form-input"/></div>' +
+        '</div>' +
+        '<label style="font-size:11px;color:var(--text2);">Preço avulso (por copo, fora de caixa)</label>' +
+        '<input type="number" step="0.01" min="0" data-tp-field="preco_avulso" value="'+(p.preco_avulso!=null?p.preco_avulso:'')+'" '+dis+' class="form-input" style="margin-bottom:10px;" placeholder="Ainda não definido"/>' +
+        '<button class="btn btn-sm admin-only" data-tp-salvar="'+p.id+'" style="width:100%;">Salvar</button>' +
+      '</div>';
+    }).join('');
+    grid.querySelectorAll('[data-tp-salvar]').forEach(function(btn){
+      btn.addEventListener('click', function(){ tpSalvarProduto(this.getAttribute('data-tp-salvar')); });
+    });
+    grid.querySelectorAll('[data-tp-del]').forEach(function(btn){
+      btn.addEventListener('click', function(){ tpExcluirProduto(this.getAttribute('data-tp-del')); });
+    });
+    // Elementos admin-only acabaram de ser criados agora, depois do
+    // applyRole() do login — precisa rodar de novo pra escondê-los de
+    // quem não é admin.
+    if(typeof applyRole==='function') applyRole();
+  }
+  window.tpRenderPage = tpRenderPage;
+
+  function tpSalvarProduto(produtoId){
+    var card = document.querySelector('[data-tp-card="'+produtoId+'"]'); if(!card) return;
+    var val = function(f){ var el = card.querySelector('[data-tp-field="'+f+'"]'); return el ? el.value : ''; };
+    var unidPorCx = parseInt(val('unidades_por_caixa')) || null;
+    var precoAvulsoRaw = parseFloat(val('preco_avulso'));
+    var precoAvulso = isNaN(precoAvulsoRaw) ? null : precoAvulsoRaw;
+    var f12 = parseFloat(val('f12')); f12 = isNaN(f12) ? null : f12;
+    var f34 = parseFloat(val('f34')); f34 = isNaN(f34) ? null : f34;
+    var f5 = parseFloat(val('f5')); f5 = isNaN(f5) ? null : f5;
+    sbClient.from('produtos').update({unidades_por_caixa: unidPorCx, preco_avulso: precoAvulso}).eq('id', produtoId).then(function(){
+      Promise.all([
+        sbClient.from('tabela_precos').update({preco: f12}).eq('produto_id', produtoId).eq('faixa_min', 1),
+        sbClient.from('tabela_precos').update({preco: f34}).eq('produto_id', produtoId).eq('faixa_min', 3),
+        sbClient.from('tabela_precos').update({preco: f5}).eq('produto_id', produtoId).eq('faixa_min', 5)
+      ]).then(function(){
+        carregarTabelaPrecosDoBanco(function(){ tpRenderPage(); });
+      });
+    });
+  }
+  window.tpSalvarProduto = tpSalvarProduto;
+
+  function tpAbrirNovoTamanho(){
+    var ml = parseInt(prompt('Tamanho em ml (ex: 300):')); if(!ml || ml<=0) return;
+    if(PRODUTOS[ml+'ml']){ alert('Esse tamanho já existe na Tabela de Preços.'); return; }
+    var unidPorCx = parseInt(prompt('Unidades por caixa (ex: 1000):')) || 1000;
+    var p12 = parseFloat(prompt('Preço de 1 a 2 caixas (R$):'));
+    var p34 = parseFloat(prompt('Preço de 3 a 4 caixas (R$):'));
+    var p5 = parseFloat(prompt('Preço de 5 caixas ou mais (R$):'));
+    sbClient.from('produtos').insert({ml: ml, unidades_por_caixa: unidPorCx, descricao: 'Copo descartável '+ml+'ml personalizado', ativo: true}).select().single().then(function(res){
+      if(res.error || !res.data){ alert('Erro ao criar tamanho.'); return; }
+      var novoId = res.data.id;
+      sbClient.from('tabela_precos').insert([
+        {produto_id: novoId, faixa_min:1, faixa_max:2, preco: isNaN(p12)?null:p12, especial:false},
+        {produto_id: novoId, faixa_min:3, faixa_max:4, preco: isNaN(p34)?null:p34, especial:false},
+        {produto_id: novoId, faixa_min:5, faixa_max:null, preco: isNaN(p5)?null:p5, especial:false}
+      ]).then(function(){
+        carregarTabelaPrecosDoBanco(function(){ tpRenderPage(); });
+      });
+    });
+  }
+  window.tpAbrirNovoTamanho = tpAbrirNovoTamanho;
+
+  function tpExcluirProduto(produtoId){
+    if(!confirm('Excluir esse tamanho da Tabela de Preços? Pedidos já feitos não são afetados.')) return;
+    sbClient.from('tabela_precos').delete().eq('produto_id', produtoId).then(function(){
+      sbClient.from('produtos').delete().eq('id', produtoId).then(function(){
+        carregarTabelaPrecosDoBanco(function(){ tpRenderPage(); });
+      });
+    });
+  }
+  window.tpExcluirProduto = tpExcluirProduto;
 
   // ── RENDER PEDIDOS ──
   function renderOrders() {
@@ -6083,12 +6236,18 @@ document.addEventListener('DOMContentLoaded',function(){
     return num+'ml';
   }
 
-  // Popula a <datalist> com os tamanhos que já existem no estoque, na
-  // caixa pronta e no refugo — sugestão ao digitar, não trava a escolha.
+  // Popula a <datalist> com a lista fechada de tamanhos: os que têm preço
+  // próprio na Tabela de Preços + seus irmãos (TAMANHO_IRMAO), mais
+  // qualquer tamanho que já exista no estoque, caixa pronta ou refugo —
+  // isso cobre tamanho antigo que ainda não foi migrado. Continua sendo
+  // sugestão ao digitar (datalist), não trava a escolha: um tamanho
+  // realmente novo pode ser digitado direto no campo.
   function estAtualizarListaTamanhosConhecidos(){
     var datalist = document.getElementById('lista-tamanhos-conhecidos');
     if(!datalist) return;
     var tamanhos = new Set();
+    Object.keys(PRODUTOS||{}).forEach(function(t){ tamanhos.add(parseInt(t)); });
+    Object.keys(TAMANHO_IRMAO||{}).forEach(function(t){ tamanhos.add(parseInt(t)); });
     Object.keys(STOCK).forEach(function(t){ tamanhos.add(parseInt(t)); });
     (CAIXAS_PRONTAS||[]).forEach(function(c){ tamanhos.add(c.tamanho_ml); });
     (ESTOQUE_REFUGO||[]).forEach(function(r){ tamanhos.add(r.tamanho_ml); });
@@ -6158,7 +6317,7 @@ document.addEventListener('DOMContentLoaded',function(){
       if(!wrap) return;
       wrap.innerHTML = ENT_ITENS.map(function(item, idx){
         return '<div class="stock-inp-row" style="align-items:flex-end;margin-bottom:8px;padding-bottom:8px;'+(idx>0?'border-top:1px dashed var(--border);padding-top:10px;':'')+'">'+
-          '<div class="stock-field"><label>Tamanho (ml)</label><input type="number" min="1" data-ent-field="tamNum" data-ent-id="'+item.id+'" value="'+(item.tamNum||'')+'" placeholder="Ex: 500" list="lista-tamanhos-conhecidos"/></div>'+
+          '<div class="stock-field"><label>Tamanho (ml)</label><input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" min="1" data-ent-field="tamNum" data-ent-id="'+item.id+'" value="'+(item.tamNum||'')+'" placeholder="Ex: 500" list="lista-tamanhos-conhecidos"/></div>'+
           '<div class="stock-field"><label>Caixas fechadas</label><input type="number" min="0" data-ent-field="caixas" data-ent-id="'+item.id+'" value="'+(item.caixas||'')+'" placeholder="0"/></div>'+
           '<div class="stock-field"><label>Unidades avulsas</label><input type="number" min="0" data-ent-field="unid" data-ent-id="'+item.id+'" value="'+(item.unid||'')+'" placeholder="0"/></div>'+
           '<div class="stock-field"><label>Custo por caixa (R$)</label><input type="number" min="0" step="0.01" data-ent-field="custo" data-ent-id="'+item.id+'" value="'+(item.custo||'')+'" placeholder="Ex: 180,00"/></div>'+
@@ -7584,40 +7743,41 @@ document.addEventListener('DOMContentLoaded',function(){
   var NP_ITEMS = [];
   var NP_COUNTER = 9; // próximo número de pedido
 
-  var PRECO_TABLE = {
-    '330ml': {cx1: 409, cx3: 369, unid_por_cx: 1000},
-    '400ml': {cx1: 489, cx3: 459, unid_por_cx: 1000},
-    '500ml': {cx1: 539, cx3: 489, unid_por_cx: 1000},
-    '770ml': {cx1: 449, cx3: 429, unid_por_cx: 500},
-  };
-  var PRECO_UNID = {'330ml': 1.40, '400ml': 1.40, '500ml': 1.40, '770ml': 1.40};
+  // ── TABELA DE PREÇOS (produtos + tabela_precos no Supabase) ──
+  // PRODUTOS: 'XXXml' -> {id, unidades_por_caixa, preco_avulso, ativo, descricao}
+  // PRECO_FAIXAS: 'XXXml' -> [{min, max, preco}, ...] ordenado por min
+  // Preenchidos por carregarTabelaPrecosDoBanco() (ver logo abaixo de
+  // carregarEstoqueDoBanco) — ficam vazios até o login terminar de carregar.
+  var PRODUTOS = {};
+  var PRECO_FAIXAS = {};
 
-  // Medidas "irmãs" têm o mesmo preço de venda — o copo é fisicamente um
-  // pouco diferente, mas comercialmente tratado igual. Cada tamanho no
-  // estoque continua totalmente separado (nunca se misturam as
-  // quantidades); isso aqui é só para achar o preço de venda certo.
-  var TAMANHO_EQUIVALENTE_PRECO = {
-    '300ml': '330ml', '330ml': '330ml',
-    '400ml': '400ml', '440ml': '400ml',
-    '500ml': '500ml', '550ml': '500ml',
-    '700ml': '770ml', '770ml': '770ml'
-  };
+  // Tamanhos "irmãos": mesmo copo, rótulo antigo usado historicamente no
+  // estoque — não têm preço próprio na Tabela de Preços, usam o preço do
+  // irmão cadastrado. Isso é só para achar o preço de VENDA certo; a baixa
+  // de estoque nunca usa isso — cada tamanho no estoque continua totalmente
+  // separado (nunca se misturam as quantidades).
+  var TAMANHO_IRMAO = { '300ml':'330ml', '400ml':'440ml', '500ml':'550ml', '700ml':'770ml' };
 
-  // Busca a linha de preço para um tamanho, usando o equivalente quando o
-  // tamanho exato não está cadastrado (ex: 440ml usa o preço do 400ml).
-  // Se nem o equivalente existir (tamanho realmente novo, fora do padrão
-  // conhecido), retorna null — quem chama decide o que fazer (pedir preço
-  // manual, avisar o vendedor, etc.), nunca cai silenciosamente em zero.
-  function buscarPrecoTabela(tam){
-    if(PRECO_TABLE[tam]) return PRECO_TABLE[tam];
-    var equivalente = TAMANHO_EQUIVALENTE_PRECO[tam];
-    if(equivalente && PRECO_TABLE[equivalente]) return PRECO_TABLE[equivalente];
+  // Acha o tamanho que de fato tem preço cadastrado (ele mesmo, ou o
+  // irmão). Se nem o irmão tiver preço (tamanho realmente novo, fora do
+  // padrão conhecido), retorna null — quem chama decide o que fazer (pedir
+  // preço manual, avisar o vendedor, etc.), nunca cai silenciosamente em zero.
+  function tamanhoComPreco(tam){
+    if(PRODUTOS[tam]) return tam;
+    var irmao = TAMANHO_IRMAO[tam];
+    if(irmao && PRODUTOS[irmao]) return irmao;
     return null;
   }
-  function buscarPrecoUnidTabela(tam){
-    if(PRECO_UNID[tam]!=null) return PRECO_UNID[tam];
-    var equivalente = TAMANHO_EQUIVALENTE_PRECO[tam];
-    if(equivalente && PRECO_UNID[equivalente]!=null) return PRECO_UNID[equivalente];
+
+  // Acha o preço da faixa certa (1–2 / 3–4 / 5+ caixas) para um tamanho
+  // que já tem preço cadastrado.
+  function buscarFaixaPreco(tamBase, qtdCaixas){
+    var faixas = PRECO_FAIXAS[tamBase];
+    if(!faixas || !faixas.length) return null;
+    for(var i=0;i<faixas.length;i++){
+      var f = faixas[i];
+      if(qtdCaixas >= f.min && (f.max==null || qtdCaixas <= f.max)) return f.preco;
+    }
     return null;
   }
 
@@ -7639,33 +7799,35 @@ document.addEventListener('DOMContentLoaded',function(){
   }
 
   function calcItemPrice(tam, tipo, qtd, precoCustom) {
+    var base = tamanhoComPreco(tam);
     if(tipo === 'caixas') {
-      var p = buscarPrecoTabela(tam);
-      if(!p){
-        // Tamanho sem preço cadastrado nem equivalente conhecido — só
-        // funciona se o vendedor já tiver digitado um preço manual;
-        // sem isso, sinaliza precisaPrecoManual para o formulário travar
-        // a criação do pedido em vez de deixar sair de graça.
-        if(precoCustom!=null) return {subtotal: precoCustom*qtd, unidades: qtd*1000, preco: precoCustom, precisaPrecoManual:false};
-        return {subtotal:0, unidades:qtd*1000, preco:0, precisaPrecoManual:true};
+      var unidPorCx = base ? PRODUTOS[base].unidades_por_caixa : 1000;
+      if(!base){
+        // Tamanho sem preço cadastrado nem irmão conhecido — só funciona
+        // se o vendedor já tiver digitado um preço manual; sem isso,
+        // sinaliza precisaPrecoManual para o formulário travar a criação
+        // do pedido em vez de deixar sair de graça.
+        if(precoCustom!=null) return {subtotal: precoCustom*qtd, unidades: qtd*unidPorCx, preco: precoCustom, precisaPrecoManual:false};
+        return {subtotal:0, unidades:qtd*unidPorCx, preco:0, precisaPrecoManual:true};
       }
-      var ppu = precoCustom != null ? precoCustom : (qtd >= 3 ? p.cx3 : p.cx1);
-      return {subtotal: ppu * qtd, unidades: p.unid_por_cx * qtd, preco: ppu, precisaPrecoManual:false};
+      var ppu = precoCustom != null ? precoCustom : buscarFaixaPreco(base, qtd);
+      if(ppu==null) return {subtotal:0, unidades:unidPorCx*qtd, preco:0, precisaPrecoManual:true};
+      return {subtotal: ppu * qtd, unidades: unidPorCx * qtd, preco: ppu, precisaPrecoManual:false};
     } else {
-      var pUnid = buscarPrecoUnidTabela(tam);
-      if(pUnid==null){
+      if(!base){
         if(precoCustom!=null) return {subtotal: precoCustom*qtd, unidades: qtd, preco: precoCustom, precisaPrecoManual:false};
         return {subtotal:0, unidades:qtd, preco:0, precisaPrecoManual:true};
       }
-      var ppu2 = precoCustom != null ? precoCustom : pUnid;
-      return {subtotal: ppu2 * qtd, unidades: qtd, preco: ppu2, precisaPrecoManual:false};
+      var pUnid = precoCustom != null ? precoCustom : PRODUTOS[base].preco_avulso;
+      if(pUnid==null) return {subtotal:0, unidades:qtd, preco:0, precisaPrecoManual:true};
+      return {subtotal: pUnid * qtd, unidades: qtd, preco: pUnid, precisaPrecoManual:false};
     }
   }
 
   function addItem() {
     var id = 'item_' + Date.now();
-    var calc = calcItemPrice('500ml', 'caixas', 1, null);
-    NP_ITEMS.push({id: id, tam: '500ml', tipo: 'caixas', qtd: 1, subtotal: calc.subtotal, unidades: calc.unidades, preco: calc.preco, precoCustom: null});
+    var calc = calcItemPrice('330ml', 'caixas', 1, null);
+    NP_ITEMS.push({id: id, tam: '330ml', tipo: 'caixas', qtd: 1, subtotal: calc.subtotal, unidades: calc.unidades, preco: calc.preco, precoCustom: null});
     renderItems();
   }
 
@@ -7680,20 +7842,25 @@ document.addEventListener('DOMContentLoaded',function(){
     NP_ITEMS.forEach(function(item) {
       var row = document.createElement('div');
       row.className = 'item-row';
+      row.setAttribute('data-item-row', item.id);
       var precisaPreco = item.preco===0 && item.precoCustom==null;
       row.innerHTML =
-        '<input type="number" min="1" class="fg input" style="border:1px solid var(--border);border-radius:7px;padding:7px 8px;font-size:12px;width:100%;" value="'+parseInt(item.tam)+'" placeholder="ml" data-field="tam" data-id="'+item.id+'" list="lista-tamanhos-conhecidos"/>' +
+        // type="text" (não "number") + inputmode="numeric": "number" não
+        // mostra a lista de sugestão (datalist) de forma confiável em
+        // vários navegadores — com texto, a lista de tamanhos já
+        // cadastrados aparece ao clicar/digitar, como pedido.
+        '<input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" class="fg input" style="border:1px solid var(--border);border-radius:7px;padding:7px 8px;font-size:12px;width:100%;" value="'+parseInt(item.tam)+'" placeholder="ml" data-field="tam" data-id="'+item.id+'" list="lista-tamanhos-conhecidos"/>' +
         '<select class="fg input" style="border:1px solid var(--border);border-radius:7px;padding:7px 8px;font-size:12px;" data-field="tipo" data-id="'+item.id+'">' +
           '<option value="caixas"'+(item.tipo==='caixas'?' selected':'')+'>Caixas</option>' +
           '<option value="unidades"'+(item.tipo==='unidades'?' selected':'')+'>Unidades</option>' +
         '</select>' +
         '<input type="number" min="1" value="'+item.qtd+'" style="border:1px solid var(--border);border-radius:7px;padding:7px 8px;font-size:12px;width:100%;" data-field="qtd" data-id="'+item.id+'"/>' +
-        '<div style="border:1px solid '+(precisaPreco?'#E87000':'var(--border)')+';border-radius:7px;padding:4px 6px;font-size:12px;background:'+(precisaPreco?'#FFF7ED':'var(--bg)')+';display:flex;align-items:center;gap:4px;">' +
-          '<span style="color:'+(precisaPreco?'#E87000':'var(--text2)')+';flex:1;">'+(precisaPreco?'Defina o preço →':'R$'+item.preco.toLocaleString('pt-BR',{minimumFractionDigits:2}))+'</span>' +
+        '<div class="item-preco-box" style="border:1px solid '+(precisaPreco?'#E87000':'var(--border)')+';border-radius:7px;padding:4px 6px;font-size:12px;background:'+(precisaPreco?'#FFF7ED':'var(--bg)')+';display:flex;align-items:center;gap:4px;">' +
+          '<span class="item-preco-lbl" style="color:'+(precisaPreco?'#E87000':'var(--text2)')+';flex:1;">'+(precisaPreco?'Defina o preço →':'R$'+item.preco.toLocaleString('pt-BR',{minimumFractionDigits:2}))+'</span>' +
           '<button class="edit-preco-btn" data-itemid="'+item.id+'" style="border:none;background:none;color:var(--rosa);cursor:pointer;padding:0;font-size:14px;" title="Editar preco">&#9998;</button>' +
         '</div>' +
-        '<div style="border:1px solid var(--border);border-radius:7px;padding:7px 8px;font-size:12px;font-weight:600;color:var(--rosa);">R$'+item.subtotal.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div>' +
-        '<div style="border:1px solid var(--border);border-radius:7px;padding:7px 8px;font-size:12px;color:var(--text2);">'+item.unidades.toLocaleString('pt-BR')+' un</div>' +
+        '<div class="item-subtotal" style="border:1px solid var(--border);border-radius:7px;padding:7px 8px;font-size:12px;font-weight:600;color:var(--rosa);">R$'+item.subtotal.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div>' +
+        '<div class="item-unidades" style="border:1px solid var(--border);border-radius:7px;padding:7px 8px;font-size:12px;color:var(--text2);">'+item.unidades.toLocaleString('pt-BR')+' un</div>' +
         '<button class="btn-remove-item" data-remove="'+item.id+'">×</button>';
       container.appendChild(row);
     });
@@ -7709,6 +7876,24 @@ document.addEventListener('DOMContentLoaded',function(){
     updateTotals();
   }
 
+  // Atualiza só os campos CALCULADOS de uma linha (preço, subtotal,
+  // unidades) sem recriar os <input> — recriar a cada tecla digitada
+  // (como era antes) tira o foco do campo no meio da digitação, fazendo
+  // a tela "reiniciar" e fechando a seleção da lista de sugestão. Quem
+  // está digitando/selecionando o tamanho não é mais interrompido.
+  function atualizarLinhaItem(item){
+    var row = document.querySelector('[data-item-row="'+item.id+'"]'); if(!row) return;
+    var precisaPreco = item.preco===0 && item.precoCustom==null;
+    var box = row.querySelector('.item-preco-box');
+    if(box){ box.style.borderColor = precisaPreco?'#E87000':'var(--border)'; box.style.background = precisaPreco?'#FFF7ED':'var(--bg)'; }
+    var lbl = row.querySelector('.item-preco-lbl');
+    if(lbl){ lbl.style.color = precisaPreco?'#E87000':'var(--text2)'; lbl.textContent = precisaPreco?'Defina o preço →':('R$'+item.preco.toLocaleString('pt-BR',{minimumFractionDigits:2})); }
+    var sub = row.querySelector('.item-subtotal');
+    if(sub) sub.textContent = 'R$'+item.subtotal.toLocaleString('pt-BR',{minimumFractionDigits:2});
+    var un = row.querySelector('.item-unidades');
+    if(un) un.textContent = item.unidades.toLocaleString('pt-BR')+' un';
+  }
+
   function updateItem(id, field, val) {
     var item = NP_ITEMS.find(function(i){ return i.id === id; }); if(!item) return;
     if(field === 'qtd') { item.qtd = parseInt(val)||1; item.precoCustom = null; }
@@ -7717,7 +7902,8 @@ document.addEventListener('DOMContentLoaded',function(){
     else { item[field] = val; item.precoCustom = null; }
     var calc = calcItemPrice(item.tam, item.tipo, item.qtd, item.precoCustom);
     item.subtotal = calc.subtotal; item.unidades = calc.unidades; item.preco = calc.preco;
-    renderItems();
+    atualizarLinhaItem(item);
+    updateTotals();
   }
 
   function updateTotals() {
@@ -8591,7 +8777,6 @@ document.addEventListener('DOMContentLoaded',function(){
     html += '<div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:#aaa;margin-bottom:8px;">Produtos</div>';
     if(order && order.itens && order.itens.length) {
       order.itens.forEach(function(it) {
-        var p = PRECO_TABLE[it.tam];
         html += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:13px;">';
         html += '<span><b>' + it.tam + '</b> · ' + (it.tipo==='caixas' ? it.qtd+'cx ('+it.unidades.toLocaleString('pt-BR')+' un)' : it.qtd+' unidades') + '</span>';
         html += '<span style="color:var(--rosa);font-weight:500;">R$' + it.subtotal.toLocaleString('pt-BR',{minimumFractionDigits:2}) + '</span>';
